@@ -1,0 +1,32 @@
+package com.example.booksocial_backend.service;
+
+import java.util.List;
+
+import com.example.booksocial_backend.DTO.commerce.CreateOrderRequest;
+import com.example.booksocial_backend.DTO.commerce.OrderDTO;
+
+/**
+ * Servicio encargado de la gestión de pedidos dentro del sistema BookSocial.
+ *
+ * Un pedido representa una compra realizada por un usuario e incluye
+ * múltiples líneas de pedido con los productos adquiridos.
+ *
+ * Este servicio se encarga de validar la coherencia del pedido,
+ * calcular su importe total y gestionar su persistencia.
+ *
+ * @author Jorge
+ * @since 16/03/2026
+ * @version 3.0
+ */
+public interface OrderService {
+
+  OrderDTO createOrder(CreateOrderRequest request);
+
+  OrderDTO getOrderById(Long id);
+
+  List<OrderDTO> getAllOrders();
+
+  List<OrderDTO> getOrdersByUser(Long userId);
+
+  void deleteOrder(Long id);
+}
