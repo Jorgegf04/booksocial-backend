@@ -144,29 +144,43 @@ public class WorkServiceImpl implements WorkService {
 
     Work existing = getWorkEntityById(id);
 
-    Work updated = modelMapper.map(request, Work.class);
+    if (request.title() != null) {
+      existing.setTitle(request.title().trim());
+    }
+
+    if (request.description() != null) {
+      existing.setDescription(request.description());
+    }
+
+    if (request.genre() != null) {
+      existing.setGenre(request.genre().trim());
+    }
+
+    if (request.publicationDate() != null) {
+      existing.setPublicationDate(request.publicationDate());
+    }
+
+    if (request.img() != null) {
+      existing.setImg(request.img());
+    }
+
+    if (request.averageRating() != null) {
+      existing.setAverageRating(request.averageRating());
+    }
 
     if (request.authorIds() != null) {
-      updated.setAuthors(
+      existing.getAuthors().clear();
+
+      existing.getAuthors().addAll(
           request.authorIds().stream()
               .map(aid -> authorRepository.findById(aid)
                   .orElseThrow(() -> new RuntimeException("Autor no encontrado: " + aid)))
               .toList());
     }
 
-    validateWork(updated);
+    validateWork(existing);
 
-    existing.setTitle(updated.getTitle().trim());
-    existing.setDescription(updated.getDescription());
-    existing.setGenre(updated.getGenre().trim());
-    existing.setPublicationDate(updated.getPublicationDate());
-    existing.setImg(updated.getImg());
-    existing.setAverageRating(updated.getAverageRating());
-    existing.setAuthors(updated.getAuthors());
-
-    Work saved = workRepository.save(existing);
-
-    return mapToDTO(saved);
+    return mapToDTO(workRepository.save(existing));
   }
 
   @Override
