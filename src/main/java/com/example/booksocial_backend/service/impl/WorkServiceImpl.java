@@ -39,9 +39,19 @@ public class WorkServiceImpl implements WorkService {
   @Override
   public WorkDTO createWork(CreateWorkRequest request) {
 
+    if (request.title() == null || request.title().trim().isEmpty()) {
+      throw new IllegalArgumentException("El título es obligatorio");
+    }
+
+    if (request.genre() == null || request.genre().trim().isEmpty()) {
+      throw new IllegalArgumentException("El género es obligatorio");
+    }
+
     Work work = modelMapper.map(request, Work.class);
 
-    // Set manual autores
+    work.setTitle(request.title().trim());
+    work.setGenre(request.genre().trim());
+
     if (request.authorIds() != null) {
       work.setAuthors(
           request.authorIds().stream()
@@ -50,13 +60,8 @@ public class WorkServiceImpl implements WorkService {
               .toList());
     }
 
-    validateWork(work);
-
-    work.setTitle(work.getTitle().trim());
-    work.setGenre(work.getGenre().trim());
-
     Work saved = workRepository.save(work);
-
+    System.out.println(request);
     return mapToDTO(saved);
   }
 
