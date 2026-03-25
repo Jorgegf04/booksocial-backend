@@ -11,7 +11,7 @@ import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.DTO.catalog.CreateWorkRequest;
 import com.example.booksocial_backend.DTO.catalog.WorkDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
-
+import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
 import com.example.booksocial_backend.service.WorkService;
 
@@ -34,6 +34,7 @@ public class WorkServiceImpl implements WorkService {
 
   private final WorkRepository workRepository;
   private final ModelMapper modelMapper;
+  private final AuthorRepository authorRepository;
 
   @Override
   public WorkDTO createWork(CreateWorkRequest request) {
@@ -44,7 +45,8 @@ public class WorkServiceImpl implements WorkService {
     if (request.authorIds() != null) {
       work.setAuthors(
           request.authorIds().stream()
-              .map(id -> Author.builder().id(id).build())
+              .map(id -> authorRepository.findById(id)
+                  .orElseThrow(() -> new RuntimeException("Autor no encontrado: " + id)))
               .toList());
     }
 
@@ -147,7 +149,8 @@ public class WorkServiceImpl implements WorkService {
     if (request.authorIds() != null) {
       updated.setAuthors(
           request.authorIds().stream()
-              .map(aid -> Author.builder().id(aid).build())
+              .map(aid -> authorRepository.findById(aid)
+                  .orElseThrow(() -> new RuntimeException("Autor no encontrado: " + aid)))
               .toList());
     }
 
