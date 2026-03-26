@@ -6,8 +6,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.catalog.CreateEditorialRequest;
-import com.example.booksocial_backend.DTO.catalog.EditorialDTO;
+import com.example.booksocial_backend.DTO.catalog.EditorialRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.EditorialResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Editorial;
 import com.example.booksocial_backend.repository.EditorialRepository;
 import com.example.booksocial_backend.service.EditorialService;
@@ -37,7 +37,7 @@ public class EditorialServiceImpl implements EditorialService {
   private final ModelMapper modelMapper;
 
   @Override
-  public EditorialDTO createEditorial(CreateEditorialRequest request) {
+  public EditorialResponseDTO createEditorial(EditorialRequestDTO request) {
 
     Editorial editorial = modelMapper.map(request, Editorial.class);
 
@@ -53,60 +53,60 @@ public class EditorialServiceImpl implements EditorialService {
 
     Editorial saved = editorialRepository.save(editorial);
 
-    return modelMapper.map(saved, EditorialDTO.class);
+    return modelMapper.map(saved, EditorialResponseDTO.class);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public EditorialDTO getEditorialById(Long id) {
+  public EditorialResponseDTO getEditorialById(Long id) {
 
     Editorial editorial = getEditorialEntityById(id);
 
-    return modelMapper.map(editorial, EditorialDTO.class);
+    return modelMapper.map(editorial, EditorialResponseDTO.class);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditorialDTO> getAllEditorials() {
+  public List<EditorialResponseDTO> getAllEditorials() {
 
     return editorialRepository.findAll()
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialDTO.class))
+        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditorialDTO> getEditorialsOrdered() {
+  public List<EditorialResponseDTO> getEditorialsOrdered() {
 
     return editorialRepository.findAllByOrderByNameAsc()
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialDTO.class))
+        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditorialDTO> searchEditorialsByName(String name) {
+  public List<EditorialResponseDTO> searchEditorialsByName(String name) {
 
     return editorialRepository.findByNameContainingIgnoreCase(name)
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialDTO.class))
+        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditorialDTO> getEditorialsByCountry(String country) {
+  public List<EditorialResponseDTO> getEditorialsByCountry(String country) {
 
     return editorialRepository.findByCountryIgnoreCase(country)
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialDTO.class))
+        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
         .toList();
   }
 
   @Override
-  public EditorialDTO updateEditorial(Long id, CreateEditorialRequest request) {
+  public EditorialResponseDTO updateEditorial(Long id, EditorialRequestDTO request) {
 
     Editorial existing = getEditorialEntityById(id);
 
@@ -126,7 +126,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     Editorial saved = editorialRepository.save(existing);
 
-    return modelMapper.map(saved, EditorialDTO.class);
+    return modelMapper.map(saved, EditorialResponseDTO.class);
   }
 
   @Override

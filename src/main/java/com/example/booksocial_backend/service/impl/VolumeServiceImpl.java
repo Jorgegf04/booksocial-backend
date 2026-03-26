@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Volume;
-import com.example.booksocial_backend.DTO.catalog.CreateVolumeRequest;
-import com.example.booksocial_backend.DTO.catalog.VolumeDTO;
+import com.example.booksocial_backend.DTO.catalog.VolumeRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.VolumeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.repository.VolumeRepository;
 import com.example.booksocial_backend.service.VolumeService;
@@ -36,19 +36,19 @@ public class VolumeServiceImpl implements VolumeService {
   private final ModelMapper modelMapper;
 
   @Override
-  public VolumeDTO createVolume(CreateVolumeRequest request) {
+  public VolumeResponseDTO createVolume(VolumeRequestDTO request) {
 
     Volume volume = modelMapper.map(request, Volume.class);
 
     // Set manual relación
-    volume.setEdition(Edition.builder().id(request.editionId()).build());
+    volume.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateVolume(volume);
 
-    List<Volume> existing = volumeRepository.findByEditionId(request.editionId());
+    List<Volume> existing = volumeRepository.findByEditionId(request.getEditionId());
 
     boolean exists = existing.stream()
-        .anyMatch(v -> v.getVolumeNumber().equals(request.volumeNumber()));
+        .anyMatch(v -> v.getVolumeNumber().equals(request.getVolumeNumber()));
 
     if (exists) {
       throw new IllegalArgumentException("Ya existe un volumen con ese número en la edición");
@@ -63,7 +63,7 @@ public class VolumeServiceImpl implements VolumeService {
 
   @Override
   @Transactional(readOnly = true)
-  public VolumeDTO getVolumeById(Long id) {
+  public VolumeResponseDTO getVolumeById(Long id) {
 
     Volume volume = getVolumeEntityById(id);
 
@@ -72,7 +72,7 @@ public class VolumeServiceImpl implements VolumeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<VolumeDTO> getAllVolumes() {
+  public List<VolumeResponseDTO> getAllVolumes() {
 
     return volumeRepository.findAll()
         .stream()
@@ -82,7 +82,7 @@ public class VolumeServiceImpl implements VolumeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<VolumeDTO> getVolumesByEdition(Long editionId) {
+  public List<VolumeResponseDTO> getVolumesByEdition(Long editionId) {
 
     return volumeRepository.findByEditionId(editionId)
         .stream()
@@ -92,7 +92,7 @@ public class VolumeServiceImpl implements VolumeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<VolumeDTO> getVolumesByEditionOrdered(Long editionId) {
+  public List<VolumeResponseDTO> getVolumesByEditionOrdered(Long editionId) {
 
     return volumeRepository.findByEditionIdOrderByVolumeNumberAsc(editionId)
         .stream()
@@ -101,22 +101,22 @@ public class VolumeServiceImpl implements VolumeService {
   }
 
   @Override
-  public VolumeDTO updateVolume(Long id, CreateVolumeRequest request) {
+  public VolumeResponseDTO updateVolume(Long id, VolumeRequestDTO request) {
 
     Volume existing = getVolumeEntityById(id);
 
     Volume updated = modelMapper.map(request, Volume.class);
 
-    updated.setEdition(Edition.builder().id(request.editionId()).build());
+    updated.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateVolume(updated);
 
     if (!existing.getVolumeNumber().equals(updated.getVolumeNumber())) {
 
-      List<Volume> volumes = volumeRepository.findByEditionId(request.editionId());
+      List<Volume> volumes = volumeRepository.findByEditionId(request.getEditionId());
 
       boolean exists = volumes.stream()
-          .anyMatch(v -> v.getVolumeNumber().equals(request.volumeNumber()));
+          .anyMatch(v -> v.getVolumeNumber().equals(request.getVolumeNumber()));
 
       if (exists) {
         throw new IllegalArgumentException("Ya existe otro volumen con ese número");
@@ -143,9 +143,9 @@ public class VolumeServiceImpl implements VolumeService {
   /**
    * Convierte Volume → VolumeDTO.
    */
-  private VolumeDTO mapToDTO(Volume volume) {
+  private VolumeResponseDTO mapToDTO(Volume volume) {
 
-    return new VolumeDTO(
+    return new VolumeResponseDTO(
         volume.getId(),
         volume.getVolumeNumber(),
         volume.getTitle(),

@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.social.ReactionDTO;
-import com.example.booksocial_backend.DTO.social.ToggleReactionRequest;
+import com.example.booksocial_backend.DTO.social.ReactionResponseDTO;
+import com.example.booksocial_backend.DTO.social.ReactionRequestDTO;
 
 /**
  * Servicio encargado de la gestión de reacciones (likes) dentro del sistema.
@@ -14,9 +14,9 @@ import com.example.booksocial_backend.DTO.social.ToggleReactionRequest;
  */
 public interface ReactionService {
 
-  ReactionDTO toggleReaction(ToggleReactionRequest request);
+  ReactionResponseDTO toggleReaction(ReactionRequestDTO request);
 
-  List<ReactionDTO> getReactionsByComment(Long commentId);
+  List<ReactionResponseDTO> getReactionsByComment(Long commentId);
 
   int countReactionsByComment(Long commentId);
 

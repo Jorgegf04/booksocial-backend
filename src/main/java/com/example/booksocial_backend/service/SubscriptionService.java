@@ -1,18 +1,18 @@
 package com.example.booksocial_backend.service;
 
-import com.example.booksocial_backend.DTO.user.ActivateSubscriptionRequest;
-import com.example.booksocial_backend.DTO.user.SubscriptionDTO;
+import com.example.booksocial_backend.DTO.user.SubscriptionRequestDTO;
+import com.example.booksocial_backend.DTO.user.SubscriptionResponseDTO;
 
 /**
  * Servicio de suscripciones.
  */
 public interface SubscriptionService {
 
-  SubscriptionDTO activateSubscription(ActivateSubscriptionRequest request);
+  SubscriptionResponseDTO activateSubscription(SubscriptionRequestDTO request);
 
   void cancelSubscription(Long userId);
 
-  SubscriptionDTO getSubscriptionByUserId(Long userId);
+  SubscriptionResponseDTO getSubscriptionByUserId(Long userId);
 
   boolean hasActiveSubscription(Long userId);
 }

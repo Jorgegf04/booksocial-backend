@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateEditorialRequest;
-import com.example.booksocial_backend.DTO.catalog.EditorialDTO;
+import com.example.booksocial_backend.DTO.catalog.EditorialRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.EditorialResponseDTO;
 
 /**
  * Servicio encargado de la gestión de editoriales dentro del catálogo.
@@ -21,19 +21,19 @@ import com.example.booksocial_backend.DTO.catalog.EditorialDTO;
  */
 public interface EditorialService {
 
-  EditorialDTO createEditorial(CreateEditorialRequest request);
+  EditorialResponseDTO createEditorial(EditorialRequestDTO request);
 
-  EditorialDTO getEditorialById(Long id);
+  EditorialResponseDTO getEditorialById(Long id);
 
-  List<EditorialDTO> getAllEditorials();
+  List<EditorialResponseDTO> getAllEditorials();
 
-  List<EditorialDTO> getEditorialsOrdered();
+  List<EditorialResponseDTO> getEditorialsOrdered();
 
-  List<EditorialDTO> searchEditorialsByName(String name);
+  List<EditorialResponseDTO> searchEditorialsByName(String name);
 
-  List<EditorialDTO> getEditorialsByCountry(String country);
+  List<EditorialResponseDTO> getEditorialsByCountry(String country);
 
-  EditorialDTO updateEditorial(Long id, CreateEditorialRequest request);
+  EditorialResponseDTO updateEditorial(Long id, EditorialRequestDTO request);
 
   void deleteEditorial(Long id);
 }

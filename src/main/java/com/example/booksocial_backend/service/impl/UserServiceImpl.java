@@ -8,9 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.DTO.auth.RegisterRequest;
-import com.example.booksocial_backend.DTO.user.CreateUserRequest;
-import com.example.booksocial_backend.DTO.user.UpdateUserRequest;
-import com.example.booksocial_backend.DTO.user.UserDTO;
+import com.example.booksocial_backend.DTO.user.CreateUserRequestDTO;
+import com.example.booksocial_backend.DTO.user.UpdateUserRequestDTO;
+import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 import com.example.booksocial_backend.domain.user.Role;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -32,12 +32,12 @@ public class UserServiceImpl implements UserService {
   // ==============================
 
   @Override
-  public UserDTO createUser(CreateUserRequest request) {
+  public UserResponseDTO createUser(CreateUserRequestDTO request) {
 
     validateCreateRequest(request);
 
-    String username = request.username().trim();
-    String email = request.email().trim().toLowerCase();
+    String username = request.getUsername().trim();
+    String email = request.getEmail().trim().toLowerCase();
 
     if (userRepository.existsByUsername(username)) {
       throw new IllegalArgumentException("El username ya existe");
@@ -50,12 +50,12 @@ public class UserServiceImpl implements UserService {
     User user = User.builder()
         .username(username)
         .email(email)
-        .password(passwordEncoder.encode(request.password()))
-        .name(request.name())
-        .secondName(request.secondName())
+        .password(passwordEncoder.encode(request.getPassword()))
+        .name(request.getName())
+        .secondName(request.getSecondName())
         .registrationDate(LocalDate.now())
         .active(true)
-        .role(request.role() != null ? request.role() : Role.REGISTERED)
+        .role(request.getRole() != null ? request.getRole() : Role.REGISTERED)
         .build();
 
     return mapToDTO(userRepository.save(user));
@@ -67,7 +67,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public UserDTO getUserById(Long id) {
+  public UserResponseDTO getUserById(Long id) {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
@@ -77,7 +77,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public UserDTO getUserByUsername(String username) {
+  public UserResponseDTO getUserByUsername(String username) {
 
     User user = userRepository.findByUsername(username)
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserDTO> getAllUsers() {
+  public List<UserResponseDTO> getAllUsers() {
 
     return userRepository.findAll()
         .stream()
@@ -97,7 +97,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserDTO> getActiveUsers() {
+  public List<UserResponseDTO> getActiveUsers() {
 
     return userRepository.findByActiveTrue()
         .stream()
@@ -107,7 +107,7 @@ public class UserServiceImpl implements UserService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<UserDTO> getUsersByRole(Role role) {
+  public List<UserResponseDTO> getUsersByRole(Role role) {
 
     return userRepository.findByRole(role)
         .stream()
@@ -120,15 +120,15 @@ public class UserServiceImpl implements UserService {
   // ==============================
 
   @Override
-  public UserDTO updateUser(Long id, UpdateUserRequest request) {
+  public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request) {
 
     validateUpdateRequest(request);
 
     User existing = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    String username = request.username().trim();
-    String email = request.email().trim().toLowerCase();
+    String username = request.getUsername().trim();
+    String email = request.getEmail().trim().toLowerCase();
 
     if (!existing.getUsername().equalsIgnoreCase(username)
         && userRepository.existsByUsername(username)) {
@@ -142,8 +142,8 @@ public class UserServiceImpl implements UserService {
 
     existing.setUsername(username);
     existing.setEmail(email);
-    existing.setName(request.name());
-    existing.setSecondName(request.secondName());
+    existing.setName(request.getName());
+    existing.setSecondName(request.getSecondName());
 
     return mapToDTO(userRepository.save(existing));
   }
@@ -166,7 +166,7 @@ public class UserServiceImpl implements UserService {
   // ==============================
 
   @Override
-  public UserDTO setUserActive(Long id, Boolean active) {
+  public UserResponseDTO setUserActive(Long id, Boolean active) {
 
     User user = userRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -180,9 +180,9 @@ public class UserServiceImpl implements UserService {
   // MAPPER
   // ==============================
 
-  private UserDTO mapToDTO(User user) {
+  private UserResponseDTO mapToDTO(User user) {
 
-    return new UserDTO(
+    return new UserResponseDTO(
         user.getId(),
         user.getUsername(),
         user.getEmail(),
@@ -197,36 +197,36 @@ public class UserServiceImpl implements UserService {
   // VALIDATION
   // ==============================
 
-  private void validateCreateRequest(CreateUserRequest request) {
+  private void validateCreateRequest(CreateUserRequestDTO request) {
 
     if (request == null) {
       throw new IllegalArgumentException("Datos de usuario inválidos");
     }
 
-    if (request.username() == null || request.username().trim().isEmpty()) {
+    if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
       throw new IllegalArgumentException("El username es obligatorio");
     }
 
-    if (request.email() == null || request.email().trim().isEmpty()) {
+    if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
       throw new IllegalArgumentException("El email es obligatorio");
     }
 
-    if (request.password() == null || request.password().length() < 6) {
+    if (request.getPassword() == null || request.getPassword().length() < 6) {
       throw new IllegalArgumentException("La contraseña debe tener al menos 6 caracteres");
     }
   }
 
-  private void validateUpdateRequest(UpdateUserRequest request) {
+  private void validateUpdateRequest(UpdateUserRequestDTO request) {
 
     if (request == null) {
       throw new IllegalArgumentException("Datos de actualización inválidos");
     }
 
-    if (request.username() == null || request.username().trim().isEmpty()) {
+    if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
       throw new IllegalArgumentException("El username es obligatorio");
     }
 
-    if (request.email() == null || request.email().trim().isEmpty()) {
+    if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
       throw new IllegalArgumentException("El email es obligatorio");
     }
   }

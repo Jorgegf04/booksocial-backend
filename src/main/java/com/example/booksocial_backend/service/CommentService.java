@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.social.CommentDTO;
-import com.example.booksocial_backend.DTO.social.CreateCommentRequest;
+import com.example.booksocial_backend.DTO.social.CommentResponseDTO;
+import com.example.booksocial_backend.DTO.social.CommentRequestDTO;
 
 /**
  * Servicio encargado de la gestión del sistema de comentarios de BookSocial.
@@ -14,21 +14,21 @@ import com.example.booksocial_backend.DTO.social.CreateCommentRequest;
  */
 public interface CommentService {
 
-  CommentDTO createComment(CreateCommentRequest request);
+  CommentResponseDTO createComment(CommentRequestDTO request);
 
-  CommentDTO replyToComment(Long parentId, CreateCommentRequest request);
+  CommentResponseDTO replyToComment(Long parentId, CommentRequestDTO request);
 
-  CommentDTO getCommentById(Long id);
+  CommentResponseDTO getCommentById(Long id);
 
-  List<CommentDTO> getAllComments();
+  List<CommentResponseDTO> getAllComments();
 
-  List<CommentDTO> getCommentsByWork(Long workId);
+  List<CommentResponseDTO> getCommentsByWork(Long workId);
 
-  List<CommentDTO> getRootCommentsByWork(Long workId);
+  List<CommentResponseDTO> getRootCommentsByWork(Long workId);
 
-  List<CommentDTO> getReplies(Long commentId);
+  List<CommentResponseDTO> getReplies(Long commentId);
 
-  List<CommentDTO> getCommentsByWorkOrdered(Long workId);
+  List<CommentResponseDTO> getCommentsByWorkOrdered(Long workId);
 
   void deleteComment(Long id);
 }

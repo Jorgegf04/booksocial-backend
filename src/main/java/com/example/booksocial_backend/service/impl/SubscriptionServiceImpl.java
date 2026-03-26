@@ -5,8 +5,8 @@ import java.time.LocalDate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.user.ActivateSubscriptionRequest;
-import com.example.booksocial_backend.DTO.user.SubscriptionDTO;
+import com.example.booksocial_backend.DTO.user.SubscriptionRequestDTO;
+import com.example.booksocial_backend.DTO.user.SubscriptionResponseDTO;
 import com.example.booksocial_backend.domain.user.Subscription;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -23,10 +23,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private final SubscriptionRepository subscriptionRepository;
 
   @Override
-  public SubscriptionDTO activateSubscription(ActivateSubscriptionRequest request) {
+  public SubscriptionResponseDTO activateSubscription(SubscriptionRequestDTO request) {
 
-    // 🔥 Evitar duplicados
-    if (subscriptionRepository.existsByUserIdAndActivatedTrue(request.userId())) {
+    if (subscriptionRepository.existsByUserIdAndActivatedTrue(request.getUserId())) {
       throw new IllegalArgumentException("El usuario ya tiene una suscripción activa");
     }
 
@@ -37,7 +36,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     subscription.setActivated(true);
 
     User user = new User();
-    user.setId(request.userId());
+    user.setId(request.getUserId());
     subscription.setUser(user);
 
     Subscription saved = subscriptionRepository.save(subscription);
@@ -56,7 +55,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
   @Override
   @Transactional(readOnly = true)
-  public SubscriptionDTO getSubscriptionByUserId(Long userId) {
+  public SubscriptionResponseDTO getSubscriptionByUserId(Long userId) {
 
     Subscription subscription = subscriptionRepository.findByUserId(userId)
         .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
@@ -70,9 +69,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     return subscriptionRepository.existsByUserIdAndActivatedTrue(userId);
   }
 
-  private SubscriptionDTO mapToDTO(Subscription subscription) {
+  private SubscriptionResponseDTO mapToDTO(Subscription subscription) {
 
-    return new SubscriptionDTO(
+    return new SubscriptionResponseDTO(
         subscription.getId(),
         subscription.getStartDate(),
         subscription.getEndDate(),

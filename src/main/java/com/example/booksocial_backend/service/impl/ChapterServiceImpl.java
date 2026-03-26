@@ -6,8 +6,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.catalog.ChapterDTO;
-import com.example.booksocial_backend.DTO.catalog.CreateChapterRequest;
+import com.example.booksocial_backend.DTO.catalog.ChapterResponseDTO;
+import com.example.booksocial_backend.DTO.catalog.ChapterRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Chapter;
 import com.example.booksocial_backend.domain.catalog.Tome;
 import com.example.booksocial_backend.repository.ChapterRepository;
@@ -24,18 +24,18 @@ public class ChapterServiceImpl implements ChapterService {
   private final ModelMapper modelMapper;
 
   @Override
-  public ChapterDTO createChapter(CreateChapterRequest request) {
+  public ChapterResponseDTO createChapter(ChapterRequestDTO request) {
 
     Chapter chapter = modelMapper.map(request, Chapter.class);
 
-    chapter.setTome(Tome.builder().id(request.tomeId()).build());
+    chapter.setTome(Tome.builder().id(request.getTomeId()).build());
 
     validateChapter(chapter);
 
-    List<Chapter> existingChapters = chapterRepository.findByTomeId(request.tomeId());
+    List<Chapter> existingChapters = chapterRepository.findByTomeId(request.getTomeId());
 
     boolean exists = existingChapters.stream()
-        .anyMatch(c -> c.getChapterNumber().equals(request.chapterNumber()));
+        .anyMatch(c -> c.getChapterNumber().equals(request.getChapterNumber()));
 
     if (exists) {
       throw new IllegalArgumentException("Ya existe un capítulo con ese número en el tomo");
@@ -48,7 +48,7 @@ public class ChapterServiceImpl implements ChapterService {
 
   @Override
   @Transactional(readOnly = true)
-  public ChapterDTO getChapterById(Long id) {
+  public ChapterResponseDTO getChapterById(Long id) {
 
     Chapter chapter = getChapterEntityById(id);
 
@@ -57,7 +57,7 @@ public class ChapterServiceImpl implements ChapterService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChapterDTO> getAllChapters() {
+  public List<ChapterResponseDTO> getAllChapters() {
 
     return chapterRepository.findAll()
         .stream()
@@ -67,7 +67,7 @@ public class ChapterServiceImpl implements ChapterService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ChapterDTO> getChaptersByTome(Long tomeId) {
+  public List<ChapterResponseDTO> getChaptersByTome(Long tomeId) {
 
     return chapterRepository.findByTomeId(tomeId)
         .stream()
@@ -84,9 +84,9 @@ public class ChapterServiceImpl implements ChapterService {
   }
 
   // 🔹 Mapper manual (clave en relaciones)
-  private ChapterDTO mapToDTO(Chapter chapter) {
+  private ChapterResponseDTO mapToDTO(Chapter chapter) {
 
-    return new ChapterDTO(
+    return new ChapterResponseDTO(
         chapter.getId(),
         chapter.getChapterNumber(),
         chapter.getTitle(),

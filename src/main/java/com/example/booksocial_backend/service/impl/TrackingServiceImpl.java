@@ -8,8 +8,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.commerce.Tracking;
 import com.example.booksocial_backend.domain.commerce.TrackingStatus;
-import com.example.booksocial_backend.DTO.commerce.CreateTrackingRequest;
-import com.example.booksocial_backend.DTO.commerce.TrackingDTO;
+import com.example.booksocial_backend.DTO.commerce.TrackingRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.TrackingResponseDTO;
 import com.example.booksocial_backend.domain.commerce.Order;
 
 import com.example.booksocial_backend.repository.TrackingRepository;
@@ -36,17 +36,17 @@ public class TrackingServiceImpl implements TrackingService {
   private final TrackingRepository trackingRepository;
 
   @Override
-  public TrackingDTO addTracking(CreateTrackingRequest request) {
+  public TrackingResponseDTO addTracking(TrackingRequestDTO request) {
 
     Tracking tracking = new Tracking();
 
-    tracking.setTrackingStatus(request.trackingStatus());
+    tracking.setTrackingStatus(request.getTrackingStatus());
     tracking.setDate(LocalDateTime.now());
-    tracking.setOrder(Order.builder().id(request.orderId()).build());
+    tracking.setOrder(Order.builder().id(request.getOrderId()).build());
 
     validateTracking(tracking);
 
-    validateStateTransition(request.orderId(), request.trackingStatus());
+    validateStateTransition(request.getOrderId(), request.getTrackingStatus());
 
     Tracking saved = trackingRepository.save(tracking);
 
@@ -55,14 +55,14 @@ public class TrackingServiceImpl implements TrackingService {
 
   @Override
   @Transactional(readOnly = true)
-  public TrackingDTO getTrackingById(Long id) {
+  public TrackingResponseDTO getTrackingById(Long id) {
 
     return mapToDTO(getTrackingEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<TrackingDTO> getTrackingByOrder(Long orderId) {
+  public List<TrackingResponseDTO> getTrackingByOrder(Long orderId) {
 
     return trackingRepository.findByOrderId(orderId)
         .stream()
@@ -72,7 +72,7 @@ public class TrackingServiceImpl implements TrackingService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TrackingDTO> getTrackingByOrderOrdered(Long orderId) {
+  public List<TrackingResponseDTO> getTrackingByOrderOrdered(Long orderId) {
 
     return trackingRepository.findByOrderIdOrderByDateAsc(orderId)
         .stream()
@@ -86,9 +86,9 @@ public class TrackingServiceImpl implements TrackingService {
     trackingRepository.delete(getTrackingEntityById(id));
   }
 
-  private TrackingDTO mapToDTO(Tracking tracking) {
+  private TrackingResponseDTO mapToDTO(Tracking tracking) {
 
-    return new TrackingDTO(
+    return new TrackingResponseDTO(
         tracking.getId(),
         tracking.getTrackingStatus(),
         tracking.getDate(),

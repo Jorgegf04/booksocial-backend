@@ -6,8 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.example.booksocial_backend.DTO.catalog.AuthorDTO;
-import com.example.booksocial_backend.DTO.catalog.CreateAuthorRequest;
+import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.service.AuthorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,9 +58,9 @@ public class AuthorController {
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
   @PostMapping
-  public ResponseEntity<AuthorDTO> createAuthor(@RequestBody CreateAuthorRequest request) {
+  public ResponseEntity<AuthorResponseDTO> createAuthor(@RequestBody AuthorRequestDTO request) {
 
-    AuthorDTO author = authorService.createAuthor(request);
+    AuthorResponseDTO author = authorService.createAuthor(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(author);
   }
 
@@ -72,14 +72,14 @@ public class AuthorController {
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
   @PostMapping("/batch")
-  public ResponseEntity<List<AuthorDTO>> createMany(
-      @RequestBody List<CreateAuthorRequest> requests) {
+  public ResponseEntity<List<AuthorResponseDTO>> createMany(
+      @RequestBody List<AuthorRequestDTO> requests) {
 
     if (requests == null || requests.isEmpty()) {
       throw new IllegalArgumentException("La lista no puede estar vacía");
     }
 
-    List<AuthorDTO> authors = requests.stream()
+    List<AuthorResponseDTO> authors = requests.stream()
         .map(authorService::createAuthor)
         .toList();
 
@@ -96,7 +96,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "404", description = "Autor no encontrado")
   })
   @GetMapping("/{id}")
-  public ResponseEntity<AuthorDTO> getAuthorById(@PathVariable Long id) {
+  public ResponseEntity<AuthorResponseDTO> getAuthorById(@PathVariable Long id) {
 
     return ResponseEntity.ok(authorService.getAuthorById(id));
   }
@@ -106,7 +106,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
   })
   @GetMapping
-  public ResponseEntity<List<AuthorDTO>> getAllAuthors() {
+  public ResponseEntity<List<AuthorResponseDTO>> getAllAuthors() {
 
     return ResponseEntity.ok(authorService.getAllAuthors());
   }
@@ -118,7 +118,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "400", description = "Parámetro de búsqueda inválido")
   })
   @GetMapping("/search")
-  public ResponseEntity<List<AuthorDTO>> searchByName(@RequestParam String name) {
+  public ResponseEntity<List<AuthorResponseDTO>> searchByName(@RequestParam String name) {
 
     return ResponseEntity.ok(authorService.searchAuthorsByName(name));
   }
@@ -128,7 +128,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "200", description = "Autores ordenados correctamente")
   })
   @GetMapping("/ordered")
-  public ResponseEntity<List<AuthorDTO>> getOrderedAuthors() {
+  public ResponseEntity<List<AuthorResponseDTO>> getOrderedAuthors() {
 
     return ResponseEntity.ok(authorService.getAuthorsOrderedByName());
   }
@@ -138,7 +138,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "200", description = "Autores con obras obtenidos correctamente")
   })
   @GetMapping("/with-works")
-  public ResponseEntity<List<AuthorDTO>> getAuthorsWithWorks() {
+  public ResponseEntity<List<AuthorResponseDTO>> getAuthorsWithWorks() {
 
     return ResponseEntity.ok(authorService.getAuthorsWithWorks());
   }
@@ -149,7 +149,7 @@ public class AuthorController {
       @ApiResponse(responseCode = "200", description = "Ranking generado correctamente")
   })
   @GetMapping("/top")
-  public ResponseEntity<List<AuthorDTO>> getTopAuthors() {
+  public ResponseEntity<List<AuthorResponseDTO>> getTopAuthors() {
 
     return ResponseEntity.ok(authorService.getTopAuthors());
   }
@@ -165,9 +165,9 @@ public class AuthorController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
   @PutMapping("/{id}")
-  public ResponseEntity<AuthorDTO> updateAuthor(
+  public ResponseEntity<AuthorResponseDTO> updateAuthor(
       @PathVariable Long id,
-      @RequestBody CreateAuthorRequest request) {
+      @RequestBody AuthorRequestDTO request) {
 
     return ResponseEntity.ok(authorService.updateAuthor(id, request));
   }

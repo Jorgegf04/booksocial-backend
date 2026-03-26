@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Product;
-import com.example.booksocial_backend.DTO.catalog.CreateProductRequest;
-import com.example.booksocial_backend.DTO.catalog.ProductDTO;
+import com.example.booksocial_backend.DTO.catalog.ProductRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.ProductResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.ProductService;
@@ -37,12 +37,12 @@ public class ProductServiceImpl implements ProductService {
   private final ModelMapper modelMapper;
 
   @Override
-  public ProductDTO createProduct(CreateProductRequest request) {
+  public ProductResponseDTO createProduct(ProductRequestDTO request) {
 
     Product product = modelMapper.map(request, Product.class);
 
     // Set manual de relación
-    product.setEdition(Edition.builder().id(request.editionId()).build());
+    product.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateProduct(product);
 
@@ -53,7 +53,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public ProductDTO getProductById(Long id) {
+  public ProductResponseDTO getProductById(Long id) {
 
     Product product = getProductEntityById(id);
 
@@ -62,7 +62,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ProductDTO> getAllProducts() {
+  public List<ProductResponseDTO> getAllProducts() {
 
     return productRepository.findAll()
         .stream()
@@ -72,7 +72,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ProductDTO> getAvailableProducts() {
+  public List<ProductResponseDTO> getAvailableProducts() {
 
     return productRepository.findByStockGreaterThan(0)
         .stream()
@@ -82,7 +82,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ProductDTO> getProductsByEdition(Long editionId) {
+  public List<ProductResponseDTO> getProductsByEdition(Long editionId) {
 
     return productRepository.findByEditionId(editionId)
         .stream()
@@ -92,7 +92,7 @@ public class ProductServiceImpl implements ProductService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ProductDTO> getProductsByWork(Long workId) {
+  public List<ProductResponseDTO> getProductsByWork(Long workId) {
 
     return productRepository.findByEdition_Work_Id(workId)
         .stream()
@@ -101,13 +101,13 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public ProductDTO updateProduct(Long id, CreateProductRequest request) {
+  public ProductResponseDTO updateProduct(Long id, ProductRequestDTO request) {
 
     Product existing = getProductEntityById(id);
 
     Product updated = modelMapper.map(request, Product.class);
 
-    updated.setEdition(Edition.builder().id(request.editionId()).build());
+    updated.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateProduct(updated);
 
@@ -145,9 +145,9 @@ public class ProductServiceImpl implements ProductService {
   /**
    * Convierte Product → ProductDTO.
    */
-  private ProductDTO mapToDTO(Product product) {
+  private ProductResponseDTO mapToDTO(Product product) {
 
-    return new ProductDTO(
+    return new ProductResponseDTO(
         product.getId(),
         product.getPrice(),
         product.getStock(),

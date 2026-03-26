@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.social.Comment;
-import com.example.booksocial_backend.DTO.social.CommentDTO;
-import com.example.booksocial_backend.DTO.social.CreateCommentRequest;
+import com.example.booksocial_backend.DTO.social.CommentResponseDTO;
+import com.example.booksocial_backend.DTO.social.CommentRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -42,15 +42,15 @@ public class CommentServiceImpl implements CommentService {
   private final CommentRepository commentRepository;
 
   @Override
-  public CommentDTO createComment(CreateCommentRequest request) {
+  public CommentResponseDTO createComment(CommentRequestDTO request) {
 
     Comment comment = new Comment();
 
-    comment.setContent(request.content().trim());
+    comment.setContent(request.getContent().trim());
     comment.setDate(LocalDateTime.now());
 
-    comment.setUser(User.builder().id(request.userId()).build());
-    comment.setWork(Work.builder().id(request.workId()).build());
+    comment.setUser(User.builder().id(request.getUserId()).build());
+    comment.setWork(Work.builder().id(request.getWorkId()).build());
 
     // Comentario raíz
     comment.setParent(null);
@@ -63,20 +63,20 @@ public class CommentServiceImpl implements CommentService {
   }
 
   @Override
-  public CommentDTO replyToComment(Long parentId, CreateCommentRequest request) {
+  public CommentResponseDTO replyToComment(Long parentId, CommentRequestDTO request) {
 
     Comment parent = getCommentEntityById(parentId);
 
     Comment reply = new Comment();
 
-    reply.setContent(request.content().trim());
+    reply.setContent(request.getContent().trim());
     reply.setDate(LocalDateTime.now());
 
-    reply.setUser(User.builder().id(request.userId()).build());
-    reply.setWork(Work.builder().id(request.workId()).build());
+    reply.setUser(User.builder().id(request.getUserId()).build());
+    reply.setWork(Work.builder().id(request.getWorkId()).build());
 
     // Validar coherencia: misma obra
-    if (!parent.getWork().getId().equals(request.workId())) {
+    if (!parent.getWork().getId().equals(request.getWorkId())) {
       throw new IllegalArgumentException("La respuesta debe pertenecer a la misma obra");
     }
 
@@ -91,14 +91,14 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional(readOnly = true)
-  public CommentDTO getCommentById(Long id) {
+  public CommentResponseDTO getCommentById(Long id) {
 
     return mapToDTO(getCommentEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<CommentDTO> getAllComments() {
+  public List<CommentResponseDTO> getAllComments() {
 
     return commentRepository.findAll()
         .stream()
@@ -108,7 +108,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CommentDTO> getCommentsByWork(Long workId) {
+  public List<CommentResponseDTO> getCommentsByWork(Long workId) {
 
     return commentRepository.findByWorkId(workId)
         .stream()
@@ -118,7 +118,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CommentDTO> getRootCommentsByWork(Long workId) {
+  public List<CommentResponseDTO> getRootCommentsByWork(Long workId) {
 
     return commentRepository.findByWorkIdAndParentIsNull(workId)
         .stream()
@@ -128,7 +128,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CommentDTO> getReplies(Long commentId) {
+  public List<CommentResponseDTO> getReplies(Long commentId) {
 
     return commentRepository.findByParentId(commentId)
         .stream()
@@ -138,7 +138,7 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<CommentDTO> getCommentsByWorkOrdered(Long workId) {
+  public List<CommentResponseDTO> getCommentsByWorkOrdered(Long workId) {
 
     return commentRepository.findByWorkIdOrderByDateDesc(workId)
         .stream()
@@ -159,9 +159,9 @@ public class CommentServiceImpl implements CommentService {
    *
    * Incluye únicamente un nivel de respuestas para evitar recursividad infinita.
    */
-  private CommentDTO mapToDTO(Comment comment) {
+  private CommentResponseDTO mapToDTO(Comment comment) {
 
-    return new CommentDTO(
+    return new CommentResponseDTO(
         comment.getId(),
         comment.getContent(),
         comment.getDate(),
@@ -174,14 +174,14 @@ public class CommentServiceImpl implements CommentService {
   /**
    * Mapea las respuestas de un comentario (solo un nivel).
    */
-  private List<CommentDTO> mapReplies(List<Comment> replies) {
+  private List<CommentResponseDTO> mapReplies(List<Comment> replies) {
 
     if (replies == null || replies.isEmpty()) {
       return List.of();
     }
 
     return replies.stream()
-        .map(reply -> new CommentDTO(
+        .map(reply -> new CommentResponseDTO(
             reply.getId(),
             reply.getContent(),
             reply.getDate(),

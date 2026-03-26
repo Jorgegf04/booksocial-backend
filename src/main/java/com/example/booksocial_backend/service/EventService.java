@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.social.CreateEventRequest;
-import com.example.booksocial_backend.DTO.social.EventDTO;
+import com.example.booksocial_backend.DTO.social.EventRequestDTO;
+import com.example.booksocial_backend.DTO.social.EventResponseDTO;
 
 /**
  * Servicio encargado de la gestión de eventos dentro del sistema BookSocial.
@@ -20,17 +20,17 @@ import com.example.booksocial_backend.DTO.social.EventDTO;
  */
 public interface EventService {
 
-  EventDTO createEvent(CreateEventRequest request);
+  EventResponseDTO createEvent(EventRequestDTO request);
 
-  EventDTO getEventById(Long id);
+  EventResponseDTO getEventById(Long id);
 
-  List<EventDTO> getAllEvents();
+  List<EventResponseDTO> getAllEvents();
 
-  List<EventDTO> getAllEventsOrdered();
+  List<EventResponseDTO> getAllEventsOrdered();
 
-  List<EventDTO> getUpcomingEvents();
+  List<EventResponseDTO> getUpcomingEvents();
 
-  EventDTO updateEvent(Long id, CreateEventRequest request);
+  EventResponseDTO updateEvent(Long id, EventRequestDTO request);
 
   void deleteEvent(Long id);
 }

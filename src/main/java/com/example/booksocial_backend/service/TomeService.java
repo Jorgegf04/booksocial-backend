@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateTomeRequest;
-import com.example.booksocial_backend.DTO.catalog.TomeDTO;
+import com.example.booksocial_backend.DTO.catalog.TomeRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.TomeResponseDTO;
 
 /**
  * Servicio encargado de la gestión de tomos dentro del sistema.
@@ -20,17 +20,17 @@ import com.example.booksocial_backend.DTO.catalog.TomeDTO;
  */
 public interface TomeService {
 
-  TomeDTO createTome(CreateTomeRequest request);
+  TomeResponseDTO createTome(TomeRequestDTO request);
 
-  TomeDTO getTomeById(Long id);
+  TomeResponseDTO getTomeById(Long id);
 
-  List<TomeDTO> getAllTomes();
+  List<TomeResponseDTO> getAllTomes();
 
-  List<TomeDTO> getTomesByEdition(Long editionId);
+  List<TomeResponseDTO> getTomesByEdition(Long editionId);
 
-  List<TomeDTO> getTomesByEditionOrdered(Long editionId);
+  List<TomeResponseDTO> getTomesByEditionOrdered(Long editionId);
 
-  TomeDTO updateTome(Long id, CreateTomeRequest request);
+  TomeResponseDTO updateTome(Long id, TomeRequestDTO request);
 
   void deleteTome(Long id);
 }

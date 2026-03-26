@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateVolumeRequest;
-import com.example.booksocial_backend.DTO.catalog.VolumeDTO;
+import com.example.booksocial_backend.DTO.catalog.VolumeRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.VolumeResponseDTO;
 
 /**
  * Servicio encargado de la gestión de volúmenes dentro del catálogo.
@@ -20,17 +20,17 @@ import com.example.booksocial_backend.DTO.catalog.VolumeDTO;
  */
 public interface VolumeService {
 
-  VolumeDTO createVolume(CreateVolumeRequest request);
+  VolumeResponseDTO createVolume(VolumeRequestDTO request);
 
-  VolumeDTO getVolumeById(Long id);
+  VolumeResponseDTO getVolumeById(Long id);
 
-  List<VolumeDTO> getAllVolumes();
+  List<VolumeResponseDTO> getAllVolumes();
 
-  List<VolumeDTO> getVolumesByEdition(Long editionId);
+  List<VolumeResponseDTO> getVolumesByEdition(Long editionId);
 
-  List<VolumeDTO> getVolumesByEditionOrdered(Long editionId);
+  List<VolumeResponseDTO> getVolumesByEditionOrdered(Long editionId);
 
-  VolumeDTO updateVolume(Long id, CreateVolumeRequest request);
+  VolumeResponseDTO updateVolume(Long id, VolumeRequestDTO request);
 
   void deleteVolume(Long id);
 }

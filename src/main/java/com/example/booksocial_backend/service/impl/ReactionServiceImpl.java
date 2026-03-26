@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.social.Reaction;
-import com.example.booksocial_backend.DTO.social.ReactionDTO;
-import com.example.booksocial_backend.DTO.social.ToggleReactionRequest;
+import com.example.booksocial_backend.DTO.social.ReactionResponseDTO;
+import com.example.booksocial_backend.DTO.social.ReactionRequestDTO;
 import com.example.booksocial_backend.domain.social.Comment;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -37,28 +37,27 @@ public class ReactionServiceImpl implements ReactionService {
   private final ReactionRepository reactionRepository;
 
   @Override
-  public ReactionDTO toggleReaction(ToggleReactionRequest request) {
+  public ReactionResponseDTO toggleReaction(ReactionRequestDTO request) {
 
     boolean exists = reactionRepository
-        .existsByUserIdAndCommentId(request.userId(), request.commentId());
+        .existsByUserIdAndCommentId(request.getUserId(), request.getCommentId());
 
-    // 🔥 SI EXISTE → eliminar (toggle OFF)
     if (exists) {
 
       Reaction existing = reactionRepository
-          .findByUserIdAndCommentId(request.userId(), request.commentId())
+          .findByUserIdAndCommentId(request.getUserId(), request.getCommentId())
           .orElseThrow();
 
       reactionRepository.delete(existing);
 
-      return null; // eliminado (puedes cambiar esto si quieres)
+      return null;
     }
 
     // 🔥 SI NO EXISTE → crear (toggle ON)
     Reaction reaction = Reaction.builder()
         .date(LocalDateTime.now())
-        .user(User.builder().id(request.userId()).build())
-        .comment(Comment.builder().id(request.commentId()).build())
+        .user(User.builder().id(request.getUserId()).build())
+        .comment(Comment.builder().id(request.getCommentId()).build())
         .build();
 
     Reaction saved = reactionRepository.save(reaction);
@@ -68,7 +67,7 @@ public class ReactionServiceImpl implements ReactionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<ReactionDTO> getReactionsByComment(Long commentId) {
+  public List<ReactionResponseDTO> getReactionsByComment(Long commentId) {
 
     return reactionRepository.findByCommentId(commentId)
         .stream()
@@ -93,9 +92,9 @@ public class ReactionServiceImpl implements ReactionService {
     reactionRepository.delete(reaction);
   }
 
-  private ReactionDTO mapToDTO(Reaction reaction) {
+  private ReactionResponseDTO mapToDTO(Reaction reaction) {
 
-    return new ReactionDTO(
+    return new ReactionResponseDTO(
         reaction.getId(),
         reaction.getDate(),
         reaction.getUser().getId(),

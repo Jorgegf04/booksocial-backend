@@ -5,9 +5,8 @@ import java.util.List;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import com.example.booksocial_backend.DTO.catalog.AuthorDTO;
-import com.example.booksocial_backend.DTO.catalog.CreateAuthorRequest;
+import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
 import com.example.booksocial_backend.repository.AuthorRepository;
@@ -27,7 +26,7 @@ public class AuthorServiceImpl implements AuthorService {
   private final ModelMapper modelMapper;
 
   @Override
-  public AuthorDTO createAuthor(CreateAuthorRequest request) {
+  public AuthorResponseDTO createAuthor(AuthorRequestDTO request) {
 
     Author author = Author.builder()
         .name(request.getName())
@@ -46,7 +45,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     Author saved = authorRepository.save(author);
 
-    return new AuthorDTO(
+    return new AuthorResponseDTO(
         saved.getId(),
         saved.getName(),
         saved.getBirthDate(),
@@ -58,50 +57,50 @@ public class AuthorServiceImpl implements AuthorService {
 
   @Override
   @Transactional(readOnly = true)
-  public AuthorDTO getAuthorById(Long id) {
+  public AuthorResponseDTO getAuthorById(Long id) {
 
     Author author = getAuthorEntityById(id);
 
-    return modelMapper.map(author, AuthorDTO.class);
+    return modelMapper.map(author, AuthorResponseDTO.class);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<AuthorDTO> getAllAuthors() {
+  public List<AuthorResponseDTO> getAllAuthors() {
 
     return authorRepository.findAll()
         .stream()
-        .map(author -> modelMapper.map(author, AuthorDTO.class))
+        .map(author -> modelMapper.map(author, AuthorResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<AuthorDTO> searchAuthorsByName(String name) {
+  public List<AuthorResponseDTO> searchAuthorsByName(String name) {
 
     return authorRepository.findByNameContainingIgnoreCase(name)
         .stream()
-        .map(author -> modelMapper.map(author, AuthorDTO.class))
+        .map(author -> modelMapper.map(author, AuthorResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<AuthorDTO> getAuthorsOrderedByName() {
+  public List<AuthorResponseDTO> getAuthorsOrderedByName() {
 
     return authorRepository.findAllOrderByName()
         .stream()
-        .map(author -> modelMapper.map(author, AuthorDTO.class))
+        .map(author -> modelMapper.map(author, AuthorResponseDTO.class))
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<AuthorDTO> getAuthorsWithWorks() {
+  public List<AuthorResponseDTO> getAuthorsWithWorks() {
 
     return authorRepository.findAuthorsWithWorks()
         .stream()
-        .map(author -> new AuthorDTO(
+        .map(author -> new AuthorResponseDTO(
             author.getId(),
             author.getName(),
             author.getBirthDate(),
@@ -114,11 +113,11 @@ public class AuthorServiceImpl implements AuthorService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<AuthorDTO> getTopAuthors() {
+  public List<AuthorResponseDTO> getTopAuthors() {
 
     return authorRepository.findTopAuthorsByWorksCount()
         .stream()
-        .map(author -> new AuthorDTO(
+        .map(author -> new AuthorResponseDTO(
             author.getId(),
             author.getName(),
             author.getBirthDate(),
@@ -130,7 +129,7 @@ public class AuthorServiceImpl implements AuthorService {
   }
 
   @Override
-  public AuthorDTO updateAuthor(Long id, CreateAuthorRequest request) {
+  public AuthorResponseDTO updateAuthor(Long id, AuthorRequestDTO request) {
 
     Author existingAuthor = getAuthorEntityById(id);
 
@@ -150,7 +149,7 @@ public class AuthorServiceImpl implements AuthorService {
 
     Author saved = authorRepository.save(existingAuthor);
 
-    return modelMapper.map(saved, AuthorDTO.class);
+    return modelMapper.map(saved, AuthorResponseDTO.class);
   }
 
   @Override

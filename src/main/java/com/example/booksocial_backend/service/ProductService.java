@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateProductRequest;
-import com.example.booksocial_backend.DTO.catalog.ProductDTO;
+import com.example.booksocial_backend.DTO.catalog.ProductRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.ProductResponseDTO;
 
 /**
  * Servicio encargado de la gestión de productos dentro del sistema de compra.
@@ -20,19 +20,19 @@ import com.example.booksocial_backend.DTO.catalog.ProductDTO;
  */
 public interface ProductService {
 
-  ProductDTO createProduct(CreateProductRequest request);
+  ProductResponseDTO createProduct(ProductRequestDTO request);
 
-  ProductDTO getProductById(Long id);
+  ProductResponseDTO getProductById(Long id);
 
-  List<ProductDTO> getAllProducts();
+  List<ProductResponseDTO> getAllProducts();
 
-  List<ProductDTO> getAvailableProducts();
+  List<ProductResponseDTO> getAvailableProducts();
 
-  List<ProductDTO> getProductsByEdition(Long editionId);
+  List<ProductResponseDTO> getProductsByEdition(Long editionId);
 
-  List<ProductDTO> getProductsByWork(Long workId);
+  List<ProductResponseDTO> getProductsByWork(Long workId);
 
-  ProductDTO updateProduct(Long id, CreateProductRequest request);
+  ProductResponseDTO updateProduct(Long id, ProductRequestDTO request);
 
   void decreaseStock(Long productId, int quantity);
 

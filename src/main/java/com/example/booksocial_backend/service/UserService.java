@@ -3,30 +3,30 @@ package com.example.booksocial_backend.service;
 import java.util.List;
 
 import com.example.booksocial_backend.DTO.auth.RegisterRequest;
-import com.example.booksocial_backend.DTO.user.CreateUserRequest;
-import com.example.booksocial_backend.DTO.user.UpdateUserRequest;
-import com.example.booksocial_backend.DTO.user.UserDTO;
+import com.example.booksocial_backend.DTO.user.CreateUserRequestDTO;
+import com.example.booksocial_backend.DTO.user.UpdateUserRequestDTO;
+import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 import com.example.booksocial_backend.domain.user.Role;
 
 public interface UserService {
 
-  UserDTO createUser(CreateUserRequest request);
+  UserResponseDTO createUser(CreateUserRequestDTO request);
 
-  UserDTO getUserById(Long id);
+  UserResponseDTO getUserById(Long id);
 
-  UserDTO getUserByUsername(String username);
+  UserResponseDTO getUserByUsername(String username);
 
-  List<UserDTO> getAllUsers();
+  List<UserResponseDTO> getAllUsers();
 
-  List<UserDTO> getActiveUsers();
+  List<UserResponseDTO> getActiveUsers();
 
-  List<UserDTO> getUsersByRole(Role role);
+  List<UserResponseDTO> getUsersByRole(Role role);
 
-  UserDTO updateUser(Long id, UpdateUserRequest request);
+  UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request);
 
   void deleteUser(Long id);
 
-  UserDTO setUserActive(Long id, Boolean active);
+  UserResponseDTO setUserActive(Long id, Boolean active);
 
   void registerUser(RegisterRequest request);
 }

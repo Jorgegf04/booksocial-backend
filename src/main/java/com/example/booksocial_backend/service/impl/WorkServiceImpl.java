@@ -8,8 +8,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Work;
-import com.example.booksocial_backend.DTO.catalog.CreateWorkRequest;
-import com.example.booksocial_backend.DTO.catalog.WorkDTO;
+import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
@@ -37,24 +37,24 @@ public class WorkServiceImpl implements WorkService {
   private final AuthorRepository authorRepository;
 
   @Override
-  public WorkDTO createWork(CreateWorkRequest request) {
+  public WorkResponseDTO createWork(WorkRequestDTO request) {
 
-    if (request.title() == null || request.title().trim().isEmpty()) {
+    if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
       throw new IllegalArgumentException("El título es obligatorio");
     }
 
-    if (request.genre() == null || request.genre().trim().isEmpty()) {
+    if (request.getGenre() == null || request.getGenre().trim().isEmpty()) {
       throw new IllegalArgumentException("El género es obligatorio");
     }
 
     Work work = modelMapper.map(request, Work.class);
 
-    work.setTitle(request.title().trim());
-    work.setGenre(request.genre().trim());
+    work.setTitle(request.getTitle().trim());
+    work.setGenre(request.getGenre().trim());
 
-    if (request.authorIds() != null) {
+    if (request.getAuthorIds() != null) {
       work.setAuthors(
-          request.authorIds().stream()
+          request.getAuthorIds().stream()
               .map(id -> authorRepository.findById(id)
                   .orElseThrow(() -> new RuntimeException("Autor no encontrado: " + id)))
               .toList());
@@ -67,7 +67,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public WorkDTO getWorkById(Long id) {
+  public WorkResponseDTO getWorkById(Long id) {
 
     Work work = getWorkEntityById(id);
 
@@ -76,7 +76,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> getAllWorks() {
+  public List<WorkResponseDTO> getAllWorks() {
 
     return workRepository.findAll()
         .stream()
@@ -86,7 +86,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> searchWorksByTitle(String title) {
+  public List<WorkResponseDTO> searchWorksByTitle(String title) {
 
     return workRepository.findByTitleContainingIgnoreCase(title)
         .stream()
@@ -96,7 +96,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> getWorksByGenre(String genre) {
+  public List<WorkResponseDTO> getWorksByGenre(String genre) {
 
     return workRepository.findByGenreIgnoreCase(genre)
         .stream()
@@ -106,7 +106,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> getWorksByAuthor(Long authorId) {
+  public List<WorkResponseDTO> getWorksByAuthor(Long authorId) {
 
     return workRepository.findByAuthorId(authorId)
         .stream()
@@ -116,7 +116,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> searchWorks(String title, String genre, Double rating) {
+  public List<WorkResponseDTO> searchWorks(String title, String genre, Double rating) {
 
     return workRepository.searchWorks(title, genre, rating)
         .stream()
@@ -126,7 +126,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> getTopRatedWorks() {
+  public List<WorkResponseDTO> getTopRatedWorks() {
 
     return workRepository.findTopRatedWorks()
         .stream()
@@ -136,7 +136,7 @@ public class WorkServiceImpl implements WorkService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<WorkDTO> getWorksAfterDate(LocalDate date) {
+  public List<WorkResponseDTO> getWorksAfterDate(LocalDate date) {
 
     return workRepository.findByPublicationDateAfter(date)
         .stream()
@@ -145,39 +145,39 @@ public class WorkServiceImpl implements WorkService {
   }
 
   @Override
-  public WorkDTO updateWork(Long id, CreateWorkRequest request) {
+  public WorkResponseDTO updateWork(Long id, WorkRequestDTO request) {
 
     Work existing = getWorkEntityById(id);
 
-    if (request.title() != null) {
-      existing.setTitle(request.title().trim());
+    if (request.getTitle() != null) {
+      existing.setTitle(request.getTitle().trim());
     }
 
-    if (request.description() != null) {
-      existing.setDescription(request.description());
+    if (request.getDescription() != null) {
+      existing.setDescription(request.getDescription());
     }
 
-    if (request.genre() != null) {
-      existing.setGenre(request.genre().trim());
+    if (request.getGenre() != null) {
+      existing.setGenre(request.getGenre().trim());
     }
 
-    if (request.publicationDate() != null) {
-      existing.setPublicationDate(request.publicationDate());
+    if (request.getPublicationDate() != null) {
+      existing.setPublicationDate(request.getPublicationDate());
     }
 
-    if (request.img() != null) {
-      existing.setImg(request.img());
+    if (request.getImg() != null) {
+      existing.setImg(request.getImg());
     }
 
-    if (request.averageRating() != null) {
-      existing.setAverageRating(request.averageRating());
+    if (request.getAverageRating() != null) {
+      existing.setAverageRating(request.getAverageRating());
     }
 
-    if (request.authorIds() != null) {
+    if (request.getAuthorIds() != null) {
       existing.getAuthors().clear();
 
       existing.getAuthors().addAll(
-          request.authorIds().stream()
+          request.getAuthorIds().stream()
               .map(aid -> authorRepository.findById(aid)
                   .orElseThrow(() -> new RuntimeException("Autor no encontrado: " + aid)))
               .toList());
@@ -199,9 +199,9 @@ public class WorkServiceImpl implements WorkService {
   /**
    * Convierte Work → WorkDTO.
    */
-  private WorkDTO mapToDTO(Work work) {
+  private WorkResponseDTO mapToDTO(Work work) {
 
-    return new WorkDTO(
+    return new WorkResponseDTO(
         work.getId(),
         work.getTitle(),
         work.getDescription(),

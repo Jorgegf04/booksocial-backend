@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.social.CreateEventRequest;
-import com.example.booksocial_backend.DTO.social.EventDTO;
+import com.example.booksocial_backend.DTO.social.EventRequestDTO;
+import com.example.booksocial_backend.DTO.social.EventResponseDTO;
 import com.example.booksocial_backend.domain.social.Event;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -37,18 +37,18 @@ public class EventServiceImpl implements EventService {
   private final EventRepository eventRepository;
 
   @Override
-  public EventDTO createEvent(CreateEventRequest request) {
+  public EventResponseDTO createEvent(EventRequestDTO request) {
 
     Event event = new Event();
 
-    event.setTitle(request.title().trim());
-    event.setDescription(request.description());
-    event.setDate(request.date());
+    event.setTitle(request.getTitle().trim());
+    event.setDescription(request.getDescription());
+    event.setDate(request.getDate());
 
     // Mapear usuarios
-    if (request.userIds() != null) {
+    if (request.getUserIds() != null) {
       event.setUsers(
-          request.userIds().stream()
+          request.getUserIds().stream()
               .map(id -> User.builder().id(id).build())
               .toList());
     }
@@ -66,14 +66,14 @@ public class EventServiceImpl implements EventService {
 
   @Override
   @Transactional(readOnly = true)
-  public EventDTO getEventById(Long id) {
+  public EventResponseDTO getEventById(Long id) {
 
     return mapToDTO(getEventEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<EventDTO> getAllEvents() {
+  public List<EventResponseDTO> getAllEvents() {
 
     return eventRepository.findAll()
         .stream()
@@ -83,7 +83,7 @@ public class EventServiceImpl implements EventService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<EventDTO> getAllEventsOrdered() {
+  public List<EventResponseDTO> getAllEventsOrdered() {
 
     return eventRepository.findAllByOrderByDateAsc()
         .stream()
@@ -93,7 +93,7 @@ public class EventServiceImpl implements EventService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<EventDTO> getUpcomingEvents() {
+  public List<EventResponseDTO> getUpcomingEvents() {
 
     return eventRepository.findByDateAfter(LocalDateTime.now())
         .stream()
@@ -102,17 +102,17 @@ public class EventServiceImpl implements EventService {
   }
 
   @Override
-  public EventDTO updateEvent(Long id, CreateEventRequest request) {
+  public EventResponseDTO updateEvent(Long id, EventRequestDTO request) {
 
     Event existing = getEventEntityById(id);
 
-    existing.setTitle(request.title().trim());
-    existing.setDescription(request.description());
-    existing.setDate(request.date());
+    existing.setTitle(request.getTitle().trim());
+    existing.setDescription(request.getDescription());
+    existing.setDate(request.getDate());
 
-    if (request.userIds() != null) {
+    if (request.getUserIds() != null) {
       existing.setUsers(
-          request.userIds().stream()
+          request.getUserIds().stream()
               .map(uid -> User.builder().id(uid).build())
               .toList());
     }
@@ -132,9 +132,9 @@ public class EventServiceImpl implements EventService {
     eventRepository.delete(getEventEntityById(id));
   }
 
-  private EventDTO mapToDTO(Event event) {
+  private EventResponseDTO mapToDTO(Event event) {
 
-    return new EventDTO(
+    return new EventResponseDTO(
         event.getId(),
         event.getTitle(),
         event.getDescription(),

@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.ChapterDTO;
-import com.example.booksocial_backend.DTO.catalog.CreateChapterRequest;
+import com.example.booksocial_backend.DTO.catalog.ChapterResponseDTO;
+import com.example.booksocial_backend.DTO.catalog.ChapterRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Chapter;
 
 /**
@@ -31,7 +31,7 @@ public interface ChapterService {
    * @return capítulo persistido
    * @throws IllegalArgumentException si los datos son inválidos o duplicados
    */
-  ChapterDTO createChapter(CreateChapterRequest request);
+  ChapterResponseDTO createChapter(ChapterRequestDTO request);
 
   /**
    * Obtiene un capítulo por su identificador.
@@ -39,14 +39,14 @@ public interface ChapterService {
    * @param id identificador del capítulo
    * @return capítulo encontrado
    */
-  ChapterDTO getChapterById(Long id);
+  ChapterResponseDTO getChapterById(Long id);
 
   /**
    * Obtiene todos los capítulos del sistema.
    *
    * @return lista de capítulos
    */
-  List<ChapterDTO> getAllChapters();
+  List<ChapterResponseDTO> getAllChapters();
 
   /**
    * Obtiene todos los capítulos pertenecientes a un tomo.
@@ -54,7 +54,7 @@ public interface ChapterService {
    * @param tomeId identificador del tomo
    * @return lista de capítulos
    */
-  List<ChapterDTO> getChaptersByTome(Long tomeId);
+  List<ChapterResponseDTO> getChaptersByTome(Long tomeId);
 
   /**
    * Elimina un capítulo del sistema.

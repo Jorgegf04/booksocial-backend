@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.commerce.CreateOrderRequest;
-import com.example.booksocial_backend.DTO.commerce.OrderDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
 
 /**
  * Servicio encargado de la gestión de pedidos dentro del sistema BookSocial.
@@ -20,13 +20,13 @@ import com.example.booksocial_backend.DTO.commerce.OrderDTO;
  */
 public interface OrderService {
 
-  OrderDTO createOrder(CreateOrderRequest request);
+  OrderResponseDTO createOrder(OrderRequestDTO request);
 
-  OrderDTO getOrderById(Long id);
+  OrderResponseDTO getOrderById(Long id);
 
-  List<OrderDTO> getAllOrders();
+  List<OrderResponseDTO> getAllOrders();
 
-  List<OrderDTO> getOrdersByUser(Long userId);
+  List<OrderResponseDTO> getOrdersByUser(Long userId);
 
   void deleteOrder(Long id);
 }

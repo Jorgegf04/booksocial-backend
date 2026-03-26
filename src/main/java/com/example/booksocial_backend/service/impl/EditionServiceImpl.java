@@ -6,8 +6,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.catalog.CreateEditionRequest;
-import com.example.booksocial_backend.DTO.catalog.EditionDTO;
+import com.example.booksocial_backend.DTO.catalog.EditionRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.EditionResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.domain.catalog.Editorial;
 import com.example.booksocial_backend.domain.catalog.Work;
@@ -39,13 +39,13 @@ public class EditionServiceImpl implements EditionService {
   private final ModelMapper modelMapper;
 
   @Override
-  public EditionDTO createEdition(CreateEditionRequest request) {
+  public EditionResponseDTO createEdition(EditionRequestDTO request) {
 
     Edition edition = modelMapper.map(request, Edition.class);
 
     // Set manual de relaciones
-    edition.setWork(Work.builder().id(request.workId()).build());
-    edition.setEditorial(Editorial.builder().id(request.editorialId()).build());
+    edition.setWork(Work.builder().id(request.getWorkId()).build());
+    edition.setEditorial(Editorial.builder().id(request.getEditorialId()).build());
 
     validateEdition(edition);
 
@@ -64,7 +64,7 @@ public class EditionServiceImpl implements EditionService {
 
   @Override
   @Transactional(readOnly = true)
-  public EditionDTO getEditionById(Long id) {
+  public EditionResponseDTO getEditionById(Long id) {
 
     Edition edition = getEditionEntityById(id);
 
@@ -73,7 +73,7 @@ public class EditionServiceImpl implements EditionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditionDTO> getAllEditions() {
+  public List<EditionResponseDTO> getAllEditions() {
 
     return editionRepository.findAll()
         .stream()
@@ -83,7 +83,7 @@ public class EditionServiceImpl implements EditionService {
 
   @Override
   @Transactional(readOnly = true)
-  public EditionDTO getEditionByIsbn(String isbn) {
+  public EditionResponseDTO getEditionByIsbn(String isbn) {
 
     Edition edition = editionRepository.findByIsbn(isbn)
         .orElseThrow(() -> new RuntimeException("Edición no encontrada con ISBN: " + isbn));
@@ -93,7 +93,7 @@ public class EditionServiceImpl implements EditionService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<EditionDTO> getEditionsByEditorial(Long editorialId) {
+  public List<EditionResponseDTO> getEditionsByEditorial(Long editorialId) {
 
     return editionRepository.findByEditorialId(editorialId)
         .stream()
@@ -102,14 +102,14 @@ public class EditionServiceImpl implements EditionService {
   }
 
   @Override
-  public EditionDTO updateEdition(Long id, CreateEditionRequest request) {
+  public EditionResponseDTO updateEdition(Long id, EditionRequestDTO request) {
 
     Edition existing = getEditionEntityById(id);
 
     Edition updated = modelMapper.map(request, Edition.class);
 
-    updated.setWork(Work.builder().id(request.workId()).build());
-    updated.setEditorial(Editorial.builder().id(request.editorialId()).build());
+    updated.setWork(Work.builder().id(request.getWorkId()).build());
+    updated.setEditorial(Editorial.builder().id(request.getEditorialId()).build());
 
     validateEdition(updated);
 
@@ -141,9 +141,9 @@ public class EditionServiceImpl implements EditionService {
   /**
    * Convierte una entidad Edition en su DTO correspondiente.
    */
-  private EditionDTO mapToDTO(Edition edition) {
+  private EditionResponseDTO mapToDTO(Edition edition) {
 
-    return new EditionDTO(
+    return new EditionResponseDTO(
         edition.getId(),
         edition.getIsbn(),
         edition.getEditionDate(),

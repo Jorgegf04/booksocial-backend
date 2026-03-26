@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Tome;
-import com.example.booksocial_backend.DTO.catalog.CreateTomeRequest;
-import com.example.booksocial_backend.DTO.catalog.TomeDTO;
+import com.example.booksocial_backend.DTO.catalog.TomeRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.TomeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 
 import com.example.booksocial_backend.repository.TomeRepository;
@@ -38,19 +38,19 @@ public class TomeServiceImpl implements TomeService {
   private final ModelMapper modelMapper;
 
   @Override
-  public TomeDTO createTome(CreateTomeRequest request) {
+  public TomeResponseDTO createTome(TomeRequestDTO request) {
 
     Tome tome = modelMapper.map(request, Tome.class);
 
     // Set manual relación
-    tome.setEdition(Edition.builder().id(request.editionId()).build());
+    tome.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateTome(tome);
 
-    List<Tome> existing = tomeRepository.findByEditionId(request.editionId());
+    List<Tome> existing = tomeRepository.findByEditionId(request.getEditionId());
 
     boolean exists = existing.stream()
-        .anyMatch(t -> t.getNumberTome().equals(request.numberTome()));
+        .anyMatch(t -> t.getNumberTome().equals(request.getNumberTome()));
 
     if (exists) {
       throw new IllegalArgumentException("Ya existe un tomo con ese número en la edición");
@@ -63,7 +63,7 @@ public class TomeServiceImpl implements TomeService {
 
   @Override
   @Transactional(readOnly = true)
-  public TomeDTO getTomeById(Long id) {
+  public TomeResponseDTO getTomeById(Long id) {
 
     Tome tome = getTomeEntityById(id);
 
@@ -72,7 +72,7 @@ public class TomeServiceImpl implements TomeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TomeDTO> getAllTomes() {
+  public List<TomeResponseDTO> getAllTomes() {
 
     return tomeRepository.findAll()
         .stream()
@@ -82,7 +82,7 @@ public class TomeServiceImpl implements TomeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TomeDTO> getTomesByEdition(Long editionId) {
+  public List<TomeResponseDTO> getTomesByEdition(Long editionId) {
 
     return tomeRepository.findByEditionId(editionId)
         .stream()
@@ -92,7 +92,7 @@ public class TomeServiceImpl implements TomeService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TomeDTO> getTomesByEditionOrdered(Long editionId) {
+  public List<TomeResponseDTO> getTomesByEditionOrdered(Long editionId) {
 
     return tomeRepository.findByEditionIdOrderByNumberTomeAsc(editionId)
         .stream()
@@ -101,22 +101,22 @@ public class TomeServiceImpl implements TomeService {
   }
 
   @Override
-  public TomeDTO updateTome(Long id, CreateTomeRequest request) {
+  public TomeResponseDTO updateTome(Long id, TomeRequestDTO request) {
 
     Tome existing = getTomeEntityById(id);
 
     Tome updated = modelMapper.map(request, Tome.class);
 
-    updated.setEdition(Edition.builder().id(request.editionId()).build());
+    updated.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateTome(updated);
 
     if (!existing.getNumberTome().equals(updated.getNumberTome())) {
 
-      List<Tome> tomes = tomeRepository.findByEditionId(request.editionId());
+      List<Tome> tomes = tomeRepository.findByEditionId(request.getEditionId());
 
       boolean exists = tomes.stream()
-          .anyMatch(t -> t.getNumberTome().equals(request.numberTome()));
+          .anyMatch(t -> t.getNumberTome().equals(request.getNumberTome()));
 
       if (exists) {
         throw new IllegalArgumentException("Ya existe otro tomo con ese número");
@@ -142,9 +142,9 @@ public class TomeServiceImpl implements TomeService {
   /**
    * Convierte Tome → TomeDTO.
    */
-  private TomeDTO mapToDTO(Tome tome) {
+  private TomeResponseDTO mapToDTO(Tome tome) {
 
-    return new TomeDTO(
+    return new TomeResponseDTO(
         tome.getId(),
         tome.getNumberTome(),
         tome.getEdition().getId());

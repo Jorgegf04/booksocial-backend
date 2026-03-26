@@ -39,9 +39,9 @@ public class UserController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
   @PostMapping
-  public ResponseEntity<UserDTO> createUser(@RequestBody CreateUserRequest request) {
+  public ResponseEntity<UserResponseDTO> createUser(@RequestBody CreateUserRequestDTO request) {
 
-    UserDTO user = userService.createUser(request);
+    UserResponseDTO user = userService.createUser(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(user);
   }
 
@@ -51,28 +51,28 @@ public class UserController {
 
   @Operation(summary = "Obtener usuario por ID")
   @GetMapping("/{id}")
-  public ResponseEntity<UserDTO> getUserById(@PathVariable Long id) {
+  public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long id) {
 
     return ResponseEntity.ok(userService.getUserById(id));
   }
 
   @Operation(summary = "Obtener todos los usuarios")
   @GetMapping
-  public ResponseEntity<List<UserDTO>> getAllUsers() {
+  public ResponseEntity<List<UserResponseDTO>> getAllUsers() {
 
     return ResponseEntity.ok(userService.getAllUsers());
   }
 
   @Operation(summary = "Obtener usuarios activos")
   @GetMapping("/active")
-  public ResponseEntity<List<UserDTO>> getActiveUsers() {
+  public ResponseEntity<List<UserResponseDTO>> getActiveUsers() {
 
     return ResponseEntity.ok(userService.getActiveUsers());
   }
 
   @Operation(summary = "Buscar por rol")
   @GetMapping("/role/{role}")
-  public ResponseEntity<List<UserDTO>> getByRole(@PathVariable Role role) {
+  public ResponseEntity<List<UserResponseDTO>> getByRole(@PathVariable Role role) {
 
     return ResponseEntity.ok(userService.getUsersByRole(role));
   }
@@ -83,9 +83,9 @@ public class UserController {
 
   @Operation(summary = "Actualizar usuario")
   @PutMapping("/{id}")
-  public ResponseEntity<UserDTO> updateUser(
+  public ResponseEntity<UserResponseDTO> updateUser(
       @PathVariable Long id,
-      @RequestBody UpdateUserRequest request) {
+      @RequestBody UpdateUserRequestDTO request) {
 
     return ResponseEntity.ok(userService.updateUser(id, request));
   }
@@ -108,7 +108,7 @@ public class UserController {
 
   @Operation(summary = "Activar o desactivar usuario")
   @PatchMapping("/{id}/active")
-  public ResponseEntity<UserDTO> setActive(
+  public ResponseEntity<UserResponseDTO> setActive(
       @PathVariable Long id,
       @RequestParam Boolean active) {
 

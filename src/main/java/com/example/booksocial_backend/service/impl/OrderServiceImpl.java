@@ -8,9 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.commerce.Order;
 import com.example.booksocial_backend.domain.commerce.OrderLine;
-import com.example.booksocial_backend.DTO.commerce.CreateOrderRequest;
-import com.example.booksocial_backend.DTO.commerce.OrderDTO;
-import com.example.booksocial_backend.DTO.commerce.OrderLineDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -40,22 +40,22 @@ public class OrderServiceImpl implements OrderService {
   private final OrderRepository orderRepository;
 
   @Override
-  public OrderDTO createOrder(CreateOrderRequest request) {
+  public OrderResponseDTO createOrder(OrderRequestDTO request) {
 
     Order order = new Order();
 
     // Set usuario
-    order.setUser(User.builder().id(request.userId()).build());
+    order.setUser(User.builder().id(request.getUserId()).build());
 
     // Fecha automática
     order.setDate(LocalDateTime.now());
 
     // Map líneas
-    List<OrderLine> lines = request.orderLines().stream()
+    List<OrderLine> lines = request.getOrderLines().stream()
         .map(dto -> OrderLine.builder()
-            .product(Product.builder().id(dto.productId()).build())
-            .quantity(dto.quantity())
-            .unitaryPrice(dto.unitaryPrice())
+            .product(Product.builder().id(dto.getProductId()).build())
+            .quantity(dto.getQuantity())
+            .unitaryPrice(dto.getUnitaryPrice())
             .order(order)
             .build())
         .toList();
@@ -74,14 +74,14 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public OrderDTO getOrderById(Long id) {
+  public OrderResponseDTO getOrderById(Long id) {
 
     return mapToDTO(getOrderEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<OrderDTO> getAllOrders() {
+  public List<OrderResponseDTO> getAllOrders() {
 
     return orderRepository.findAll()
         .stream()
@@ -91,7 +91,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<OrderDTO> getOrdersByUser(Long userId) {
+  public List<OrderResponseDTO> getOrdersByUser(Long userId) {
 
     return orderRepository.findByUserId(userId)
         .stream()
@@ -112,15 +112,15 @@ public class OrderServiceImpl implements OrderService {
         .sum();
   }
 
-  private OrderDTO mapToDTO(Order order) {
+  private OrderResponseDTO mapToDTO(Order order) {
 
-    return new OrderDTO(
+    return new OrderResponseDTO(
         order.getId(),
         order.getDate(),
         order.getTotal(),
         order.getUser().getId(),
         order.getOrderLines().stream()
-            .map(l -> new OrderLineDTO(
+            .map(l -> new OrderLineResponseDTO(
                 l.getProduct().getId(),
                 l.getQuantity(),
                 l.getUnitaryPrice()))

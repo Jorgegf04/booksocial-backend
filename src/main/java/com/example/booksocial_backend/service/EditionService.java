@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateEditionRequest;
-import com.example.booksocial_backend.DTO.catalog.EditionDTO;
+import com.example.booksocial_backend.DTO.catalog.EditionRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.EditionResponseDTO;
 
 /**
  * Servicio encargado de la gestión de ediciones dentro del sistema BookSocial.
@@ -20,17 +20,17 @@ import com.example.booksocial_backend.DTO.catalog.EditionDTO;
  */
 public interface EditionService {
 
-  EditionDTO createEdition(CreateEditionRequest request);
+  EditionResponseDTO createEdition(EditionRequestDTO request);
 
-  EditionDTO getEditionById(Long id);
+  EditionResponseDTO getEditionById(Long id);
 
-  List<EditionDTO> getAllEditions();
+  List<EditionResponseDTO> getAllEditions();
 
-  EditionDTO getEditionByIsbn(String isbn);
+  EditionResponseDTO getEditionByIsbn(String isbn);
 
-  List<EditionDTO> getEditionsByEditorial(Long editorialId);
+  List<EditionResponseDTO> getEditionsByEditorial(Long editorialId);
 
-  EditionDTO updateEdition(Long id, CreateEditionRequest request);
+  EditionResponseDTO updateEdition(Long id, EditionRequestDTO request);
 
   void deleteEdition(Long id);
 }

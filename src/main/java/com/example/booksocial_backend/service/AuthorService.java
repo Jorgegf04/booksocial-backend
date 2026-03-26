@@ -2,8 +2,8 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.AuthorDTO;
-import com.example.booksocial_backend.DTO.catalog.CreateAuthorRequest;
+import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 
 /**
@@ -26,21 +26,21 @@ import com.example.booksocial_backend.domain.catalog.Author;
  */
 public interface AuthorService {
 
-  AuthorDTO createAuthor(CreateAuthorRequest request);
+  AuthorResponseDTO createAuthor(AuthorRequestDTO request);
 
-  AuthorDTO getAuthorById(Long id);
+  AuthorResponseDTO getAuthorById(Long id);
 
-  List<AuthorDTO> getAllAuthors();
+  List<AuthorResponseDTO> getAllAuthors();
 
-  List<AuthorDTO> searchAuthorsByName(String name);
+  List<AuthorResponseDTO> searchAuthorsByName(String name);
 
-  List<AuthorDTO> getAuthorsOrderedByName();
+  List<AuthorResponseDTO> getAuthorsOrderedByName();
 
-  List<AuthorDTO> getAuthorsWithWorks();
+  List<AuthorResponseDTO> getAuthorsWithWorks();
 
-  List<AuthorDTO> getTopAuthors();
+  List<AuthorResponseDTO> getTopAuthors();
 
-  AuthorDTO updateAuthor(Long id, CreateAuthorRequest request);
+  AuthorResponseDTO updateAuthor(Long id, AuthorRequestDTO request);
 
   void deleteAuthor(Long id);
 

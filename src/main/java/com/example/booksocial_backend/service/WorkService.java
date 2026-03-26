@@ -3,8 +3,8 @@ package com.example.booksocial_backend.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import com.example.booksocial_backend.DTO.catalog.CreateWorkRequest;
-import com.example.booksocial_backend.DTO.catalog.WorkDTO;
+import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
+import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
 
 /**
  * Servicio encargado de la gestión del catálogo de obras.
@@ -18,25 +18,25 @@ import com.example.booksocial_backend.DTO.catalog.WorkDTO;
  */
 public interface WorkService {
 
-  WorkDTO createWork(CreateWorkRequest request);
+  WorkResponseDTO createWork(WorkRequestDTO request);
 
-  WorkDTO getWorkById(Long id);
+  WorkResponseDTO getWorkById(Long id);
 
-  List<WorkDTO> getAllWorks();
+  List<WorkResponseDTO> getAllWorks();
 
-  List<WorkDTO> searchWorksByTitle(String title);
+  List<WorkResponseDTO> searchWorksByTitle(String title);
 
-  List<WorkDTO> getWorksByGenre(String genre);
+  List<WorkResponseDTO> getWorksByGenre(String genre);
 
-  List<WorkDTO> getWorksByAuthor(Long authorId);
+  List<WorkResponseDTO> getWorksByAuthor(Long authorId);
 
-  List<WorkDTO> searchWorks(String title, String genre, Double rating);
+  List<WorkResponseDTO> searchWorks(String title, String genre, Double rating);
 
-  List<WorkDTO> getTopRatedWorks();
+  List<WorkResponseDTO> getTopRatedWorks();
 
-  List<WorkDTO> getWorksAfterDate(LocalDate date);
+  List<WorkResponseDTO> getWorksAfterDate(LocalDate date);
 
-  WorkDTO updateWork(Long id, CreateWorkRequest request);
+  WorkResponseDTO updateWork(Long id, WorkRequestDTO request);
 
   void deleteWork(Long id);
 }
