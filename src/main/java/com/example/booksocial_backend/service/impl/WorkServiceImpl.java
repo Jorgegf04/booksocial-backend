@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Work;
+import com.example.booksocial_backend.exception.AuthorNotFoundException;
 import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
@@ -63,6 +64,47 @@ public class WorkServiceImpl implements WorkService {
     Work saved = workRepository.save(work);
     System.out.println(request);
     return mapToDTO(saved);
+  }
+
+  @Override
+  public List<WorkResponseDTO> createMany(List<WorkRequestDTO> requests) {
+
+    if (requests == null || requests.isEmpty()) {
+      throw new IllegalArgumentException("La lista de obras no puede estar vacía");
+    }
+
+    List<Work> works = requests.stream()
+        .map(request -> {
+
+          if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+            throw new IllegalArgumentException("El título es obligatorio");
+          }
+
+          if (request.getGenre() == null || request.getGenre().trim().isEmpty()) {
+            throw new IllegalArgumentException("El género es obligatorio");
+          }
+
+          Work work = modelMapper.map(request, Work.class);
+
+          work.setTitle(request.getTitle().trim());
+          work.setGenre(request.getGenre().trim());
+
+          if (request.getAuthorIds() != null) {
+            work.setAuthors(
+                request.getAuthorIds().stream()
+                    .map(id -> authorRepository.findById(id)
+                        .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado: " + id)))
+                    .toList());
+          }
+
+          return work;
+        })
+        .toList();
+
+    return workRepository.saveAll(works)
+        .stream()
+        .map(this::mapToDTO)
+        .toList();
   }
 
   @Override

@@ -20,6 +20,8 @@ public interface WorkService {
 
   WorkResponseDTO createWork(WorkRequestDTO request);
 
+  List<WorkResponseDTO> createMany(List<WorkRequestDTO> requests);
+
   WorkResponseDTO getWorkById(Long id);
 
   List<WorkResponseDTO> getAllWorks();

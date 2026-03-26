@@ -4,13 +4,11 @@ import java.time.LocalDateTime;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
 
-/**
- * Gestión global de excepciones REST.
- */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -19,18 +17,12 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<?> handleUserNotFound(
-      UserNotFoundException ex,
-      HttpServletRequest request) {
-
+  public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
     return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 
   @ExceptionHandler(UserAlreadyExistsException.class)
-  public ResponseEntity<?> handleUserExists(
-      UserAlreadyExistsException ex,
-      HttpServletRequest request) {
-
+  public ResponseEntity<?> handleUserExists(UserAlreadyExistsException ex, HttpServletRequest request) {
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
   }
 
@@ -39,31 +31,35 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(AuthorNotFoundException.class)
-  public ResponseEntity<?> handleAuthorNotFound(
-      AuthorNotFoundException ex,
-      HttpServletRequest request) {
-
+  public ResponseEntity<?> handleAuthorNotFound(AuthorNotFoundException ex, HttpServletRequest request) {
     return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 
-  @ExceptionHandler(AuthorAlreadyExistsException.class)
-  public ResponseEntity<?> handleAuthorExists(
-      AuthorAlreadyExistsException ex,
-      HttpServletRequest request) {
+  // =========================
+  // WORK
+  // =========================
 
-    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  @ExceptionHandler(WorkNotFoundException.class)
+  public ResponseEntity<?> handleWorkNotFound(WorkNotFoundException ex, HttpServletRequest request) {
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 
   // =========================
   // VALIDATION
   // =========================
 
-  @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<?> handleValidation(
-      IllegalArgumentException ex,
-      HttpServletRequest request) {
-
+  @ExceptionHandler(ValidationException.class)
+  public ResponseEntity<?> handleValidation(ValidationException ex, HttpServletRequest request) {
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  // =========================
+  // JSON ERROR
+  // =========================
+
+  @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
+  public ResponseEntity<?> handleJsonError(Exception ex, HttpServletRequest request) {
+    return buildResponse("JSON mal formado", HttpStatus.BAD_REQUEST, request);
   }
 
   // =========================
@@ -71,9 +67,7 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<?> handleGeneric(
-      Exception ex,
-      HttpServletRequest request) {
+  public ResponseEntity<?> handleGeneric(Exception ex, HttpServletRequest request) {
 
     ex.printStackTrace();
 
@@ -84,10 +78,7 @@ public class GlobalExceptionHandler {
   // BUILDER
   // =========================
 
-  private ResponseEntity<?> buildResponse(
-      String message,
-      HttpStatus status,
-      HttpServletRequest request) {
+  private ResponseEntity<?> buildResponse(String message, HttpStatus status, HttpServletRequest request) {
 
     return ResponseEntity.status(status).body(
         new ExceptionBody(
