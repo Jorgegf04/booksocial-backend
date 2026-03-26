@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.booksocial_backend.DTO.catalog.AuthorDTO;
 import com.example.booksocial_backend.DTO.catalog.CreateAuthorRequest;
 import com.example.booksocial_backend.domain.catalog.Author;
+import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.service.AuthorService;
 
@@ -28,21 +29,31 @@ public class AuthorServiceImpl implements AuthorService {
   @Override
   public AuthorDTO createAuthor(CreateAuthorRequest request) {
 
-    Author author = modelMapper.map(request, Author.class);
+    Author author = Author.builder()
+        .name(request.getName())
+        .birthDate(request.getBirthDate())
+        .build();
 
     validateAuthor(author);
 
     String normalizedName = author.getName().trim();
 
     if (authorRepository.existsByName(normalizedName)) {
-      throw new IllegalArgumentException("Ya existe un autor con ese nombre");
+      throw new AuthorAlreadyExistsException(normalizedName);
     }
 
     author.setName(normalizedName);
 
     Author saved = authorRepository.save(author);
 
-    return modelMapper.map(saved, AuthorDTO.class);
+    return new AuthorDTO(
+        saved.getId(),
+        saved.getName(),
+        saved.getBirthDate(),
+        saved.getWorks()
+            .stream()
+            .map(work -> work.getTitle())
+            .toList());
   }
 
   @Override

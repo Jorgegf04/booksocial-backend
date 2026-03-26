@@ -40,6 +40,17 @@ public class WorkController {
     return ResponseEntity.status(HttpStatus.CREATED).body(work);
   }
 
+  @PostMapping("/batch")
+  public ResponseEntity<List<WorkDTO>> createMany(
+      @RequestBody List<CreateWorkRequest> requests) {
+
+    List<WorkDTO> works = requests.stream()
+        .map(workService::createWork)
+        .toList();
+
+    return ResponseEntity.status(HttpStatus.CREATED).body(works);
+  }
+
   // =========================
   // READ
   // =========================
@@ -119,4 +130,5 @@ public class WorkController {
     workService.deleteWork(id);
     return ResponseEntity.noContent().build();
   }
+
 }

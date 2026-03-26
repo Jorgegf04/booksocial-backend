@@ -77,6 +77,7 @@ public class Author {
    * Lista de obras en las que este autor ha participado.
    * La relación es gestionada por la entidad {@link Work} (mappedBy).
    */
+  @Builder.Default
   @ToString.Exclude
   @ManyToMany(mappedBy = "authors", fetch = FetchType.LAZY)
   private List<Work> works = new ArrayList<>();

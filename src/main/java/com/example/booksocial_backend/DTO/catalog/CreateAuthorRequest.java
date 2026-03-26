@@ -2,7 +2,15 @@ package com.example.booksocial_backend.DTO.catalog;
 
 import java.time.LocalDate;
 
-public record CreateAuthorRequest(
-    String name,
-    LocalDate birthDate) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateAuthorRequest {
+
+    private String name;
+    private LocalDate birthDate;
 }

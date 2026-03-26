@@ -3,9 +3,17 @@ package com.example.booksocial_backend.DTO.catalog;
 import java.time.LocalDate;
 import java.util.List;
 
-public record AuthorDTO(
-        Long id,
-        String name,
-        LocalDate birthDate,
-        List<String> works) {
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+public class AuthorDTO {
+
+        private Long id;
+        private String name;
+        private LocalDate birthDate;
+        private List<String> works;
 }

@@ -14,3 +14,4 @@ public class ExceptionBody {
   private String message;
   private String path;
 }
+// ¿Meter dentro de Global Exception como clase de paquete?

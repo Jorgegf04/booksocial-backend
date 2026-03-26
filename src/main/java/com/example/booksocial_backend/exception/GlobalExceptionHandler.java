@@ -14,6 +14,10 @@ import jakarta.servlet.http.HttpServletRequest;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  // =========================
+  // USER
+  // =========================
+
   @ExceptionHandler(UserNotFoundException.class)
   public ResponseEntity<?> handleUserNotFound(
       UserNotFoundException ex,
@@ -30,6 +34,30 @@ public class GlobalExceptionHandler {
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
   }
 
+  // =========================
+  // AUTHOR
+  // =========================
+
+  @ExceptionHandler(AuthorNotFoundException.class)
+  public ResponseEntity<?> handleAuthorNotFound(
+      AuthorNotFoundException ex,
+      HttpServletRequest request) {
+
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(AuthorAlreadyExistsException.class)
+  public ResponseEntity<?> handleAuthorExists(
+      AuthorAlreadyExistsException ex,
+      HttpServletRequest request) {
+
+    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  // =========================
+  // VALIDATION
+  // =========================
+
   @ExceptionHandler(IllegalArgumentException.class)
   public ResponseEntity<?> handleValidation(
       IllegalArgumentException ex,
@@ -38,13 +66,23 @@ public class GlobalExceptionHandler {
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
   }
 
+  // =========================
+  // GENERIC
+  // =========================
+
   @ExceptionHandler(Exception.class)
   public ResponseEntity<?> handleGeneric(
       Exception ex,
       HttpServletRequest request) {
 
+    ex.printStackTrace();
+
     return buildResponse("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
+
+  // =========================
+  // BUILDER
+  // =========================
 
   private ResponseEntity<?> buildResponse(
       String message,
