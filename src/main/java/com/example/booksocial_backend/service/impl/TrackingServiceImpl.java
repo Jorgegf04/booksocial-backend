@@ -11,7 +11,7 @@ import com.example.booksocial_backend.domain.commerce.TrackingStatus;
 import com.example.booksocial_backend.DTO.commerce.TrackingRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.TrackingResponseDTO;
 import com.example.booksocial_backend.domain.commerce.Order;
-
+import com.example.booksocial_backend.repository.OrderRepository;
 import com.example.booksocial_backend.repository.TrackingRepository;
 import com.example.booksocial_backend.service.TrackingService;
 
@@ -34,15 +34,19 @@ import lombok.RequiredArgsConstructor;
 public class TrackingServiceImpl implements TrackingService {
 
   private final TrackingRepository trackingRepository;
+  private final OrderRepository orderRepository;
 
   @Override
   public TrackingResponseDTO addTracking(TrackingRequestDTO request) {
 
     Tracking tracking = new Tracking();
 
-    tracking.setTrackingStatus(request.getTrackingStatus());
+    tracking.setStatus(request.getTrackingStatus());
     tracking.setDate(LocalDateTime.now());
-    tracking.setOrder(Order.builder().id(request.getOrderId()).build());
+    Order order = orderRepository.findById(request.getOrderId())
+        .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + request.getOrderId()));
+
+    tracking.setOrder(order);
 
     validateTracking(tracking);
 
@@ -90,7 +94,7 @@ public class TrackingServiceImpl implements TrackingService {
 
     return new TrackingResponseDTO(
         tracking.getId(),
-        tracking.getTrackingStatus(),
+        tracking.getStatus(),
         tracking.getDate(),
         tracking.getOrder().getId());
   }
@@ -110,7 +114,7 @@ public class TrackingServiceImpl implements TrackingService {
       throw new IllegalArgumentException("El tracking no puede ser nulo");
     }
 
-    if (tracking.getTrackingStatus() == null) {
+    if (tracking.getStatus() == null) {
       throw new IllegalArgumentException("El estado es obligatorio");
     }
 
@@ -130,7 +134,7 @@ public class TrackingServiceImpl implements TrackingService {
       return;
     }
 
-    TrackingStatus lastStatus = history.get(history.size() - 1).getTrackingStatus();
+    TrackingStatus lastStatus = history.get(history.size() - 1).getStatus();
 
     if (lastStatus == TrackingStatus.DELIVERED) {
       throw new IllegalArgumentException("El pedido ya ha sido entregado");

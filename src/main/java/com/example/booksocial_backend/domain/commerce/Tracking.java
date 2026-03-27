@@ -8,6 +8,8 @@ import jakarta.validation.constraints.Size;
 import lombok.*;
 import java.time.LocalDateTime;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Entidad que representa el seguimiento de un pedido.
  *
@@ -39,8 +41,8 @@ public class Tracking {
    * Estado actual del envío.
    */
   @Enumerated(EnumType.STRING)
-  @Column(nullable = false)
-  private TrackingStatus trackingStatus;
+  @Column(name = "STATUS", nullable = false)
+  private TrackingStatus status;
 
   /**
    * Fecha del cambio de estado.

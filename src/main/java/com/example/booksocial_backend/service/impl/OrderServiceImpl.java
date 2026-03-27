@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -8,9 +9,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.commerce.Order;
 import com.example.booksocial_backend.domain.commerce.OrderLine;
+import com.example.booksocial_backend.DTO.commerce.OrderLineRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
-import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.user.User;
 
@@ -42,15 +44,18 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public OrderResponseDTO createOrder(OrderRequestDTO request) {
 
-    Order order = new Order();
+    System.out.println("REQUEST COMPLETO: " + request);
+    System.out.println("ORDER LINES: " + request.getOrderLines());
 
-    // Set usuario
-    order.setUser(User.builder().id(request.getUserId()).build());
+    if (request.getOrderLines() == null || request.getOrderLines().isEmpty()) {
+      throw new IllegalArgumentException("El pedido debe contener al menos una línea de pedido");
+    }
 
-    // Fecha automática
-    order.setDate(LocalDateTime.now());
+    Order order = Order.builder()
+        .user(User.builder().id(request.getUserId()).build())
+        .date(LocalDateTime.now())
+        .build();
 
-    // Map líneas
     List<OrderLine> lines = request.getOrderLines().stream()
         .map(dto -> OrderLine.builder()
             .product(Product.builder().id(dto.getProductId()).build())
@@ -60,7 +65,8 @@ public class OrderServiceImpl implements OrderService {
             .build())
         .toList();
 
-    order.setOrderLines(lines);
+    order.setOrderLines(new ArrayList<>());
+    order.getOrderLines().addAll(lines);
 
     validateOrder(order);
 

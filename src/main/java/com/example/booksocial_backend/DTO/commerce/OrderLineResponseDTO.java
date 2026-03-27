@@ -26,4 +26,5 @@ public class OrderLineResponseDTO {
     private Long productId;
     private Integer quantity;
     private Double unitaryPrice;
+
 }

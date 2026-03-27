@@ -67,6 +67,7 @@ public class Order {
   /**
    * Líneas de pedido.
    */
+  @Builder.Default
   @ToString.Exclude
   @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<OrderLine> orderLines = new ArrayList<>();

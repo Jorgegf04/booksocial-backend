@@ -24,5 +24,6 @@ import lombok.NoArgsConstructor;
 public class OrderRequestDTO {
 
     private Long userId;
-    private List<OrderLineResponseDTO> orderLines;
+    private List<OrderLineRequestDTO> orderLines;
+
 }
