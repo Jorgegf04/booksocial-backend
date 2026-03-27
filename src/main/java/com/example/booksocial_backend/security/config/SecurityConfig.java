@@ -11,7 +11,6 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -26,8 +25,10 @@ import com.example.booksocial_backend.security.jwt.AuthTokenFilter;
 @EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
+
   @Autowired
   private UserDetailsService userDetailsService;
+
   @Autowired
   private AuthEntryPointJwt authEntryPointJwt;
 
@@ -57,22 +58,33 @@ public class SecurityConfig {
 
   @Bean
   @Order(1)
-  public SecurityFilterChain ApifilterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain apiFilterChain(HttpSecurity http) throws Exception {
+
     http.securityMatcher("/api/**");
+
     http
         .csrf(csrf -> csrf.disable())
         .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPointJwt))
         .sessionManagement(session -> session
             .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
         .authorizeHttpRequests(auth -> auth
-            // PERMISOS API
-            .requestMatchers("/api/**").permitAll() // añadir aquí permisos api
-        );
+
+            .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/comments/**").permitAll() // puedes quitarlo luego si quieres proteger
+            .requestMatchers("/api/reactions/**").permitAll() // puedes quitarlo luego si quieres proteger
+            .requestMatchers("/api/events/**").permitAll() // puedes quitarlo luego si quieres proteger
+            .requestMatchers("/api/subscriptions/**").permitAll() // puedes quitarlo luego si quieres proteger
+
+            .anyRequest().authenticated());
+
     http.authenticationProvider(authenticationProvider());
+
     http.addFilterBefore(authenticationJwtTokenFilter(),
         UsernamePasswordAuthenticationFilter.class);
+
     http.cors(Customizer.withDefaults());
+
     return http.build();
   }
-
 }
