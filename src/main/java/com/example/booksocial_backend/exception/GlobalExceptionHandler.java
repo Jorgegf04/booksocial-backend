@@ -87,4 +87,32 @@ public class GlobalExceptionHandler {
             message,
             request.getRequestURI()));
   }
+
+  // =========================
+  // CHAPTER
+  // =========================
+
+  @ExceptionHandler(ChapterNotFoundException.class)
+  public ResponseEntity<?> handleChapterNotFound(
+      ChapterNotFoundException ex,
+      HttpServletRequest request) {
+
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(ChapterAlreadyExistsException.class)
+  public ResponseEntity<?> handleChapterExists(
+      ChapterAlreadyExistsException ex,
+      HttpServletRequest request) {
+
+    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  @ExceptionHandler(TomeNotFoundException.class)
+  public ResponseEntity<?> handleTomeNotFound(
+      TomeNotFoundException ex,
+      HttpServletRequest request) {
+
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
 }

@@ -3,8 +3,13 @@ package com.example.booksocial_backend.service;
 import java.time.LocalDate;
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
+import com.example.booksocial_backend.DTO.catalog.WorkFilterDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
+import com.example.booksocial_backend.domain.catalog.Genre;
 
 /**
  * Servicio encargado de la gestión del catálogo de obras.
@@ -28,7 +33,7 @@ public interface WorkService {
 
   List<WorkResponseDTO> searchWorksByTitle(String title);
 
-  List<WorkResponseDTO> getWorksByGenre(String genre);
+  List<WorkResponseDTO> getWorksByGenre(Genre genre);
 
   List<WorkResponseDTO> getWorksByAuthor(Long authorId);
 
@@ -39,6 +44,8 @@ public interface WorkService {
   List<WorkResponseDTO> getWorksAfterDate(LocalDate date);
 
   WorkResponseDTO updateWork(Long id, WorkRequestDTO request);
+
+  Page<WorkResponseDTO> searchAdvanced(WorkFilterDTO filter, Pageable pageable);
 
   void deleteWork(Long id);
 }

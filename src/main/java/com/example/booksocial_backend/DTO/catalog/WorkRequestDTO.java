@@ -3,6 +3,10 @@ package com.example.booksocial_backend.DTO.catalog;
 import java.time.LocalDate;
 import java.util.List;
 
+import com.example.booksocial_backend.domain.catalog.Demographic;
+import com.example.booksocial_backend.domain.catalog.Genre;
+import com.example.booksocial_backend.domain.catalog.WorkType;
+
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,10 +27,11 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkRequestDTO {
-
     private String title;
     private String description;
-    private String genre;
+    private Genre genre;
+    private WorkType type;
+    private Demographic demographic;
     private LocalDate publicationDate;
     private String img;
     private Double averageRating;

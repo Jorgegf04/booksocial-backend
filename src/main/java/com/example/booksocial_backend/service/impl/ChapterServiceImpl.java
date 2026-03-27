@@ -10,6 +10,8 @@ import com.example.booksocial_backend.DTO.catalog.ChapterResponseDTO;
 import com.example.booksocial_backend.DTO.catalog.ChapterRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Chapter;
 import com.example.booksocial_backend.domain.catalog.Tome;
+import com.example.booksocial_backend.exception.ChapterAlreadyExistsException;
+import com.example.booksocial_backend.exception.ChapterNotFoundException;
 import com.example.booksocial_backend.repository.ChapterRepository;
 import com.example.booksocial_backend.service.ChapterService;
 
@@ -38,7 +40,9 @@ public class ChapterServiceImpl implements ChapterService {
         .anyMatch(c -> c.getChapterNumber().equals(request.getChapterNumber()));
 
     if (exists) {
-      throw new IllegalArgumentException("Ya existe un capítulo con ese número en el tomo");
+      throw new ChapterAlreadyExistsException(
+          request.getChapterNumber(),
+          request.getTomeId());
     }
 
     Chapter saved = chapterRepository.save(chapter);
@@ -83,7 +87,6 @@ public class ChapterServiceImpl implements ChapterService {
     chapterRepository.delete(chapter);
   }
 
-  // 🔹 Mapper manual (clave en relaciones)
   private ChapterResponseDTO mapToDTO(Chapter chapter) {
 
     return new ChapterResponseDTO(
@@ -96,7 +99,7 @@ public class ChapterServiceImpl implements ChapterService {
   private Chapter getChapterEntityById(Long id) {
 
     return chapterRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Capítulo no encontrado con id: " + id));
+        .orElseThrow(() -> new ChapterNotFoundException(id));
   }
 
   private void validateChapter(Chapter chapter) {

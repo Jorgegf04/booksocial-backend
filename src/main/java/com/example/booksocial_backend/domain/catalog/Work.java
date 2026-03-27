@@ -7,6 +7,8 @@ import java.util.List;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -19,6 +21,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -73,14 +76,6 @@ public class Work {
   private String description;
 
   /**
-   * Género literario principal.
-   */
-  @NotBlank
-  @Size(max = 100)
-  @Column(length = 100)
-  private String genre;
-
-  /**
    * Fecha de publicación original de la obra.
    */
   @PastOrPresent
@@ -99,6 +94,21 @@ public class Work {
   @Min(0)
   @Max(5)
   private Double averageRating;
+
+  /**
+   * Género literario principal.
+   */
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private Genre genre;
+
+  @NotNull
+  @Enumerated(EnumType.STRING)
+  private WorkType type;
+
+  // opcional
+  @Enumerated(EnumType.STRING)
+  private Demographic demographic;
 
   /**
    * Autores asociados a la obra.

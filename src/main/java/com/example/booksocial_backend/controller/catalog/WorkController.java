@@ -2,10 +2,13 @@ package com.example.booksocial_backend.controller.catalog;
 
 import java.util.List;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -14,10 +17,14 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.booksocial_backend.DTO.catalog.WorkFilterDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
+import com.example.booksocial_backend.domain.catalog.Genre;
+import com.example.booksocial_backend.domain.catalog.WorkType;
 import com.example.booksocial_backend.service.WorkService;
 
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 
@@ -71,7 +78,7 @@ public class WorkController {
   }
 
   @GetMapping("/genre/{genre}")
-  public ResponseEntity<List<WorkResponseDTO>> getByGenre(@PathVariable String genre) {
+  public ResponseEntity<List<WorkResponseDTO>> getByGenre(@PathVariable Genre genre) {
     return ResponseEntity.ok(workService.getWorksByGenre(genre));
   }
 
@@ -105,5 +112,23 @@ public class WorkController {
   public ResponseEntity<Void> delete(@PathVariable Long id) {
     workService.deleteWork(id);
     return ResponseEntity.noContent().build();
+  }
+  // =========================
+  // BUSQUEDA AVANZADA
+  // =========================
+
+  @GetMapping("/advanced-search")
+  public ResponseEntity<Page<WorkResponseDTO>> advancedSearch(
+      @RequestParam(required = false) Genre genre,
+      @RequestParam(required = false) WorkType type,
+      Pageable pageable) {
+
+    System.out.println(genre.getClass());
+
+    WorkFilterDTO filter = new WorkFilterDTO();
+    filter.setGenre(genre);
+    filter.setType(type);
+
+    return ResponseEntity.ok(workService.searchAdvanced(filter, pageable));
   }
 }

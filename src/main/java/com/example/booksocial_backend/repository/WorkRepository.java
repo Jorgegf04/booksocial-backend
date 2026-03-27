@@ -8,8 +8,11 @@ import org.springframework.data.domain.Pageable;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import com.example.booksocial_backend.DTO.catalog.WorkFilterDTO;
+import com.example.booksocial_backend.domain.catalog.Genre;
 import com.example.booksocial_backend.domain.catalog.Work;
 
 /**
@@ -42,7 +45,7 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     /**
      * Busco obras por género.
      */
-    List<Work> findByGenreIgnoreCase(String genre);
+    List<Work> findByGenre(Genre genre);
 
     /**
      * Busco obras publicadas después de una fecha.
@@ -102,5 +105,23 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
      * Busco obras por título con paginación.
      */
     Page<Work> findByTitleContainingIgnoreCase(String title, Pageable pageable);
+
+    /**
+     * Busqueda avanzada de obras con paginación.
+     */
+
+    @Query("""
+                SELECT DISTINCT w FROM Work w
+                LEFT JOIN w.authors a
+                WHERE (:#{#filter.title} IS NULL OR LOWER(w.title) LIKE LOWER(CONCAT('%', :#{#filter.title}, '%')))
+                AND (:#{#filter.genre} IS NULL OR w.genre = :#{#filter.genre})
+                AND (:#{#filter.type} IS NULL OR w.type = :#{#filter.type})
+                AND (:#{#filter.demographic} IS NULL OR w.demographic = :#{#filter.demographic})
+                AND (:#{#filter.minRating} IS NULL OR w.averageRating >= :#{#filter.minRating})
+                AND (:#{#filter.publishedAfter} IS NULL OR w.publicationDate >= :#{#filter.publishedAfter})
+                AND (:#{#filter.publishedBefore} IS NULL OR w.publicationDate <= :#{#filter.publishedBefore})
+                AND (:#{#filter.authorId} IS NULL OR a.id = :#{#filter.authorId})
+            """)
+    Page<Work> searchAdvanced(@Param("filter") WorkFilterDTO filter, Pageable pageable);
 
 }
