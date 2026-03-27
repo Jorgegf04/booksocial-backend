@@ -23,5 +23,7 @@ import lombok.NoArgsConstructor;
 public class AuthorRequestDTO {
 
     private String name;
+    private String nationality;
     private LocalDate birthDate;
+
 }

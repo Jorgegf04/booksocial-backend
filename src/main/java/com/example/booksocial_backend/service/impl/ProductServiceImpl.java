@@ -121,17 +121,20 @@ public class ProductServiceImpl implements ProductService {
   }
 
   @Override
-  public void decreaseStock(Long productId, int quantity) {
+  public void decreaseStock(Long id, int quantity) {
 
-    Product product = getProductEntityById(productId);
+    Product product = productRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+
+    if (quantity <= 0) {
+      throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
+    }
 
     if (product.getStock() < quantity) {
       throw new IllegalArgumentException("Stock insuficiente");
     }
 
     product.setStock(product.getStock() - quantity);
-
-    productRepository.save(product);
   }
 
   @Override

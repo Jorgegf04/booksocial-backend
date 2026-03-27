@@ -13,6 +13,7 @@ import com.example.booksocial_backend.domain.catalog.Tome;
 import com.example.booksocial_backend.exception.ChapterAlreadyExistsException;
 import com.example.booksocial_backend.exception.ChapterNotFoundException;
 import com.example.booksocial_backend.repository.ChapterRepository;
+import com.example.booksocial_backend.repository.TomeRepository;
 import com.example.booksocial_backend.service.ChapterService;
 
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 public class ChapterServiceImpl implements ChapterService {
 
   private final ChapterRepository chapterRepository;
+  private final TomeRepository tomeRepository;
   private final ModelMapper modelMapper;
 
   @Override
@@ -30,7 +32,10 @@ public class ChapterServiceImpl implements ChapterService {
 
     Chapter chapter = modelMapper.map(request, Chapter.class);
 
-    chapter.setTome(Tome.builder().id(request.getTomeId()).build());
+    Tome tome = tomeRepository.findById(request.getTomeId())
+        .orElseThrow(() -> new RuntimeException("Tome no encontrado con id: " + request.getTomeId()));
+
+    chapter.setTome(tome);
 
     validateChapter(chapter);
 

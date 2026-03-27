@@ -12,6 +12,8 @@ import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.domain.catalog.Editorial;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.repository.EditionRepository;
+import com.example.booksocial_backend.repository.EditorialRepository;
+import com.example.booksocial_backend.repository.WorkRepository;
 import com.example.booksocial_backend.service.EditionService;
 
 import lombok.RequiredArgsConstructor;
@@ -36,26 +38,26 @@ import lombok.RequiredArgsConstructor;
 public class EditionServiceImpl implements EditionService {
 
   private final EditionRepository editionRepository;
+  private final WorkRepository workRepository;
+  private final EditorialRepository editorialRepository;
   private final ModelMapper modelMapper;
 
   @Override
   public EditionResponseDTO createEdition(EditionRequestDTO request) {
 
-    Edition edition = modelMapper.map(request, Edition.class);
+    Edition edition = new Edition();
 
-    // Set manual de relaciones
-    edition.setWork(Work.builder().id(request.getWorkId()).build());
-    edition.setEditorial(Editorial.builder().id(request.getEditorialId()).build());
+    edition.setIsbn(request.getIsbn());
+    edition.setEditionDate(request.getEditionDate());
 
-    validateEdition(edition);
+    Work work = workRepository.findById(request.getWorkId())
+        .orElseThrow(() -> new RuntimeException("Work no encontrado"));
 
-    String normalizedIsbn = edition.getIsbn().trim();
+    Editorial editorial = editorialRepository.findById(request.getEditorialId())
+        .orElseThrow(() -> new RuntimeException("Editorial no encontrada"));
 
-    if (editionRepository.findByIsbn(normalizedIsbn).isPresent()) {
-      throw new IllegalArgumentException("Ya existe una edición con ese ISBN");
-    }
-
-    edition.setIsbn(normalizedIsbn);
+    edition.setWork(work);
+    edition.setEditorial(editorial);
 
     Edition saved = editionRepository.save(edition);
 
@@ -108,8 +110,11 @@ public class EditionServiceImpl implements EditionService {
 
     Edition updated = modelMapper.map(request, Edition.class);
 
-    updated.setWork(Work.builder().id(request.getWorkId()).build());
-    updated.setEditorial(Editorial.builder().id(request.getEditorialId()).build());
+    Work work = workRepository.findById(request.getWorkId())
+        .orElseThrow(() -> new RuntimeException("Work no encontrada con id: " + request.getWorkId()));
+
+    Editorial editorial = editorialRepository.findById(request.getEditorialId())
+        .orElseThrow(() -> new RuntimeException("Editorial no encontrada con id: " + request.getEditorialId()));
 
     validateEdition(updated);
 
@@ -122,8 +127,8 @@ public class EditionServiceImpl implements EditionService {
 
     existing.setIsbn(normalizedIsbn);
     existing.setEditionDate(updated.getEditionDate());
-    existing.setWork(updated.getWork());
-    existing.setEditorial(updated.getEditorial());
+    existing.setWork(work);
+    existing.setEditorial(editorial);
 
     Edition saved = editionRepository.save(existing);
 
@@ -142,7 +147,6 @@ public class EditionServiceImpl implements EditionService {
    * Convierte una entidad Edition en su DTO correspondiente.
    */
   private EditionResponseDTO mapToDTO(Edition edition) {
-
     return new EditionResponseDTO(
         edition.getId(),
         edition.getIsbn(),

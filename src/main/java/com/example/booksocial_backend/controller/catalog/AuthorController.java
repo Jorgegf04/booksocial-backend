@@ -11,34 +11,52 @@ import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.service.AuthorService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Controlador REST para la gestión de autores dentro del sistema BookSocial.
+ * Controlador REST encargado de la gestión de la entidad Author dentro del
+ * módulo de catálogo.
  *
- * Este controlador forma parte del módulo de catálogo y permite realizar
- * operaciones CRUD sobre los autores, así como consultas avanzadas
- * para la exploración del catálogo.
+ * <p>
+ * Este controlador expone los endpoints necesarios para realizar operaciones
+ * CRUD
+ * y consultas avanzadas sobre autores en el sistema BookSocial.
+ * </p>
  *
- * Proporciona endpoints preparados para ser consumidos por clientes REST
- * como Postman o aplicaciones frontend.
+ * <p>
+ * Forma parte del subsistema de gestión de catálogo definido en la arquitectura
+ * del sistema,
+ * permitiendo la interacción con los recursos Author mediante API REST
+ * siguiendo
+ * el estándar HTTP.
+ * </p>
  *
- * Funcionalidades principales:
- * - Creación de autores
- * - Consulta de autores
- * - Búsqueda y filtrado
- * - Ranking de autores
- * - Actualización y eliminación
+ * <p>
+ * <b>Responsabilidades principales:</b>
+ * </p>
+ * <ul>
+ * <li>Registro y gestión de autores</li>
+ * <li>Consulta individual y listados</li>
+ * <li>Búsqueda y filtrado</li>
+ * <li>Ranking y estadísticas básicas</li>
+ * </ul>
+ *
+ * <p>
+ * Todas las respuestas se devuelven en formato JSON y están diseñadas para ser
+ * consumidas
+ * por clientes REST (frontend, Postman, Swagger UI, etc.).
+ * </p>
  *
  * @author Jorge
+ * @version 1.1
  * @since 2026
- * @version 1.0
  */
-
-@Tag(name = "Author Controller", description = "Gestión completa de autores dentro del catálogo literario del sistema BookSocial")
+@Tag(name = "Author Controller", description = "API REST para la gestión completa de autores dentro del catálogo literario")
 @RestController
 @RequestMapping("/api/authors")
 @RequiredArgsConstructor
@@ -50,22 +68,33 @@ public class AuthorController {
   // CREATE
   // =========================
 
-  @Operation(summary = "Crear nuevo autor", description = "Registra un nuevo autor en el sistema con los datos proporcionados. "
-      + "El autor podrá posteriormente asociarse a una o varias obras.")
+  /**
+   * Crea un nuevo autor en el sistema.
+   *
+   * @param request DTO con los datos del autor a registrar
+   * @return Autor creado con su información completa
+   */
+  @Operation(summary = "Crear autor", description = "Registra un nuevo autor en el sistema. El autor podrá asociarse posteriormente a múltiples obras.")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Autor creado correctamente"),
-      @ApiResponse(responseCode = "400", description = "Datos inválidos o incompletos"),
+      @ApiResponse(responseCode = "400", description = "Datos inválidos en la petición"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
   @PostMapping
-  public ResponseEntity<AuthorResponseDTO> createAuthor(@RequestBody AuthorRequestDTO request) {
+  public ResponseEntity<AuthorResponseDTO> createAuthor(
+      @Valid @RequestBody AuthorRequestDTO request) {
 
     AuthorResponseDTO author = authorService.createAuthor(request);
     return ResponseEntity.status(HttpStatus.CREATED).body(author);
   }
 
-  @Operation(summary = "Crear múltiples autores", description = "Permite la creación masiva de autores en una única petición. "
-      + "Optimiza operaciones de carga inicial o importación de datos.")
+  /**
+   * Crea múltiples autores en una única operación.
+   *
+   * @param requests lista de autores a registrar
+   * @return lista de autores creados
+   */
+  @Operation(summary = "Creación masiva de autores", description = "Permite registrar múltiples autores en una única petición. Ideal para cargas iniciales de datos.")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Autores creados correctamente"),
       @ApiResponse(responseCode = "400", description = "Lista vacía o datos inválidos"),
@@ -73,10 +102,10 @@ public class AuthorController {
   })
   @PostMapping("/batch")
   public ResponseEntity<List<AuthorResponseDTO>> createMany(
-      @RequestBody List<AuthorRequestDTO> requests) {
+      @Valid @RequestBody List<AuthorRequestDTO> requests) {
 
     if (requests == null || requests.isEmpty()) {
-      throw new IllegalArgumentException("La lista no puede estar vacía");
+      throw new IllegalArgumentException("La lista de autores no puede estar vacía");
     }
 
     List<AuthorResponseDTO> authors = requests.stream()
@@ -90,18 +119,30 @@ public class AuthorController {
   // READ
   // =========================
 
-  @Operation(summary = "Obtener autor por ID", description = "Recupera la información completa de un autor a partir de su identificador único.")
+  /**
+   * Obtiene un autor por su identificador único.
+   *
+   * @param id ID del autor
+   * @return Autor encontrado
+   */
+  @Operation(summary = "Obtener autor por ID", description = "Recupera un autor específico a partir de su identificador único.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Autor encontrado"),
       @ApiResponse(responseCode = "404", description = "Autor no encontrado")
   })
   @GetMapping("/{id}")
-  public ResponseEntity<AuthorResponseDTO> getAuthorById(@PathVariable Long id) {
+  public ResponseEntity<AuthorResponseDTO> getAuthorById(
+      @Parameter(description = "ID único del autor", example = "1") @PathVariable Long id) {
 
     return ResponseEntity.ok(authorService.getAuthorById(id));
   }
 
-  @Operation(summary = "Obtener todos los autores", description = "Devuelve el listado completo de autores registrados en el sistema.")
+  /**
+   * Obtiene todos los autores del sistema.
+   *
+   * @return listado completo de autores
+   */
+  @Operation(summary = "Listar todos los autores", description = "Devuelve todos los autores registrados en el sistema sin filtros.")
   @ApiResponses({
       @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
   })
@@ -111,43 +152,39 @@ public class AuthorController {
     return ResponseEntity.ok(authorService.getAllAuthors());
   }
 
-  @Operation(summary = "Buscar autores por nombre", description = "Realiza una búsqueda parcial de autores por nombre. "
-      + "El sistema devolverá coincidencias que contengan el texto indicado.")
+  /**
+   * Busca autores por nombre.
+   *
+   * @param name texto a buscar
+   * @return lista de autores coincidentes
+   */
+  @Operation(summary = "Buscar autores por nombre", description = "Realiza una búsqueda parcial (LIKE) sobre el nombre del autor.")
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Resultados de búsqueda"),
-      @ApiResponse(responseCode = "400", description = "Parámetro de búsqueda inválido")
+      @ApiResponse(responseCode = "200", description = "Resultados encontrados"),
+      @ApiResponse(responseCode = "400", description = "Parámetro inválido")
   })
   @GetMapping("/search")
-  public ResponseEntity<List<AuthorResponseDTO>> searchByName(@RequestParam String name) {
+  public ResponseEntity<List<AuthorResponseDTO>> searchByName(
+      @Parameter(description = "Nombre o parte del nombre del autor", example = "Tolkien") @RequestParam String name) {
 
     return ResponseEntity.ok(authorService.searchAuthorsByName(name));
   }
 
-  @Operation(summary = "Obtener autores ordenados alfabéticamente", description = "Devuelve los autores ordenados de forma ascendente según su nombre.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Autores ordenados correctamente")
-  })
+  @Operation(summary = "Autores ordenados", description = "Devuelve los autores ordenados alfabéticamente por nombre.")
   @GetMapping("/ordered")
   public ResponseEntity<List<AuthorResponseDTO>> getOrderedAuthors() {
 
     return ResponseEntity.ok(authorService.getAuthorsOrderedByName());
   }
 
-  @Operation(summary = "Obtener autores con obras asociadas", description = "Filtra y devuelve únicamente aquellos autores que tienen al menos una obra registrada en el sistema.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Autores con obras obtenidos correctamente")
-  })
+  @Operation(summary = "Autores con obras", description = "Obtiene únicamente los autores que tienen al menos una obra asociada.")
   @GetMapping("/with-works")
   public ResponseEntity<List<AuthorResponseDTO>> getAuthorsWithWorks() {
 
     return ResponseEntity.ok(authorService.getAuthorsWithWorks());
   }
 
-  @Operation(summary = "Ranking de autores", description = "Obtiene un ranking de autores en función del número de obras asociadas, "
-      + "permitiendo identificar los autores más relevantes del catálogo.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Ranking generado correctamente")
-  })
+  @Operation(summary = "Top autores", description = "Ranking de autores basado en número de obras asociadas.")
   @GetMapping("/top")
   public ResponseEntity<List<AuthorResponseDTO>> getTopAuthors() {
 
@@ -158,16 +195,23 @@ public class AuthorController {
   // UPDATE
   // =========================
 
-  @Operation(summary = "Actualizar autor", description = "Permite modificar los datos de un autor existente mediante su identificador.")
+  /**
+   * Actualiza un autor existente.
+   *
+   * @param id      ID del autor
+   * @param request nuevos datos
+   * @return autor actualizado
+   */
+  @Operation(summary = "Actualizar autor", description = "Modifica los datos de un autor existente.")
   @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Autor actualizado correctamente"),
+      @ApiResponse(responseCode = "200", description = "Autor actualizado"),
       @ApiResponse(responseCode = "404", description = "Autor no encontrado"),
       @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
   @PutMapping("/{id}")
   public ResponseEntity<AuthorResponseDTO> updateAuthor(
-      @PathVariable Long id,
-      @RequestBody AuthorRequestDTO request) {
+      @Parameter(description = "ID del autor a actualizar", example = "1") @PathVariable Long id,
+      @Valid @RequestBody AuthorRequestDTO request) {
 
     return ResponseEntity.ok(authorService.updateAuthor(id, request));
   }
@@ -176,14 +220,20 @@ public class AuthorController {
   // DELETE
   // =========================
 
-  @Operation(summary = "Eliminar autor", description = "Elimina un autor del sistema mediante su identificador. "
-      + "Esta operación es irreversible.")
+  /**
+   * Elimina un autor del sistema.
+   *
+   * @param id ID del autor
+   * @return respuesta sin contenido
+   */
+  @Operation(summary = "Eliminar autor", description = "Elimina permanentemente un autor del sistema.")
   @ApiResponses({
-      @ApiResponse(responseCode = "204", description = "Autor eliminado correctamente"),
+      @ApiResponse(responseCode = "204", description = "Autor eliminado"),
       @ApiResponse(responseCode = "404", description = "Autor no encontrado")
   })
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> deleteAuthor(@PathVariable Long id) {
+  public ResponseEntity<Void> deleteAuthor(
+      @Parameter(description = "ID del autor a eliminar", example = "1") @PathVariable Long id) {
 
     authorService.deleteAuthor(id);
     return ResponseEntity.noContent().build();

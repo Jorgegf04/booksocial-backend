@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
+import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.service.AuthorService;
@@ -123,7 +124,7 @@ public class AuthorServiceImpl implements AuthorService {
             author.getBirthDate(),
             author.getWorks()
                 .stream()
-                .map(work -> work.getTitle())
+                .map(Work::getTitle)
                 .toList()))
         .toList();
   }
