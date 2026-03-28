@@ -6,19 +6,19 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.domain.commerce.Tracking;
-import com.example.booksocial_backend.domain.commerce.TrackingStatus;
-import com.example.booksocial_backend.DTO.commerce.TrackingRequestDTO;
-import com.example.booksocial_backend.DTO.commerce.TrackingResponseDTO;
+import com.example.booksocial_backend.domain.commerce.TrackingOrder;
+import com.example.booksocial_backend.domain.commerce.TrackingOrderStatus;
+import com.example.booksocial_backend.DTO.commerce.TrackingOrderRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
 import com.example.booksocial_backend.domain.commerce.Order;
 import com.example.booksocial_backend.repository.OrderRepository;
-import com.example.booksocial_backend.repository.TrackingRepository;
-import com.example.booksocial_backend.service.TrackingService;
+import com.example.booksocial_backend.repository.TrackingOrderRepository;
+import com.example.booksocial_backend.service.TrackingOrderService;
 
 import lombok.RequiredArgsConstructor;
 
 /**
- * Implementación del servicio {@link TrackingService}.
+ * Implementación del servicio {@link TrackingOrderService}.
  *
  * Gestiona la lógica de negocio del seguimiento de pedidos,
  * controlando la evolución de estados y garantizando
@@ -31,15 +31,15 @@ import lombok.RequiredArgsConstructor;
 @Service
 @RequiredArgsConstructor
 @Transactional
-public class TrackingServiceImpl implements TrackingService {
+public class TrackingOrderServiceImpl implements TrackingOrderService {
 
-  private final TrackingRepository trackingRepository;
+  private final TrackingOrderRepository trackingRepository;
   private final OrderRepository orderRepository;
 
   @Override
-  public TrackingResponseDTO addTracking(TrackingRequestDTO request) {
+  public TrackingOrderResponseDTO addTracking(TrackingOrderRequestDTO request) {
 
-    Tracking tracking = new Tracking();
+    TrackingOrder tracking = new TrackingOrder();
 
     tracking.setStatus(request.getTrackingStatus());
     tracking.setDate(LocalDateTime.now());
@@ -52,21 +52,21 @@ public class TrackingServiceImpl implements TrackingService {
 
     validateStateTransition(request.getOrderId(), request.getTrackingStatus());
 
-    Tracking saved = trackingRepository.save(tracking);
+    TrackingOrder saved = trackingRepository.save(tracking);
 
     return mapToDTO(saved);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public TrackingResponseDTO getTrackingById(Long id) {
+  public TrackingOrderResponseDTO getTrackingById(Long id) {
 
     return mapToDTO(getTrackingEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<TrackingResponseDTO> getTrackingByOrder(Long orderId) {
+  public List<TrackingOrderResponseDTO> getTrackingByOrder(Long orderId) {
 
     return trackingRepository.findByOrderId(orderId)
         .stream()
@@ -76,7 +76,7 @@ public class TrackingServiceImpl implements TrackingService {
 
   @Override
   @Transactional(readOnly = true)
-  public List<TrackingResponseDTO> getTrackingByOrderOrdered(Long orderId) {
+  public List<TrackingOrderResponseDTO> getTrackingByOrderOrdered(Long orderId) {
 
     return trackingRepository.findByOrderIdOrderByDateAsc(orderId)
         .stream()
@@ -90,16 +90,16 @@ public class TrackingServiceImpl implements TrackingService {
     trackingRepository.delete(getTrackingEntityById(id));
   }
 
-  private TrackingResponseDTO mapToDTO(Tracking tracking) {
+  private TrackingOrderResponseDTO mapToDTO(TrackingOrder tracking) {
 
-    return new TrackingResponseDTO(
+    return new TrackingOrderResponseDTO(
         tracking.getId(),
         tracking.getStatus(),
         tracking.getDate(),
         tracking.getOrder().getId());
   }
 
-  private Tracking getTrackingEntityById(Long id) {
+  private TrackingOrder getTrackingEntityById(Long id) {
 
     return trackingRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Tracking no encontrado con id: " + id));
@@ -108,7 +108,7 @@ public class TrackingServiceImpl implements TrackingService {
   /**
    * Valida los datos básicos de tracking.
    */
-  private void validateTracking(Tracking tracking) {
+  private void validateTracking(TrackingOrder tracking) {
 
     if (tracking == null) {
       throw new IllegalArgumentException("El tracking no puede ser nulo");
@@ -126,21 +126,21 @@ public class TrackingServiceImpl implements TrackingService {
   /**
    * Valida la transición de estados de un pedido.
    */
-  private void validateStateTransition(Long orderId, TrackingStatus newStatus) {
+  private void validateStateTransition(Long orderId, TrackingOrderStatus newStatus) {
 
-    List<Tracking> history = trackingRepository.findByOrderIdOrderByDateAsc(orderId);
+    List<TrackingOrder> history = trackingRepository.findByOrderIdOrderByDateAsc(orderId);
 
     if (history.isEmpty()) {
       return;
     }
 
-    TrackingStatus lastStatus = history.get(history.size() - 1).getStatus();
+    TrackingOrderStatus lastStatus = history.get(history.size() - 1).getStatus();
 
-    if (lastStatus == TrackingStatus.DELIVERED) {
+    if (lastStatus == TrackingOrderStatus.DELIVERED) {
       throw new IllegalArgumentException("El pedido ya ha sido entregado");
     }
 
-    if (lastStatus == TrackingStatus.CANCELED) {
+    if (lastStatus == TrackingOrderStatus.CANCELED) {
       throw new IllegalArgumentException("El pedido está cancelado");
     }
   }

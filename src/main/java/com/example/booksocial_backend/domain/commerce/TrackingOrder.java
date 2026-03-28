@@ -22,13 +22,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  */
 
 @Entity
-@Table(name = "TRACKING")
+@Table(name = "TRACKING_ORDER")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Tracking {
+public class TrackingOrder {
 
   /**
    * Identificador del tracking.
@@ -42,7 +42,7 @@ public class Tracking {
    */
   @Enumerated(EnumType.STRING)
   @Column(name = "STATUS", nullable = false)
-  private TrackingStatus status;
+  private TrackingOrderStatus status;
 
   /**
    * Fecha del cambio de estado.

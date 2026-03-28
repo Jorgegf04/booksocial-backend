@@ -4,6 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.booksocial_backend.domain.social.TrackingWork;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -126,4 +129,28 @@ public class Work {
   @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Edition> editions = new ArrayList<>();
 
+  /**
+   * Lista de seguimientos asociados a esta obra.
+   *
+   * <p>
+   * Representa todos los usuarios que siguen esta obra dentro del sistema,
+   * junto con su estado de seguimiento (pendiente, leyendo, completada, etc).
+   * </p>
+   *
+   * <p>
+   * Relación:
+   * </p>
+   * <ul>
+   * <li>Work → TrackingWork (1:N)</li>
+   * </ul>
+   *
+   * <p>
+   * Se utiliza carga perezosa (LAZY) para optimizar el rendimiento
+   * y evitar cargar innecesariamente los seguimientos.
+   * </p>
+   */
+  @JsonIgnore
+  @ToString.Exclude
+  @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  private List<TrackingWork> trackingWorks = new ArrayList<>();
 }

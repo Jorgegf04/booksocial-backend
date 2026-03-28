@@ -2,7 +2,7 @@ package com.example.booksocial_backend.DTO.commerce;
 
 import java.time.LocalDateTime;
 
-import com.example.booksocial_backend.domain.commerce.TrackingStatus;
+import com.example.booksocial_backend.domain.commerce.TrackingOrderStatus;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,10 +22,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrackingResponseDTO {
+public class TrackingOrderResponseDTO {
 
     private Long id;
-    private TrackingStatus trackingStatus;
+    private TrackingOrderStatus trackingStatus;
     private LocalDateTime date;
     private Long orderId;
 }

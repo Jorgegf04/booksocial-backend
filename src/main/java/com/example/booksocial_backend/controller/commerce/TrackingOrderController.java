@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.booksocial_backend.DTO.commerce.TrackingRequestDTO;
-import com.example.booksocial_backend.DTO.commerce.TrackingResponseDTO;
-import com.example.booksocial_backend.service.TrackingService;
+import com.example.booksocial_backend.DTO.commerce.TrackingOrderRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
+import com.example.booksocial_backend.service.TrackingOrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -54,12 +54,12 @@ import lombok.RequiredArgsConstructor;
  * @since 2026
  */
 @RestController
-@RequestMapping("/api/tracking")
+@RequestMapping("/api/tracking-orders")
 @RequiredArgsConstructor
 @Tag(name = "Tracking Controller", description = "API REST para el seguimiento logístico de pedidos")
-public class TrackingController {
+public class TrackingOrderController {
 
-  private final TrackingService trackingService;
+  private final TrackingOrderService trackingService;
 
   // =========================
   // CREATE
@@ -78,8 +78,8 @@ public class TrackingController {
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
   @PostMapping
-  public ResponseEntity<TrackingResponseDTO> create(
-      @Valid @RequestBody TrackingRequestDTO request) {
+  public ResponseEntity<TrackingOrderResponseDTO> create(
+      @Valid @RequestBody TrackingOrderRequestDTO request) {
 
     return ResponseEntity.status(HttpStatus.CREATED)
         .body(trackingService.addTracking(request));
@@ -98,14 +98,14 @@ public class TrackingController {
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
   @PostMapping("/batch")
-  public ResponseEntity<List<TrackingResponseDTO>> createMany(
-      @Valid @RequestBody List<TrackingRequestDTO> requests) {
+  public ResponseEntity<List<TrackingOrderResponseDTO>> createMany(
+      @Valid @RequestBody List<TrackingOrderRequestDTO> requests) {
 
     if (requests == null || requests.isEmpty()) {
       throw new IllegalArgumentException("La lista de tracking no puede estar vacía");
     }
 
-    List<TrackingResponseDTO> result = requests.stream()
+    List<TrackingOrderResponseDTO> result = requests.stream()
         .map(trackingService::addTracking)
         .toList();
 
@@ -128,7 +128,7 @@ public class TrackingController {
       @ApiResponse(responseCode = "404", description = "Tracking no encontrado")
   })
   @GetMapping("/{id}")
-  public ResponseEntity<TrackingResponseDTO> getById(
+  public ResponseEntity<TrackingOrderResponseDTO> getById(
       @Parameter(description = "ID del tracking", example = "1") @PathVariable Long id) {
 
     return ResponseEntity.ok(trackingService.getTrackingById(id));
@@ -143,7 +143,7 @@ public class TrackingController {
   @Operation(summary = "Tracking por pedido", description = "Obtiene todos los estados asociados a un pedido.")
   @ApiResponse(responseCode = "200", description = "Tracking obtenido correctamente")
   @GetMapping("/order/{orderId}")
-  public ResponseEntity<List<TrackingResponseDTO>> getByOrder(
+  public ResponseEntity<List<TrackingOrderResponseDTO>> getByOrder(
       @Parameter(description = "ID del pedido", example = "1") @PathVariable Long orderId) {
 
     return ResponseEntity.ok(trackingService.getTrackingByOrder(orderId));
@@ -158,7 +158,7 @@ public class TrackingController {
   @Operation(summary = "Tracking ordenado", description = "Devuelve el historial de tracking ordenado por fecha.")
   @ApiResponse(responseCode = "200", description = "Tracking ordenado correctamente")
   @GetMapping("/order/{orderId}/ordered")
-  public ResponseEntity<List<TrackingResponseDTO>> getOrdered(
+  public ResponseEntity<List<TrackingOrderResponseDTO>> getOrdered(
       @Parameter(description = "ID del pedido", example = "1") @PathVariable Long orderId) {
 
     return ResponseEntity.ok(trackingService.getTrackingByOrderOrdered(orderId));

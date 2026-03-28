@@ -5,10 +5,10 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.example.booksocial_backend.domain.commerce.Tracking;
+import com.example.booksocial_backend.domain.commerce.TrackingOrder;
 
 /**
- * Repositorio de acceso a datos para la entidad {@link Tracking}.
+ * Repositorio de acceso a datos para la entidad {@link TrackingOrder}.
  *
  * Gestiono la persistencia del seguimiento de pedidos dentro del sistema
  * BookSocial,
@@ -25,7 +25,7 @@ import com.example.booksocial_backend.domain.commerce.Tracking;
  */
 
 @Repository
-public interface TrackingRepository extends JpaRepository<Tracking, Long> {
+public interface TrackingOrderRepository extends JpaRepository<TrackingOrder, Long> {
 
   /**
    * Obtiene el tracking asociado a un pedido.
@@ -33,7 +33,7 @@ public interface TrackingRepository extends JpaRepository<Tracking, Long> {
    * @param orderId identificador del pedido
    * @return lista de estados del pedido
    */
-  List<Tracking> findByOrderId(Long orderId);
+  List<TrackingOrder> findByOrderId(Long orderId);
 
   /**
    * Obtiene el tracking de un pedido ordenado por fecha.
@@ -41,6 +41,6 @@ public interface TrackingRepository extends JpaRepository<Tracking, Long> {
    * @param orderId identificador del pedido
    * @return lista de estados ordenados cronológicamente
    */
-  List<Tracking> findByOrderIdOrderByDateAsc(Long orderId);
+  List<TrackingOrder> findByOrderIdOrderByDateAsc(Long orderId);
 
 }

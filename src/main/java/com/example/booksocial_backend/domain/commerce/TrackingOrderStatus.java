@@ -1,6 +1,6 @@
 package com.example.booksocial_backend.domain.commerce;
 
-public enum TrackingStatus {
+public enum TrackingOrderStatus {
   CANCELED,
   PREPARING,
   SHIPPED,

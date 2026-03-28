@@ -1,8 +1,11 @@
 package com.example.booksocial_backend.domain.user;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import org.springframework.jca.support.LocalConnectionFactoryBean;
+
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -13,6 +16,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Email;
@@ -139,5 +143,30 @@ public class User {
   @ToString.Exclude
   @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private Subscription subscription;
+
+  /**
+   * Lista de obras seguidas por el usuario.
+   *
+   * <p>
+   * Representa la relación entre el usuario y las obras que sigue,
+   * incluyendo el estado de seguimiento (pendiente, leyendo, completada, etc).
+   * </p>
+   *
+   * <p>
+   * Relación:
+   * </p>
+   * <ul>
+   * <li>User → TrackingWork (1:N)</li>
+   * </ul>
+   *
+   * <p>
+   * Se utiliza carga perezosa (LAZY) para optimizar el rendimiento y evitar
+   * cargar innecesariamente los seguimientos.
+   * </p>
+   */
+  @JsonIgnore
+  @ToString.Exclude
+  @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  private List<com.example.booksocial_backend.domain.social.TrackingWork> trackingWorks;
 
 }

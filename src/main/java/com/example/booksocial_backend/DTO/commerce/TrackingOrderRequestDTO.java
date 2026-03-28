@@ -1,6 +1,6 @@
 package com.example.booksocial_backend.DTO.commerce;
 
-import com.example.booksocial_backend.domain.commerce.TrackingStatus;
+import com.example.booksocial_backend.domain.commerce.TrackingOrderStatus;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import lombok.AllArgsConstructor;
@@ -21,9 +21,9 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrackingRequestDTO {
+public class TrackingOrderRequestDTO {
 
     private Long orderId;
 
-    private TrackingStatus trackingStatus;
+    private TrackingOrderStatus trackingStatus;
 }

@@ -6,8 +6,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.booksocial_backend.DTO.social.TrackingWorkResponseDTO;
 import com.example.booksocial_backend.DTO.user.*;
+import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.example.booksocial_backend.domain.user.Role;
+import com.example.booksocial_backend.service.TrackingWorkService;
 import com.example.booksocial_backend.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -33,6 +36,7 @@ import lombok.RequiredArgsConstructor;
 public class UserController {
 
   private final UserService userService;
+  private final TrackingWorkService trackingWorkService;
 
   // =========================
   // CREATE
@@ -145,5 +149,24 @@ public class UserController {
       @RequestParam Boolean active) {
 
     return ResponseEntity.ok(userService.setUserActive(id, active));
+  }
+
+  /**
+   * Obtiene las obras seguidas por un usuario.
+   *
+   * <p>
+   * Devuelve la lista de seguimientos del usuario, incluyendo
+   * el estado de cada obra (pendiente, leyendo, completada, etc).
+   * </p>
+   *
+   * @param id ID del usuario
+   * @return lista de obras seguidas
+   */
+  @Operation(summary = "Obras seguidas por usuario", description = "Devuelve todas las obras que sigue un usuario con su estado.")
+  @GetMapping("/{id}/tracking")
+  public ResponseEntity<List<TrackingWorkResponseDTO>> getTrackingByUser(
+      @PathVariable Long id) {
+
+    return ResponseEntity.ok(trackingWorkService.getByUser(id));
   }
 }
