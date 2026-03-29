@@ -158,6 +158,33 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
   }
 
   /**
+   * Actualiza el estado de un seguimiento.
+   *
+   * <p>
+   * Permite cambiar el estado de lectura de una obra
+   * (pendiente, leyendo, completada, etc).
+   * </p>
+   *
+   * @param id      identificador del seguimiento
+   * @param request DTO con el nuevo estado
+   * @return seguimiento actualizado
+   */
+  @Override
+  public TrackingWorkResponseDTO updateStatus(Long id, TrackingWorkRequestDTO request) {
+
+    if (request == null || request.getStatus() == null) {
+      throw new IllegalArgumentException("El estado es obligatorio");
+    }
+
+    TrackingWork tracking = repository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Seguimiento no encontrado con id: " + id));
+
+    tracking.setStatus(request.getStatus());
+
+    return map(repository.save(tracking));
+  }
+
+  /**
    * Valida los datos de entrada del request.
    *
    * @param request DTO de entrada

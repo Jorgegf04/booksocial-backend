@@ -31,4 +31,6 @@ public interface CommentService {
   List<CommentResponseDTO> getCommentsByWorkOrdered(Long workId);
 
   void deleteComment(Long id);
+
+  CommentResponseDTO updateComment(Long id, CommentRequestDTO request);
 }

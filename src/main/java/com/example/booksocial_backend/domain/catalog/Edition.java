@@ -57,9 +57,16 @@ public class Edition {
   @Column(nullable = false)
   private LocalDate editionDate;
 
+  private String title;
+
+  private Integer totalTomes;
+
+  @OneToMany(mappedBy = "edition", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<Tome> tomes = new ArrayList<>();
   /**
    * Obra a la que pertenece esta edición.
    */
+
   @NotNull
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "work_id", nullable = false)

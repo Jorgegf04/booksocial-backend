@@ -147,7 +147,14 @@ public class TomeServiceImpl implements TomeService {
     return new TomeResponseDTO(
         tome.getId(),
         tome.getNumberTome(),
-        tome.getEdition().getId());
+        tome.getTitle(),
+
+        tome.getEdition() != null ? tome.getEdition().getId() : null,
+        tome.getEdition() != null ? tome.getEdition().getTitle() : null,
+
+        (tome.getEdition() != null && tome.getEdition().getWork() != null)
+            ? tome.getEdition().getWork().getTitle()
+            : null);
   }
 
   /**

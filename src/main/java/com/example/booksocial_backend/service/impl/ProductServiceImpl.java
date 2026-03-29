@@ -10,6 +10,7 @@ import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.DTO.catalog.ProductRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.ProductResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
+import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.ProductService;
 
@@ -34,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class ProductServiceImpl implements ProductService {
 
   private final ProductRepository productRepository;
+  private final EditionRepository editionRepository;
   private final ModelMapper modelMapper;
 
   @Override
@@ -42,7 +44,10 @@ public class ProductServiceImpl implements ProductService {
     Product product = modelMapper.map(request, Product.class);
 
     // Set manual de relación
-    product.setEdition(Edition.builder().id(request.getEditionId()).build());
+    Edition edition = editionRepository.findById(request.getEditionId())
+        .orElseThrow(() -> new RuntimeException("Edition no encontrada con id: " + request.getEditionId()));
+
+    product.setEdition(edition);
 
     validateProduct(product);
 
@@ -107,7 +112,10 @@ public class ProductServiceImpl implements ProductService {
 
     Product updated = modelMapper.map(request, Product.class);
 
-    updated.setEdition(Edition.builder().id(request.getEditionId()).build());
+    Edition edition = editionRepository.findById(request.getEditionId())
+        .orElseThrow(() -> new RuntimeException("Edition no encontrada con id: " + request.getEditionId()));
+
+    updated.setEdition(edition);
 
     validateProduct(updated);
 
@@ -154,7 +162,9 @@ public class ProductServiceImpl implements ProductService {
         product.getId(),
         product.getPrice(),
         product.getStock(),
-        product.getEdition().getId());
+        product.getEdition().getId(),
+        product.getEdition().getIsbn(),
+        product.getEdition().getWork().getTitle());
   }
 
   /**

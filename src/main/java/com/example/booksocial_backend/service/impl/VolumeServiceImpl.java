@@ -149,7 +149,9 @@ public class VolumeServiceImpl implements VolumeService {
         volume.getId(),
         volume.getVolumeNumber(),
         volume.getTitle(),
-        volume.getEdition().getId());
+        volume.getEdition().getId(),
+        volume.getEdition().getIsbn(),
+        volume.getEdition().getWork().getTitle());
   }
 
   /**

@@ -25,4 +25,6 @@ public class ChapterResponseDTO {
     private Integer chapterNumber;
     private String title;
     private Long tomeId;
+    private String tomeTitle;
+    private String editionName;
 }

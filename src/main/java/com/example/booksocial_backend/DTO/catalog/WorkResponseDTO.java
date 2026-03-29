@@ -23,5 +23,6 @@ public class WorkResponseDTO {
     private LocalDate publicationDate;
     private String img;
     private Double averageRating;
-    private List<Long> authorIds;
+
+    private List<String> authors;
 }

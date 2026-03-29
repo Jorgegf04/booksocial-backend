@@ -27,4 +27,6 @@ public class ProductResponseDTO {
     private Double price;
     private Integer stock;
     private Long editionId;
+    private String editionIsbn;
+    private String workTitle;
 }

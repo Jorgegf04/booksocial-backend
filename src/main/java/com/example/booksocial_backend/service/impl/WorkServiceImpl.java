@@ -22,16 +22,6 @@ import com.example.booksocial_backend.service.WorkService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Implementación del servicio {@link WorkService}.
- *
- * Gestiona la lógica de negocio del catálogo, incluyendo
- * búsquedas avanzadas, filtrado y ranking de obras.
- *
- * @author Jorge
- * @since 16/03/2026
- * @version 3.0
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -44,29 +34,18 @@ public class WorkServiceImpl implements WorkService {
   @Override
   public WorkResponseDTO createWork(WorkRequestDTO request) {
 
-    if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-      throw new IllegalArgumentException("El título es obligatorio");
-    }
-
-    if (request.getGenre() == null) {
-      throw new IllegalArgumentException("El género es obligatorio");
-    }
+    validateWorkRequest(request);
 
     Work work = modelMapper.map(request, Work.class);
 
     work.setTitle(request.getTitle().trim());
     work.setGenre(request.getGenre());
 
-    if (request.getAuthorIds() != null) {
-      work.setAuthors(
-          request.getAuthorIds().stream()
-              .map(id -> authorRepository.findById(id)
-                  .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado: " + id)))
-              .toList());
+    if (request.getAuthors() != null) {
+      work.setAuthors(resolveAuthorsByName(request.getAuthors()));
     }
 
-    Work saved = workRepository.save(work);
-    return mapToDTO(saved);
+    return mapWorkToDTO(workRepository.save(work));
   }
 
   @Override
@@ -79,25 +58,15 @@ public class WorkServiceImpl implements WorkService {
     List<Work> works = requests.stream()
         .map(request -> {
 
-          if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
-            throw new IllegalArgumentException("El título es obligatorio");
-          }
-
-          if (request.getGenre() == null) {
-            throw new IllegalArgumentException("El género es obligatorio");
-          }
+          validateWorkRequest(request);
 
           Work work = modelMapper.map(request, Work.class);
 
           work.setTitle(request.getTitle().trim());
           work.setGenre(request.getGenre());
 
-          if (request.getAuthorIds() != null) {
-            work.setAuthors(
-                request.getAuthorIds().stream()
-                    .map(id -> authorRepository.findById(id)
-                        .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado: " + id)))
-                    .toList());
+          if (request.getAuthors() != null) {
+            work.setAuthors(resolveAuthorsByName(request.getAuthors()));
           }
 
           return work;
@@ -106,36 +75,31 @@ public class WorkServiceImpl implements WorkService {
 
     return workRepository.saveAll(works)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public WorkResponseDTO getWorkById(Long id) {
-
-    Work work = getWorkEntityById(id);
-
-    return mapToDTO(work);
+    return mapWorkToDTO(getWorkEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> getAllWorks() {
-
     return workRepository.findAll()
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> searchWorksByTitle(String title) {
-
     return workRepository.findByTitleContainingIgnoreCase(title)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
@@ -144,47 +108,43 @@ public class WorkServiceImpl implements WorkService {
   public List<WorkResponseDTO> getWorksByGenre(Genre genre) {
     return workRepository.findByGenre(genre)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> getWorksByAuthor(Long authorId) {
-
     return workRepository.findByAuthorId(authorId)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> searchWorks(String title, String genre, Double rating) {
-
     return workRepository.searchWorks(title, genre, rating)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> getTopRatedWorks() {
-
     return workRepository.findTopRatedWorks()
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<WorkResponseDTO> getWorksAfterDate(LocalDate date) {
-
     return workRepository.findByPublicationDateAfter(date)
         .stream()
-        .map(this::mapToDTO)
+        .map(this::mapWorkToDTO)
         .toList();
   }
 
@@ -202,7 +162,7 @@ public class WorkServiceImpl implements WorkService {
     }
 
     if (request.getGenre() != null) {
-      existing.setGenre(request.getGenre()); // ✅ sin trim
+      existing.setGenre(request.getGenre());
     }
 
     if (request.getPublicationDate() != null) {
@@ -217,59 +177,82 @@ public class WorkServiceImpl implements WorkService {
       existing.setAverageRating(request.getAverageRating());
     }
 
-    if (request.getAuthorIds() != null) {
+    if (request.getAuthors() != null) {
       existing.getAuthors().clear();
-
-      existing.getAuthors().addAll(
-          request.getAuthorIds().stream()
-              .map(aid -> authorRepository.findById(aid)
-                  .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado: " + aid)))
-              .toList());
+      existing.getAuthors().addAll(resolveAuthorsByName(request.getAuthors()));
     }
 
     validateWork(existing);
 
-    return mapToDTO(workRepository.save(existing));
+    return mapWorkToDTO(workRepository.save(existing));
   }
 
   @Override
   public void deleteWork(Long id) {
-
-    Work work = getWorkEntityById(id);
-
-    workRepository.delete(work);
+    workRepository.delete(getWorkEntityById(id));
   }
 
-  /**
-   * Convierte Work → WorkDTO.
-   */
-  private WorkResponseDTO mapToDTO(Work work) {
+  // =========================
+  // MAPPERS
+  // =========================
 
-    return new WorkResponseDTO(
-        work.getId(),
-        work.getTitle(),
-        work.getDescription(),
-        work.getGenre(),
-        work.getType(),
-        work.getDemographic(),
-        work.getPublicationDate(),
-        work.getImg(),
-        work.getAverageRating(),
+  private WorkResponseDTO mapWorkToDTO(Work work) {
+
+    WorkResponseDTO dto = new WorkResponseDTO();
+
+    dto.setId(work.getId());
+    dto.setTitle(work.getTitle());
+    dto.setDescription(work.getDescription());
+    dto.setGenre(work.getGenre());
+    dto.setType(work.getType());
+    dto.setDemographic(work.getDemographic());
+    dto.setPublicationDate(work.getPublicationDate());
+    dto.setImg(work.getImg());
+    dto.setAverageRating(work.getAverageRating());
+
+    dto.setAuthors(
         work.getAuthors()
             .stream()
-            .map(Author::getId)
+            .map(Author::getName)
             .toList());
+
+    return dto;
   }
 
-  private Work getWorkEntityById(Long id) {
+  // =========================
+  // UTILIDADES
+  // =========================
 
+  private Work getWorkEntityById(Long id) {
     return workRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Obra no encontrada con id: " + id));
   }
 
-  /**
-   * Valida los datos de una obra.
-   */
+  private List<Author> resolveAuthorsByName(List<String> authorNames) {
+    return authorNames.stream()
+        .map(name -> {
+          String normalized = name.trim();
+          return authorRepository.findByNameIgnoreCase(normalized)
+              .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado: " + normalized));
+        })
+        .toList();
+  }
+
+  private void validateWorkRequest(WorkRequestDTO request) {
+
+    if (request == null) {
+      throw new IllegalArgumentException("La request no puede ser nula");
+    }
+
+    if (request.getTitle() == null || request.getTitle().trim().isEmpty()) {
+      throw new IllegalArgumentException("El título es obligatorio");
+    }
+
+    if (request.getGenre() == null) {
+      throw new IllegalArgumentException("El género es obligatorio");
+    }
+  }
+
   private void validateWork(Work work) {
 
     if (work == null) {
@@ -288,9 +271,7 @@ public class WorkServiceImpl implements WorkService {
   @Override
   @Transactional(readOnly = true)
   public Page<WorkResponseDTO> searchAdvanced(WorkFilterDTO filter, Pageable pageable) {
-
-    System.out.println(filter);
     return workRepository.searchAdvanced(filter, pageable)
-        .map(this::mapToDTO);
+        .map(this::mapWorkToDTO);
   }
 }

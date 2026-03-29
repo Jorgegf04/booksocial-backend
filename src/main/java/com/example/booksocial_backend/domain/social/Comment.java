@@ -2,6 +2,7 @@ package com.example.booksocial_backend.domain.social;
 
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.user.User;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
@@ -55,6 +56,12 @@ public class Comment {
   @Column(nullable = false)
   private LocalDateTime date;
 
+  @Column(name = "updated_at")
+  private LocalDateTime updatedAt;
+
+  @Column(nullable = false)
+  private Boolean edited = false;
+
   /**
    * Relacion con usuario
    */
@@ -76,6 +83,7 @@ public class Comment {
   /**
    * Relacion con comentario padre
    */
+  @JsonIgnore
   @ToString.Exclude
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "parent_id")
@@ -85,7 +93,7 @@ public class Comment {
    * Relacion con las respuestas
    */
   @ToString.Exclude
-  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
   private List<Comment> replies = new ArrayList<>();
 
   /**

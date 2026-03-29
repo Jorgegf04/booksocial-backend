@@ -13,7 +13,8 @@ import com.example.booksocial_backend.DTO.user.UpdateUserRequestDTO;
 import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 import com.example.booksocial_backend.domain.user.Role;
 import com.example.booksocial_backend.domain.user.User;
-
+import com.example.booksocial_backend.domain.user.UserFollow;
+import com.example.booksocial_backend.repository.UserFollowRepository;
 import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.UserService;
 
@@ -26,6 +27,7 @@ public class UserServiceImpl implements UserService {
 
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
+  private final UserFollowRepository userFollowRepository;
 
   // ==============================
   // CREATE
@@ -252,5 +254,73 @@ public class UserServiceImpl implements UserService {
     user.setRole(Role.REGISTERED);
 
     userRepository.save(user);
+  }
+
+  @Override
+  public void followUser(Long userId, Long targetId) {
+
+    if (userId.equals(targetId)) {
+      throw new IllegalArgumentException("No puedes seguirte a ti mismo");
+    }
+
+    User follower = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    User following = userRepository.findById(targetId)
+        .orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+
+    if (userFollowRepository.existsByFollowerAndFollowing(follower, following)) {
+      throw new IllegalArgumentException("Ya sigues a este usuario");
+    }
+
+    UserFollow follow = UserFollow.builder()
+        .follower(follower)
+        .following(following)
+        .followDate(java.time.LocalDateTime.now())
+        .build();
+
+    userFollowRepository.save(follow);
+  }
+
+  @Override
+  public void unfollowUser(Long userId, Long targetId) {
+
+    User follower = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    User following = userRepository.findById(targetId)
+        .orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+
+    UserFollow relation = userFollowRepository
+        .findByFollowerAndFollowing(follower, following)
+        .orElseThrow(() -> new RuntimeException("No existe la relación"));
+
+    userFollowRepository.delete(relation);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserResponseDTO> getFollowers(Long userId) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    return userFollowRepository.findByFollowing(user)
+        .stream()
+        .map(f -> mapToDTO(f.getFollower()))
+        .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserResponseDTO> getFollowing(Long userId) {
+
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    return userFollowRepository.findByFollower(user)
+        .stream()
+        .map(f -> mapToDTO(f.getFollowing()))
+        .toList();
   }
 }

@@ -151,8 +151,14 @@ public class EditionServiceImpl implements EditionService {
         edition.getId(),
         edition.getIsbn(),
         edition.getEditionDate(),
-        edition.getWork().getId(),
-        edition.getEditorial().getId());
+
+        edition.getWork() != null ? edition.getWork().getId() : null,
+        edition.getWork() != null ? edition.getWork().getTitle() : null,
+
+        edition.getEditorial() != null ? edition.getEditorial().getId() : null,
+        edition.getEditorial() != null ? edition.getEditorial().getName() : null,
+
+        edition.getTotalTomes());
   }
 
   /**

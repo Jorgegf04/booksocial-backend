@@ -29,4 +29,12 @@ public interface UserService {
   UserResponseDTO setUserActive(Long id, Boolean active);
 
   void registerUser(RegisterRequest request);
+
+  void followUser(Long userId, Long targetId);
+
+  void unfollowUser(Long userId, Long targetId);
+
+  List<UserResponseDTO> getFollowers(Long userId);
+
+  List<UserResponseDTO> getFollowing(Long userId);
 }

@@ -24,4 +24,5 @@ public class EditorialResponseDTO {
     private Long id;
     private String name;
     private String country;
+    private Integer totalEditions;
 }

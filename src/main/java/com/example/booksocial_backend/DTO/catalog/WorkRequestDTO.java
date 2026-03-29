@@ -27,6 +27,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WorkRequestDTO {
+
     private String title;
     private String description;
     private Genre genre;
@@ -35,5 +36,6 @@ public class WorkRequestDTO {
     private LocalDate publicationDate;
     private String img;
     private Double averageRating;
-    private List<Long> authorIds;
+
+    private List<String> authors;
 }

@@ -22,4 +22,5 @@ public class TomeRequestDTO {
 
     private Integer numberTome;
     private Long editionId;
+    private String title;
 }

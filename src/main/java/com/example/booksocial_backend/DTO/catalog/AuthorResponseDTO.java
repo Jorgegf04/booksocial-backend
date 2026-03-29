@@ -25,6 +25,8 @@ public class AuthorResponseDTO {
 
         private Long id;
         private String name;
+        private String nationality;
         private LocalDate birthDate;
-        private List<String> works;
+
+        private List<WorkResponseDTO> works;
 }

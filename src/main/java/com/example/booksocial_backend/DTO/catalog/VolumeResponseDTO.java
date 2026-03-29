@@ -26,4 +26,6 @@ public class VolumeResponseDTO {
     private Integer volumeNumber;
     private String title;
     private Long editionId;
+    private String editionIsbn;
+    private String workTitle;
 }

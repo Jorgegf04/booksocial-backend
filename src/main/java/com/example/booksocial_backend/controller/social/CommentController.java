@@ -138,6 +138,18 @@ public class CommentController {
   }
 
   // =========================
+  // UPDATE
+  // =========================
+
+  @PutMapping("/{id}")
+  public ResponseEntity<CommentResponseDTO> update(
+      @PathVariable Long id,
+      @Valid @RequestBody CommentRequestDTO request) {
+
+    return ResponseEntity.ok(commentService.updateComment(id, request));
+  }
+
+  // =========================
   // DELETE
   // =========================
 

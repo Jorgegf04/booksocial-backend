@@ -27,77 +27,79 @@ import com.example.booksocial_backend.domain.catalog.Author;
 
 @Repository
 public interface AuthorRepository extends JpaRepository<Author, Long> {
-  /**
-   * Busca autores cuyo nombre contenga el texto indicado (búsqueda parcial).
-   * No distingue entre mayúsculas y minúsculas.
-   *
-   * @param name fragmento del nombre a buscar
-   * @return lista de autores que coinciden con la búsqueda
-   *
-   * 
-   */
-  List<Author> findByNameContainingIgnoreCase(String name);
+    /**
+     * Busca autores cuyo nombre contenga el texto indicado (búsqueda parcial).
+     * No distingue entre mayúsculas y minúsculas.
+     *
+     * @param name fragmento del nombre a buscar
+     * @return lista de autores que coinciden con la búsqueda
+     *
+     * 
+     */
+    List<Author> findByNameContainingIgnoreCase(String name);
 
-  /**
-   * Busco un autor por su nombre exacto.
-   *
-   * Útil para selecciones en formularios o relaciones con otras entidades.
-   *
-   * @param name nombre completo del autor
-   * @return autor encontrado (si existe)
-   */
-  Optional<Author> findByName(String name);
+    Optional<Author> findByNameIgnoreCase(String name);
 
-  /**
-   * Comprueba si ya existe un autor con el nombre exacto indicado.
-   *
-   * @param name nombre completo del autor
-   * @return true si ya existe, false en caso contrario
-   */
+    /**
+     * Busco un autor por su nombre exacto.
+     *
+     * Útil para selecciones en formularios o relaciones con otras entidades.
+     *
+     * @param name nombre completo del autor
+     * @return autor encontrado (si existe)
+     */
+    Optional<Author> findByName(String name);
 
-  boolean existsByName(String name);
+    /**
+     * Comprueba si ya existe un autor con el nombre exacto indicado.
+     *
+     * @param name nombre completo del autor
+     * @return true si ya existe, false en caso contrario
+     */
 
-  /**
-   * Busco autores por nombre y nacionalidad combinados.
-   *
-   * Permite aplicar filtros avanzados en el catálogo.
-   *
-   * @param name        fragmento del nombre
-   * @param nationality nacionalidad del autor
-   * @return lista de autores filtrados
-   */
-  List<Author> findByNameContainingIgnoreCaseAndNationality(String name, String nationality);
+    boolean existsByName(String name);
 
-  /**
-   * Obtengo todos los autores ordenados alfabéticamente.
-   */
-  @Query("SELECT a FROM Author a ORDER BY a.name ASC")
-  List<Author> findAllOrderByName();
+    /**
+     * Busco autores por nombre y nacionalidad combinados.
+     *
+     * Permite aplicar filtros avanzados en el catálogo.
+     *
+     * @param name        fragmento del nombre
+     * @param nationality nacionalidad del autor
+     * @return lista de autores filtrados
+     */
+    List<Author> findByNameContainingIgnoreCaseAndNationality(String name, String nationality);
 
-  /**
-   * Obtengo autores que tienen al menos una obra asociada.
-   */
-  @Query("SELECT DISTINCT a FROM Author a JOIN a.works w")
-  List<Author> findAuthorsWithWorks();
+    /**
+     * Obtengo todos los autores ordenados alfabéticamente.
+     */
+    @Query("SELECT a FROM Author a ORDER BY a.name ASC")
+    List<Author> findAllOrderByName();
 
-  /**
-   * Obtengo autores ordenados por número de obras (ranking).
-   */
-  @Query("""
-          SELECT a FROM Author a
-          JOIN a.works w
-          GROUP BY a
-          ORDER BY COUNT(w) DESC
-      """)
-  List<Author> findTopAuthorsByWorksCount();
+    /**
+     * Obtengo autores que tienen al menos una obra asociada.
+     */
+    @Query("SELECT DISTINCT a FROM Author a JOIN a.works w")
+    List<Author> findAuthorsWithWorks();
 
-  /**
-   * Cuenta cuántas obras tiene un autor.
-   */
-  @Query("""
-          SELECT COUNT(w) FROM Author a
-          JOIN a.works w
-          WHERE a.id = :authorId
-      """)
-  Long countWorksByAuthorId(Long authorId);
+    /**
+     * Obtengo autores ordenados por número de obras (ranking).
+     */
+    @Query("""
+                SELECT a FROM Author a
+                JOIN a.works w
+                GROUP BY a
+                ORDER BY COUNT(w) DESC
+            """)
+    List<Author> findTopAuthorsByWorksCount();
+
+    /**
+     * Cuenta cuántas obras tiene un autor.
+     */
+    @Query("""
+                SELECT COUNT(w) FROM Author a
+                JOIN a.works w
+                WHERE a.id = :authorId
+            """)
+    Long countWorksByAuthorId(Long authorId);
 }

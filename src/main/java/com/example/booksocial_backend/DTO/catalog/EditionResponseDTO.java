@@ -28,6 +28,12 @@ public class EditionResponseDTO {
     private Long id;
     private String isbn;
     private LocalDate editionDate;
+
     private Long workId;
+    private String workTitle;
+
     private Long editorialId;
+    private String editorialName;
+
+    private Integer totalTomes;
 }

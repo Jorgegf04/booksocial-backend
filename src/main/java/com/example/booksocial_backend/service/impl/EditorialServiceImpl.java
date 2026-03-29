@@ -26,7 +26,7 @@ import lombok.RequiredArgsConstructor;
  *
  * @author Jorge
  * @since 16/03/2026
- * @version 3.0
+ * @version 4.0
  */
 @Service
 @RequiredArgsConstructor
@@ -53,7 +53,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     Editorial saved = editorialRepository.save(editorial);
 
-    return modelMapper.map(saved, EditorialResponseDTO.class);
+    return mapToDTO(saved);
   }
 
   @Override
@@ -62,7 +62,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     Editorial editorial = getEditorialEntityById(id);
 
-    return modelMapper.map(editorial, EditorialResponseDTO.class);
+    return mapToDTO(editorial);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     return editorialRepository.findAll()
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
+        .map(this::mapToDTO)
         .toList();
   }
 
@@ -81,7 +81,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     return editorialRepository.findAllByOrderByNameAsc()
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
+        .map(this::mapToDTO)
         .toList();
   }
 
@@ -91,7 +91,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     return editorialRepository.findByNameContainingIgnoreCase(name)
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
+        .map(this::mapToDTO)
         .toList();
   }
 
@@ -101,7 +101,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     return editorialRepository.findByCountryIgnoreCase(country)
         .stream()
-        .map(editorial -> modelMapper.map(editorial, EditorialResponseDTO.class))
+        .map(this::mapToDTO)
         .toList();
   }
 
@@ -126,7 +126,7 @@ public class EditorialServiceImpl implements EditorialService {
 
     Editorial saved = editorialRepository.save(existing);
 
-    return modelMapper.map(saved, EditorialResponseDTO.class);
+    return mapToDTO(saved);
   }
 
   @Override
@@ -135,6 +135,20 @@ public class EditorialServiceImpl implements EditorialService {
     Editorial editorial = getEditorialEntityById(id);
 
     editorialRepository.delete(editorial);
+  }
+
+  /**
+   * Convierte Editorial → EditorialResponseDTO.
+   *
+   * Incluye información enriquecida como el número total de ediciones.
+   */
+  private EditorialResponseDTO mapToDTO(Editorial editorial) {
+
+    return new EditorialResponseDTO(
+        editorial.getId(),
+        editorial.getName(),
+        editorial.getCountry(),
+        editorial.getEditions() != null ? editorial.getEditions().size() : 0);
   }
 
   /**

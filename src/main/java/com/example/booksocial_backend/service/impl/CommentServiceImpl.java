@@ -13,6 +13,8 @@ import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.user.User;
 
 import com.example.booksocial_backend.repository.CommentRepository;
+import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.repository.WorkRepository;
 import com.example.booksocial_backend.service.CommentService;
 
 import lombok.RequiredArgsConstructor;
@@ -40,26 +42,31 @@ import lombok.RequiredArgsConstructor;
 public class CommentServiceImpl implements CommentService {
 
   private final CommentRepository commentRepository;
+  private final UserRepository userRepository;
+  private final WorkRepository workRepository;
 
   @Override
   public CommentResponseDTO createComment(CommentRequestDTO request) {
+
+    User user = userRepository.findById(request.getUserId())
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    Work work = workRepository.findById(request.getWorkId())
+        .orElseThrow(() -> new RuntimeException("Obra no encontrada"));
 
     Comment comment = new Comment();
 
     comment.setContent(request.getContent().trim());
     comment.setDate(LocalDateTime.now());
 
-    comment.setUser(User.builder().id(request.getUserId()).build());
-    comment.setWork(Work.builder().id(request.getWorkId()).build());
+    comment.setUser(user);
+    comment.setWork(work);
 
-    // Comentario raíz
     comment.setParent(null);
 
     validateComment(comment);
 
-    Comment saved = commentRepository.save(comment);
-
-    return mapToDTO(saved);
+    return mapToDTO(commentRepository.save(comment));
   }
 
   @Override
@@ -67,26 +74,28 @@ public class CommentServiceImpl implements CommentService {
 
     Comment parent = getCommentEntityById(parentId);
 
+    User user = userRepository.findById(request.getUserId())
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+    Work work = workRepository.findById(request.getWorkId())
+        .orElseThrow(() -> new RuntimeException("Obra no encontrada"));
+
+    if (!parent.getWork().getId().equals(request.getWorkId())) {
+      throw new IllegalArgumentException("La respuesta debe pertenecer a la misma obra");
+    }
+
     Comment reply = new Comment();
 
     reply.setContent(request.getContent().trim());
     reply.setDate(LocalDateTime.now());
 
-    reply.setUser(User.builder().id(request.getUserId()).build());
-    reply.setWork(Work.builder().id(request.getWorkId()).build());
-
-    // Validar coherencia: misma obra
-    if (!parent.getWork().getId().equals(request.getWorkId())) {
-      throw new IllegalArgumentException("La respuesta debe pertenecer a la misma obra");
-    }
-
+    reply.setUser(user);
+    reply.setWork(work);
     reply.setParent(parent);
 
     validateComment(reply);
 
-    Comment saved = commentRepository.save(reply);
-
-    return mapToDTO(saved);
+    return mapToDTO(commentRepository.save(reply));
   }
 
   @Override
@@ -165,9 +174,18 @@ public class CommentServiceImpl implements CommentService {
         comment.getId(),
         comment.getContent(),
         comment.getDate(),
+
+        comment.getUpdatedAt(),
+        comment.getEdited(),
+
         comment.getUser().getId(),
+        comment.getUser().getUsername(),
+
         comment.getWork().getId(),
+        comment.getWork().getTitle(),
+
         comment.getParent() != null ? comment.getParent().getId() : null,
+
         mapReplies(comment.getReplies()));
   }
 
@@ -185,10 +203,19 @@ public class CommentServiceImpl implements CommentService {
             reply.getId(),
             reply.getContent(),
             reply.getDate(),
+
+            reply.getUpdatedAt(),
+            reply.getEdited(),
+
             reply.getUser().getId(),
+            reply.getUser().getUsername(),
+
             reply.getWork().getId(),
+            reply.getWork().getTitle(),
+
             reply.getParent() != null ? reply.getParent().getId() : null,
-            List.of() // 🔥 evita recursividad infinita
+
+            List.of() // sin recursividad
         ))
         .toList();
   }
@@ -219,5 +246,23 @@ public class CommentServiceImpl implements CommentService {
     if (comment.getWork() == null || comment.getWork().getId() == null) {
       throw new IllegalArgumentException("El comentario debe estar asociado a una obra válida");
     }
+  }
+
+  @Override
+  public CommentResponseDTO updateComment(Long commentId, CommentRequestDTO request) {
+
+    Comment comment = getCommentEntityById(commentId);
+
+    if (!comment.getUser().getId().equals(request.getUserId())) {
+      throw new RuntimeException("No tienes permiso para editar este comentario");
+    }
+
+    comment.setContent(request.getContent().trim());
+
+    // Auditoría
+    comment.setUpdatedAt(LocalDateTime.now());
+    comment.setEdited(true);
+
+    return mapToDTO(commentRepository.save(comment));
   }
 }

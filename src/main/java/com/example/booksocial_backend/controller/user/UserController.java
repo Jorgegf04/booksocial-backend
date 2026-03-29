@@ -169,4 +169,105 @@ public class UserController {
 
     return ResponseEntity.ok(trackingWorkService.getByUser(id));
   }
+
+  // =========================
+  // FOLLOW SYSTEM
+  // =========================
+
+  /**
+   * Permite a un usuario seguir a otro usuario.
+   *
+   * <p>
+   * Establece una relación de seguimiento entre dos usuarios,
+   * donde el usuario origen (follower) comienza a seguir
+   * al usuario destino (following).
+   * </p>
+   *
+   * @param id       ID del usuario que sigue
+   * @param targetId ID del usuario a seguir
+   * @return mensaje de confirmación
+   */
+  @Operation(summary = "Seguir usuario", description = "Permite a un usuario seguir a otro usuario.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Usuario seguido correctamente"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+      @ApiResponse(responseCode = "400", description = "Relación inválida")
+  })
+  @PostMapping("/{id}/follow/{targetId}")
+  public ResponseEntity<String> followUser(
+      @PathVariable Long id,
+      @PathVariable Long targetId) {
+
+    userService.followUser(id, targetId);
+    return ResponseEntity.ok("Usuario seguido correctamente");
+  }
+
+  /**
+   * Permite a un usuario dejar de seguir a otro usuario.
+   *
+   * <p>
+   * Elimina la relación de seguimiento existente entre dos usuarios.
+   * </p>
+   *
+   * @param id       ID del usuario que deja de seguir
+   * @param targetId ID del usuario seguido
+   * @return mensaje de confirmación
+   */
+  @Operation(summary = "Dejar de seguir usuario", description = "Permite eliminar una relación de seguimiento entre usuarios.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Dejó de seguir correctamente"),
+      @ApiResponse(responseCode = "404", description = "Relación no encontrada")
+  })
+  @DeleteMapping("/{id}/follow/{targetId}")
+  public ResponseEntity<String> unfollowUser(
+      @PathVariable Long id,
+      @PathVariable Long targetId) {
+
+    userService.unfollowUser(id, targetId);
+    return ResponseEntity.ok("Dejó de seguir correctamente");
+  }
+
+  /**
+   * Obtiene la lista de seguidores de un usuario.
+   *
+   * <p>
+   * Devuelve todos los usuarios que siguen al usuario indicado.
+   * </p>
+   *
+   * @param id ID del usuario
+   * @return lista de seguidores
+   */
+  @Operation(summary = "Obtener seguidores", description = "Devuelve la lista de usuarios que siguen a un usuario.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Lista de seguidores"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+  })
+  @GetMapping("/{id}/followers")
+  public ResponseEntity<List<UserResponseDTO>> getFollowers(
+      @PathVariable Long id) {
+
+    return ResponseEntity.ok(userService.getFollowers(id));
+  }
+
+  /**
+   * Obtiene la lista de usuarios seguidos por un usuario.
+   *
+   * <p>
+   * Devuelve todos los usuarios a los que sigue el usuario indicado.
+   * </p>
+   *
+   * @param id ID del usuario
+   * @return lista de usuarios seguidos
+   */
+  @Operation(summary = "Obtener seguidos", description = "Devuelve la lista de usuarios que sigue un usuario.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Lista de seguidos"),
+      @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+  })
+  @GetMapping("/{id}/following")
+  public ResponseEntity<List<UserResponseDTO>> getFollowing(
+      @PathVariable Long id) {
+
+    return ResponseEntity.ok(userService.getFollowing(id));
+  }
 }

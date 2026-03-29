@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.springframework.jca.support.LocalConnectionFactoryBean;
 
+import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import jakarta.persistence.CascadeType;
@@ -167,6 +168,12 @@ public class User {
   @JsonIgnore
   @ToString.Exclude
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private List<com.example.booksocial_backend.domain.social.TrackingWork> trackingWorks;
+  private List<TrackingWork> trackingWorks;
+
+  @OneToMany(mappedBy = "follower")
+  private List<UserFollow> following;
+
+  @OneToMany(mappedBy = "following")
+  private List<UserFollow> followers;
 
 }

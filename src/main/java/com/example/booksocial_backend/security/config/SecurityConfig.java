@@ -71,6 +71,12 @@ public class SecurityConfig {
         .authorizeHttpRequests(auth -> auth
 
             .requestMatchers("/api/auth/**").permitAll()
+            .requestMatchers("/api/users/**").permitAll()
+            .requestMatchers("/api/subscriptions/**").permitAll()
+            .requestMatchers("/api/works/**").permitAll()
+            .requestMatchers("/api/authors/**").permitAll()
+            .requestMatchers("/api/chapters/**").permitAll()
+            .requestMatchers("/api/tomes/**").permitAll()
             .requestMatchers("/api/comments/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/reactions/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/events/**").permitAll() // puedes quitarlo luego si quieres proteger

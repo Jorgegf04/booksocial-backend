@@ -24,5 +24,10 @@ public class TomeResponseDTO {
 
     private Long id;
     private Integer numberTome;
+    private String title;
+
     private Long editionId;
+    private String editionTitle;
+
+    private String workTitle;
 }

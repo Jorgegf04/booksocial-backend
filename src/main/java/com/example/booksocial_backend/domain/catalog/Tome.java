@@ -1,8 +1,10 @@
 package com.example.booksocial_backend.domain.catalog;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.*;
 
 import java.util.ArrayList;
@@ -40,6 +42,14 @@ public class Tome {
   @Positive
   @Column(nullable = false)
   private Integer numberTome;
+
+  /**
+   * Titutlo del tomo
+   */
+  @NotBlank
+  @Size(max = 150)
+  @Column(nullable = false)
+  private String title;
 
   /**
    * Edición a la que pertenece el tomo.

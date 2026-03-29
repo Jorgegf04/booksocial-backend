@@ -98,7 +98,9 @@ public class ChapterServiceImpl implements ChapterService {
         chapter.getId(),
         chapter.getChapterNumber(),
         chapter.getTitle(),
-        chapter.getTome().getId());
+        chapter.getTome().getId(),
+        chapter.getTome().getTitle(),
+        chapter.getTome().getEdition().getTitle());
   }
 
   private Chapter getChapterEntityById(Long id) {
