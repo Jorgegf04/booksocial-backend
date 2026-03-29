@@ -162,9 +162,16 @@ public class ProductServiceImpl implements ProductService {
         product.getId(),
         product.getPrice(),
         product.getStock(),
+
         product.getEdition().getId(),
+        product.getEdition().getTitle(),
         product.getEdition().getIsbn(),
-        product.getEdition().getWork().getTitle());
+        product.getEdition().getTotalTomes(),
+
+        product.getEdition().getWork().getId(),
+        product.getEdition().getWork().getTitle(),
+
+        product.getEdition().getEditorial().getName());
   }
 
   /**

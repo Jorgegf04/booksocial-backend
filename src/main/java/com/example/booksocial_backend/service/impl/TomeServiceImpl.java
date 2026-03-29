@@ -10,7 +10,7 @@ import com.example.booksocial_backend.domain.catalog.Tome;
 import com.example.booksocial_backend.DTO.catalog.TomeRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.TomeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
-
+import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.TomeRepository;
 import com.example.booksocial_backend.service.TomeService;
 
@@ -35,6 +35,7 @@ import lombok.RequiredArgsConstructor;
 public class TomeServiceImpl implements TomeService {
 
   private final TomeRepository tomeRepository;
+  private final EditionRepository editionRepository;
   private final ModelMapper modelMapper;
 
   @Override
@@ -57,7 +58,7 @@ public class TomeServiceImpl implements TomeService {
     }
 
     Tome saved = tomeRepository.save(tome);
-
+    updateEditionTotalTomes(saved.getEdition().getId());
     return mapToDTO(saved);
   }
 
@@ -105,6 +106,8 @@ public class TomeServiceImpl implements TomeService {
 
     Tome existing = getTomeEntityById(id);
 
+    Long oldEditionId = existing.getEdition().getId(); // 🔥 guardar anterior
+
     Tome updated = modelMapper.map(request, Tome.class);
 
     updated.setEdition(Edition.builder().id(request.getEditionId()).build());
@@ -128,6 +131,9 @@ public class TomeServiceImpl implements TomeService {
 
     Tome saved = tomeRepository.save(existing);
 
+    updateEditionTotalTomes(oldEditionId);
+    updateEditionTotalTomes(saved.getEdition().getId());
+
     return mapToDTO(saved);
   }
 
@@ -136,7 +142,23 @@ public class TomeServiceImpl implements TomeService {
 
     Tome tome = getTomeEntityById(id);
 
+    Long editionId = tome.getEdition().getId();
+
     tomeRepository.delete(tome);
+
+    updateEditionTotalTomes(editionId);
+  }
+
+  private void updateEditionTotalTomes(Long editionId) {
+
+    Edition edition = editionRepository.findById(editionId)
+        .orElseThrow(() -> new RuntimeException("Edition no encontrada"));
+
+    int total = tomeRepository.findByEditionId(editionId).size();
+
+    edition.setTotalTomes(total);
+
+    editionRepository.save(edition);
   }
 
   /**
@@ -183,4 +205,5 @@ public class TomeServiceImpl implements TomeService {
       throw new IllegalArgumentException("El tomo debe pertenecer a una edición válida");
     }
   }
+
 }

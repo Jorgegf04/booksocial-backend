@@ -26,7 +26,17 @@ public class ProductResponseDTO {
     private Long id;
     private Double price;
     private Integer stock;
+
+    // Edition info
     private Long editionId;
+    private String editionTitle;
     private String editionIsbn;
+    private Integer totalTomes;
+
+    // Work info
+    private Long workId;
     private String workTitle;
+
+    // Editorial info
+    private String editorialName;
 }

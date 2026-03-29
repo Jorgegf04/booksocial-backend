@@ -10,6 +10,7 @@ import com.example.booksocial_backend.domain.catalog.Volume;
 import com.example.booksocial_backend.DTO.catalog.VolumeRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.VolumeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
+import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.VolumeRepository;
 import com.example.booksocial_backend.service.VolumeService;
 
@@ -33,6 +34,7 @@ import lombok.RequiredArgsConstructor;
 public class VolumeServiceImpl implements VolumeService {
 
   private final VolumeRepository volumeRepository;
+  private final EditionRepository editionRepository;
   private final ModelMapper modelMapper;
 
   @Override
@@ -40,8 +42,10 @@ public class VolumeServiceImpl implements VolumeService {
 
     Volume volume = modelMapper.map(request, Volume.class);
 
-    // Set manual relación
-    volume.setEdition(Edition.builder().id(request.getEditionId()).build());
+    Edition edition = editionRepository.findById(request.getEditionId())
+        .orElseThrow(() -> new RuntimeException("Edición no encontrada"));
+
+    volume.setEdition(edition);
 
     validateVolume(volume);
 
@@ -107,7 +111,10 @@ public class VolumeServiceImpl implements VolumeService {
 
     Volume updated = modelMapper.map(request, Volume.class);
 
-    updated.setEdition(Edition.builder().id(request.getEditionId()).build());
+    Edition edition = editionRepository.findById(request.getEditionId())
+        .orElseThrow(() -> new RuntimeException("Edición no encontrada"));
+
+    updated.setEdition(edition);
 
     validateVolume(updated);
 

@@ -58,6 +58,10 @@ public class EditionServiceImpl implements EditionService {
 
     edition.setWork(work);
     edition.setEditorial(editorial);
+    edition.setIsbn(request.getIsbn());
+    edition.setEditionDate(request.getEditionDate());
+    edition.setTitle(request.getTitle());
+    edition.setTotalTomes(request.getTotalTomes());
 
     Edition saved = editionRepository.save(edition);
 
@@ -147,18 +151,24 @@ public class EditionServiceImpl implements EditionService {
    * Convierte una entidad Edition en su DTO correspondiente.
    */
   private EditionResponseDTO mapToDTO(Edition edition) {
+
+    Integer totalTomes = edition.getTotalTomes() != null
+        ? edition.getTotalTomes()
+        : (edition.getTomes() != null ? edition.getTomes().size() : 0);
+
     return new EditionResponseDTO(
         edition.getId(),
         edition.getIsbn(),
         edition.getEditionDate(),
 
+        edition.getTitle(),
+        totalTomes,
+
         edition.getWork() != null ? edition.getWork().getId() : null,
         edition.getWork() != null ? edition.getWork().getTitle() : null,
 
         edition.getEditorial() != null ? edition.getEditorial().getId() : null,
-        edition.getEditorial() != null ? edition.getEditorial().getName() : null,
-
-        edition.getTotalTomes());
+        edition.getEditorial() != null ? edition.getEditorial().getName() : null);
   }
 
   /**

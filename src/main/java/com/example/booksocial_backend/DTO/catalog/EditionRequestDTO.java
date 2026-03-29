@@ -26,4 +26,6 @@ public class EditionRequestDTO {
     private LocalDate editionDate;
     private Long workId;
     private Long editorialId;
+    private String title;
+    private Integer totalTomes;
 }

@@ -77,6 +77,10 @@ public class SecurityConfig {
             .requestMatchers("/api/authors/**").permitAll()
             .requestMatchers("/api/chapters/**").permitAll()
             .requestMatchers("/api/tomes/**").permitAll()
+            .requestMatchers("/api/volumes/**").permitAll()
+            .requestMatchers("/api/editions/**").permitAll()
+            .requestMatchers("/api/editorials/**").permitAll()
+            .requestMatchers("/api/products/**").permitAll()
             .requestMatchers("/api/comments/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/reactions/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/events/**").permitAll() // puedes quitarlo luego si quieres proteger
