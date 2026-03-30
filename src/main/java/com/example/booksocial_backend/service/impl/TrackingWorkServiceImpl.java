@@ -6,11 +6,13 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
 import com.example.booksocial_backend.DTO.social.*;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.example.booksocial_backend.domain.social.TrackingWorkStatus;
 import com.example.booksocial_backend.domain.user.User;
+import com.example.booksocial_backend.repository.TrackingOrderRepository;
 import com.example.booksocial_backend.repository.TrackingWorkRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
 import com.example.booksocial_backend.service.TrackingWorkService;
@@ -40,20 +42,9 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class TrackingWorkServiceImpl implements TrackingWorkService {
 
-  private final TrackingWorkRepository repository;
+  private final TrackingWorkRepository repository; // ✔ CORRECTO
   private final WorkRepository workRepository;
 
-  /**
-   * Crea un nuevo seguimiento de obra.
-   *
-   * <p>
-   * Valida los datos de entrada, comprueba que no exista un seguimiento duplicado
-   * y carga la obra real desde la base de datos para garantizar consistencia.
-   * </p>
-   *
-   * @param request DTO con los datos del seguimiento
-   * @return DTO con la información del seguimiento creado
-   */
   @Override
   public TrackingWorkResponseDTO create(TrackingWorkRequestDTO request) {
 
@@ -79,12 +70,6 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
     return map(repository.save(tracking));
   }
 
-  /**
-   * Crea múltiples seguimientos de obras en una sola operación.
-   *
-   * @param requests lista de solicitudes de seguimiento
-   * @return lista de seguimientos creados
-   */
   @Override
   public List<TrackingWorkResponseDTO> createMany(List<TrackingWorkRequestDTO> requests) {
 
@@ -97,12 +82,6 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
         .toList();
   }
 
-  /**
-   * Obtiene todas las obras seguidas por un usuario.
-   *
-   * @param userId identificador del usuario
-   * @return lista de seguimientos
-   */
   @Override
   @Transactional(readOnly = true)
   public List<TrackingWorkResponseDTO> getByUser(Long userId) {
@@ -113,12 +92,6 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
         .toList();
   }
 
-  /**
-   * Obtiene todos los usuarios que siguen una obra.
-   *
-   * @param workId identificador de la obra
-   * @return lista de seguimientos
-   */
   @Override
   @Transactional(readOnly = true)
   public List<TrackingWorkResponseDTO> getByWork(Long workId) {
@@ -129,46 +102,12 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
         .toList();
   }
 
-  /**
-   * Elimina un seguimiento por su ID.
-   *
-   * @param id identificador del seguimiento
-   */
   @Override
   public void delete(Long id) {
 
     repository.deleteById(id);
   }
 
-  /**
-   * Convierte la entidad TrackingWork en DTO de respuesta.
-   *
-   * @param t entidad TrackingWork
-   * @return DTO de salida
-   */
-  private TrackingWorkResponseDTO map(TrackingWork t) {
-
-    return new TrackingWorkResponseDTO(
-        t.getId(),
-        t.getUser().getId(),
-        t.getWork().getId(),
-        t.getWork().getTitle(),
-        t.getStatus(),
-        t.getDate());
-  }
-
-  /**
-   * Actualiza el estado de un seguimiento.
-   *
-   * <p>
-   * Permite cambiar el estado de lectura de una obra
-   * (pendiente, leyendo, completada, etc).
-   * </p>
-   *
-   * @param id      identificador del seguimiento
-   * @param request DTO con el nuevo estado
-   * @return seguimiento actualizado
-   */
   @Override
   public TrackingWorkResponseDTO updateStatus(Long id, TrackingWorkRequestDTO request) {
 
@@ -184,11 +123,34 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
     return map(repository.save(tracking));
   }
 
-  /**
-   * Valida los datos de entrada del request.
-   *
-   * @param request DTO de entrada
-   */
+  private TrackingWorkResponseDTO map(TrackingWork t) {
+
+    return new TrackingWorkResponseDTO(
+        t.getId(),
+
+        t.getUser().getId(),
+        t.getUser().getUsername(),
+
+        t.getWork().getId(),
+        t.getWork().getTitle(),
+
+        t.getStatus(),
+        mapStatusLabel(t.getStatus()),
+
+        t.getDate(),
+
+        t.getStatus() == TrackingWorkStatus.COMPLETED);
+  }
+
+  private String mapStatusLabel(TrackingWorkStatus status) {
+    return switch (status) {
+      case PENDING -> "Pendiente";
+      case READING -> "Leyendo";
+      case COMPLETED -> "Completado";
+      case DROPPED -> "Abandonado";
+    };
+  }
+
   private void validateRequest(TrackingWorkRequestDTO request) {
 
     if (request == null) {
@@ -203,4 +165,5 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
       throw new IllegalArgumentException("WorkId obligatorio");
     }
   }
+
 }

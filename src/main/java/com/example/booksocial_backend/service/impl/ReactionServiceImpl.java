@@ -42,18 +42,26 @@ public class ReactionServiceImpl implements ReactionService {
     boolean exists = reactionRepository
         .existsByUserIdAndCommentId(request.getUserId(), request.getCommentId());
 
+    // 🔴 TOGGLE OFF (quitar like)
     if (exists) {
 
       Reaction existing = reactionRepository
           .findByUserIdAndCommentId(request.getUserId(), request.getCommentId())
           .orElseThrow();
 
+      String username = existing.getUser().getUsername();
+
       reactionRepository.delete(existing);
 
-      return null;
+      return new ReactionResponseDTO(
+          null,
+          null,
+          request.getUserId(),
+          username,
+          request.getCommentId(),
+          false);
     }
 
-    // 🔥 SI NO EXISTE → crear (toggle ON)
     Reaction reaction = Reaction.builder()
         .date(LocalDateTime.now())
         .user(User.builder().id(request.getUserId()).build())
@@ -62,7 +70,13 @@ public class ReactionServiceImpl implements ReactionService {
 
     Reaction saved = reactionRepository.save(reaction);
 
-    return mapToDTO(saved);
+    return new ReactionResponseDTO(
+        saved.getId(),
+        saved.getDate(),
+        saved.getUser().getId(),
+        saved.getUser().getUsername(),
+        saved.getComment().getId(),
+        true);
   }
 
   @Override
@@ -97,7 +111,12 @@ public class ReactionServiceImpl implements ReactionService {
     return new ReactionResponseDTO(
         reaction.getId(),
         reaction.getDate(),
+
         reaction.getUser().getId(),
-        reaction.getComment().getId());
+        reaction.getUser().getUsername(),
+
+        reaction.getComment().getId(),
+
+        true);
   }
 }

@@ -66,6 +66,16 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
 
   @Override
   @Transactional(readOnly = true)
+  public List<TrackingOrderResponseDTO> getAllTracking() {
+
+    return trackingRepository.findAll()
+        .stream()
+        .map(this::mapToDTO)
+        .toList();
+  }
+
+  @Override
+  @Transactional(readOnly = true)
   public List<TrackingOrderResponseDTO> getTrackingByOrder(Long orderId) {
 
     return trackingRepository.findByOrderId(orderId)
@@ -95,8 +105,24 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
     return new TrackingOrderResponseDTO(
         tracking.getId(),
         tracking.getStatus(),
+        mapStatusLabel(tracking.getStatus()),
         tracking.getDate(),
-        tracking.getOrder().getId());
+        tracking.getOrder().getId(),
+
+        tracking.getOrder().getUser().getId(),
+        tracking.getOrder().getUser().getUsername(),
+
+        tracking.getStatus() == TrackingOrderStatus.DELIVERED);
+  }
+
+  private String mapStatusLabel(TrackingOrderStatus status) {
+    return switch (status) {
+      case PREPARING -> "Preparando pedido";
+      case SHIPPED -> "Enviado";
+      case IN_TRANSIT -> "En tránsito";
+      case DELIVERED -> "Entregado";
+      case CANCELED -> "Cancelado";
+    };
   }
 
   private TrackingOrder getTrackingEntityById(Long id) {
@@ -143,5 +169,16 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
     if (lastStatus == TrackingOrderStatus.CANCELED) {
       throw new IllegalArgumentException("El pedido está cancelado");
     }
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public TrackingOrderResponseDTO getLatestTracking(Long orderId) {
+
+    return trackingRepository
+        .findFirstByOrder_IdOrderByDateDesc(orderId)
+        .map(this::mapToDTO)
+        .orElseThrow(() -> new RuntimeException(
+            "No hay tracking para el pedido: " + orderId));
   }
 }

@@ -20,10 +20,18 @@ import lombok.*;
 public class TrackingWorkResponseDTO {
 
   private Long id;
+
   private Long userId;
+  private String username;
+
   private Long workId;
   private String workTitle;
+
   private TrackingWorkStatus status;
+  private String statusLabel;
+
   private LocalDateTime date;
+
+  private Boolean completed;
 
 }

@@ -24,7 +24,10 @@ import lombok.NoArgsConstructor;
 public class OrderLineResponseDTO {
 
     private Long productId;
+    private String title;
+    private Double price;
+
     private Integer quantity;
-    private Double unitaryPrice;
+    private Double subtotal;
 
 }

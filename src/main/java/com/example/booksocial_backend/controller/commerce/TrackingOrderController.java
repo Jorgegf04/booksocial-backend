@@ -135,6 +135,37 @@ public class TrackingOrderController {
   }
 
   /**
+   * Obtiene todos los registros de tracking.
+   *
+   * @return lista completa de tracking
+   */
+  @Operation(summary = "Obtener todos los tracking", description = "Devuelve todos los estados de tracking registrados en el sistema.")
+  @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
+  @GetMapping
+  public ResponseEntity<List<TrackingOrderResponseDTO>> getAll() {
+
+    return ResponseEntity.ok(trackingService.getAllTracking());
+  }
+
+  /**
+   * Obtiene el último estado de tracking de un pedido.
+   *
+   * @param orderId ID del pedido
+   * @return último estado de tracking
+   */
+  @Operation(summary = "Último estado del pedido", description = "Devuelve el estado más reciente del tracking de un pedido.")
+  @ApiResponses({
+      @ApiResponse(responseCode = "200", description = "Estado obtenido correctamente"),
+      @ApiResponse(responseCode = "404", description = "No hay tracking para este pedido")
+  })
+  @GetMapping("/order/{orderId}/latest")
+  public ResponseEntity<TrackingOrderResponseDTO> getLatest(
+      @Parameter(description = "ID del pedido", example = "1") @PathVariable Long orderId) {
+
+    return ResponseEntity.ok(trackingService.getLatestTracking(orderId));
+  }
+
+  /**
    * Obtiene todos los estados de tracking de un pedido.
    *
    * @param orderId ID del pedido

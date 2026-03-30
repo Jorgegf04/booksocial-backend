@@ -26,6 +26,7 @@ public class ReactionRequestDTO {
     @NotNull
     private Long commentId;
 
+    @NotNull
     private Long userId;
 
 }

@@ -27,5 +27,7 @@ public class OrderResponseDTO {
     private LocalDateTime date;
     private Double total;
     private Long userId;
+    private String username;
+    private Integer totalItems;
     private List<OrderLineResponseDTO> orderLines;
 }

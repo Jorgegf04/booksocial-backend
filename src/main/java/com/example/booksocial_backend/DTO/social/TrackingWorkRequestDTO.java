@@ -2,6 +2,7 @@ package com.example.booksocial_backend.DTO.social;
 
 import com.example.booksocial_backend.domain.social.TrackingWorkStatus;
 
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 /**
@@ -17,7 +18,9 @@ import lombok.*;
 @AllArgsConstructor
 public class TrackingWorkRequestDTO {
 
+  @NotNull
   private Long userId;
+  @NotNull
   private Long workId;
   private TrackingWorkStatus status;
 }

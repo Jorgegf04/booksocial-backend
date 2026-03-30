@@ -1,9 +1,12 @@
 package com.example.booksocial_backend.service;
 
 import java.util.List;
+import java.util.Optional;
 
 import com.example.booksocial_backend.DTO.commerce.TrackingOrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
+import com.example.booksocial_backend.DTO.social.TrackingWorkResponseDTO;
+import com.example.booksocial_backend.domain.commerce.TrackingOrder;
 
 /**
  * Servicio encargado del seguimiento de pedidos dentro del sistema.
@@ -23,9 +26,14 @@ public interface TrackingOrderService {
 
   TrackingOrderResponseDTO getTrackingById(Long id);
 
+  List<TrackingOrderResponseDTO> getAllTracking();
+
   List<TrackingOrderResponseDTO> getTrackingByOrder(Long orderId);
 
   List<TrackingOrderResponseDTO> getTrackingByOrderOrdered(Long orderId);
 
   void deleteTracking(Long id);
+
+  TrackingOrderResponseDTO getLatestTracking(Long orderId);
+
 }

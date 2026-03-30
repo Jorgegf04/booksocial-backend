@@ -5,8 +5,14 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.example.booksocial_backend.DTO.commerce.OrderLineRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
+import com.example.booksocial_backend.domain.catalog.Product;
+import com.example.booksocial_backend.domain.commerce.Order;
 import com.example.booksocial_backend.domain.commerce.OrderLine;
 import com.example.booksocial_backend.repository.OrderLineRepository;
+import com.example.booksocial_backend.repository.OrderRepository;
+import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.OrderLineService;
 
 import lombok.RequiredArgsConstructor;
@@ -17,12 +23,13 @@ import lombok.RequiredArgsConstructor;
  * Gestiona la lógica de negocio relacionada con las líneas de pedido,
  * asegurando la integridad de los datos dentro del sistema de compra.
  *
- * Controla la cantidad de productos y el precio unitario en el momento
- * de la compra.
+ * ✔ No expone entidades directamente
+ * ✔ Calcula el precio en backend (seguridad)
+ * ✔ Valida stock
  *
  * @author Jorge
  * @since 16/03/2026
- * @version 2.0
+ * @version 3.0
  */
 @Service
 @RequiredArgsConstructor
@@ -30,76 +37,123 @@ import lombok.RequiredArgsConstructor;
 public class OrderLineServiceImpl implements OrderLineService {
 
   private final OrderLineRepository orderLineRepository;
+  private final ProductRepository productRepository;
+  private final OrderRepository orderRepository;
+
+  // =========================
+  // CREATE
+  // =========================
 
   @Override
-  public OrderLine createOrderLine(OrderLine orderLine) {
+  public OrderLineResponseDTO createOrderLine(OrderLineRequestDTO request) {
 
-    validateOrderLine(orderLine);
-
-    // Seguridad: el precio NO debería venir del frontend
-    if (orderLine.getUnitaryPrice() == null || orderLine.getUnitaryPrice() < 0) {
-      throw new IllegalArgumentException("El precio unitario no es válido");
+    // 1. Validación básica
+    if (request == null) {
+      throw new IllegalArgumentException("La petición no puede ser nula");
     }
 
-    // Normalización básica
-    if (orderLine.getQuantity() <= 0) {
-      throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
+    if (request.getProductId() == null) {
+      throw new IllegalArgumentException("El productId es obligatorio");
     }
 
-    return orderLineRepository.save(orderLine);
+    if (request.getOrderId() == null) {
+      throw new IllegalArgumentException("El orderId es obligatorio");
+    }
+
+    if (request.getQuantity() == null || request.getQuantity() <= 0) {
+      throw new IllegalArgumentException("Cantidad inválida");
+    }
+
+    // 2. Buscar producto
+    Product product = productRepository.findById(request.getProductId())
+        .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + request.getProductId()));
+
+    // 🔥 CONTROL DE STOCK (MUY IMPORTANTE)
+    if (product.getStock() < request.getQuantity()) {
+      throw new IllegalArgumentException("Stock insuficiente");
+    }
+
+    // 3. Buscar pedido
+    Order order = orderRepository.findById(request.getOrderId())
+        .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + request.getOrderId()));
+
+    // 4. Construir entidad
+    OrderLine line = new OrderLine();
+    line.setProduct(product);
+    line.setOrder(order);
+    line.setQuantity(request.getQuantity());
+
+    // 🔐 Seguridad: precio SIEMPRE backend
+    line.setUnitaryPrice(product.getPrice());
+
+    // 5. Actualizar stock
+    product.setStock(product.getStock() - request.getQuantity());
+
+    // 6. Guardar
+    OrderLine saved = orderLineRepository.save(line);
+
+    // 7. Mapear a DTO
+    return mapToDTO(saved);
+  }
+
+  // =========================
+  // READ
+  // =========================
+
+  @Override
+  @Transactional(readOnly = true)
+  public OrderLineResponseDTO getOrderLineById(Long id) {
+
+    OrderLine line = orderLineRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Línea de pedido no encontrada: " + id));
+
+    return mapToDTO(line);
   }
 
   @Override
   @Transactional(readOnly = true)
-  public OrderLine getOrderLineById(Long id) {
+  public List<OrderLineResponseDTO> getAllOrderLines() {
 
-    return orderLineRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Línea de pedido no enco" + id));
+    return orderLineRepository.findAll()
+        .stream()
+        .map(this::mapToDTO)
+        .toList();
   }
 
   @Override
   @Transactional(readOnly = true)
-  public List<OrderLine> getAllOrderLines() {
+  public List<OrderLineResponseDTO> getOrderLinesByOrder(Long orderId) {
 
-    return orderLineRepository.findAll();
+    return orderLineRepository.findByOrderId(orderId)
+        .stream()
+        .map(this::mapToDTO)
+        .toList();
   }
 
-  @Override
-  @Transactional(readOnly = true)
-  public List<OrderLine> getOrderLinesByOrder(Long orderId) {
-
-    return orderLineRepository.findByOrderId(orderId);
-  }
+  // =========================
+  // DELETE
+  // =========================
 
   @Override
   public void deleteOrderLine(Long id) {
 
-    OrderLine orderLine = getOrderLineById(id);
+    OrderLine line = orderLineRepository.findById(id)
+        .orElseThrow(() -> new RuntimeException("Línea de pedido no encontrada: " + id));
 
-    orderLineRepository.delete(orderLine);
+    orderLineRepository.delete(line);
   }
 
-  /**
-   * Valida los datos básicos de una línea de pedido.
-   *
-   * @param orderLine línea a validar
-   */
-  private void validateOrderLine(OrderLine orderLine) {
+  // =========================
+  // MAPPER
+  // =========================
 
-    if (orderLine == null) {
-      throw new IllegalArgumentException("La línea de pedido no puede ser nula");
-    }
+  private OrderLineResponseDTO mapToDTO(OrderLine line) {
 
-    if (orderLine.getProduct() == null || orderLine.getProduct().getId() == null) {
-      throw new IllegalArgumentException("Debe existir un producto válido");
-    }
-
-    if (orderLine.getOrder() == null || orderLine.getOrder().getId() == null) {
-      throw new IllegalArgumentException("Debe existir un pedido válido");
-    }
-
-    if (orderLine.getQuantity() == null || orderLine.getQuantity() <= 0) {
-      throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
-    }
+    return new OrderLineResponseDTO(
+        line.getProduct().getId(),
+        line.getProduct().getEdition().getTitle(),
+        line.getUnitaryPrice(),
+        line.getQuantity(),
+        line.getUnitaryPrice() * line.getQuantity());
   }
 }

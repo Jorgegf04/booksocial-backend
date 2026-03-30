@@ -28,4 +28,6 @@ public class EventResponseDTO {
     private String description;
     private LocalDateTime date;
     private List<Long> userIds;
+    private List<String> usernames;
+    private Integer totalParticipants;
 }

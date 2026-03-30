@@ -17,35 +17,21 @@ import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.user.User;
 
 import com.example.booksocial_backend.repository.OrderRepository;
+import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Implementación del servicio {@link OrderService}.
- *
- * Gestiona la lógica de negocio del sistema de compra,
- * incluyendo la validación de pedidos, cálculo de importes
- * y control de integridad de los datos.
- *
- * Este servicio es el núcleo del módulo de comercio electrónico.
- *
- * @author Jorge
- * @since 16/03/2026
- * @version 3.0
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orderRepository;
+  private final ProductRepository productRepository;
 
   @Override
   public OrderResponseDTO createOrder(OrderRequestDTO request) {
-
-    System.out.println("REQUEST COMPLETO: " + request);
-    System.out.println("ORDER LINES: " + request.getOrderLines());
 
     if (request.getOrderLines() == null || request.getOrderLines().isEmpty()) {
       throw new IllegalArgumentException("El pedido debe contener al menos una línea de pedido");
@@ -57,16 +43,26 @@ public class OrderServiceImpl implements OrderService {
         .build();
 
     List<OrderLine> lines = request.getOrderLines().stream()
-        .map(dto -> OrderLine.builder()
-            .product(Product.builder().id(dto.getProductId()).build())
-            .quantity(dto.getQuantity())
-            .unitaryPrice(dto.getUnitaryPrice())
-            .order(order)
-            .build())
+        .map(dto -> {
+
+          Product product = productRepository.findById(dto.getProductId())
+              .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+
+          // ✅ Validar stock
+          if (product.getStock() < dto.getQuantity()) {
+            throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getId());
+          }
+
+          return OrderLine.builder()
+              .product(product)
+              .quantity(dto.getQuantity())
+              .unitaryPrice(product.getPrice()) // 🔥 precio seguro
+              .order(order)
+              .build();
+        })
         .toList();
 
-    order.setOrderLines(new ArrayList<>());
-    order.getOrderLines().addAll(lines);
+    order.setOrderLines(new ArrayList<>(lines));
 
     validateOrder(order);
 
@@ -81,14 +77,12 @@ public class OrderServiceImpl implements OrderService {
   @Override
   @Transactional(readOnly = true)
   public OrderResponseDTO getOrderById(Long id) {
-
     return mapToDTO(getOrderEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<OrderResponseDTO> getAllOrders() {
-
     return orderRepository.findAll()
         .stream()
         .map(this::mapToDTO)
@@ -98,7 +92,6 @@ public class OrderServiceImpl implements OrderService {
   @Override
   @Transactional(readOnly = true)
   public List<OrderResponseDTO> getOrdersByUser(Long userId) {
-
     return orderRepository.findByUserId(userId)
         .stream()
         .map(this::mapToDTO)
@@ -107,12 +100,10 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public void deleteOrder(Long id) {
-
     orderRepository.delete(getOrderEntityById(id));
   }
 
   private double calculateTotal(List<OrderLine> lines) {
-
     return lines.stream()
         .mapToDouble(l -> l.getUnitaryPrice() * l.getQuantity())
         .sum();
@@ -120,21 +111,33 @@ public class OrderServiceImpl implements OrderService {
 
   private OrderResponseDTO mapToDTO(Order order) {
 
+    List<OrderLineResponseDTO> lines = order.getOrderLines().stream()
+        .map(l -> new OrderLineResponseDTO(
+            l.getProduct().getId(),
+            l.getProduct().getEdition().getTitle(),
+            l.getProduct().getPrice(),
+            l.getQuantity(),
+            l.getQuantity() * l.getProduct().getPrice()))
+        .toList();
+
+    int totalItems = order.getOrderLines().stream()
+        .mapToInt(OrderLine::getQuantity)
+        .sum();
+
     return new OrderResponseDTO(
         order.getId(),
         order.getDate(),
         order.getTotal(),
+
         order.getUser().getId(),
-        order.getOrderLines().stream()
-            .map(l -> new OrderLineResponseDTO(
-                l.getProduct().getId(),
-                l.getQuantity(),
-                l.getUnitaryPrice()))
-            .toList());
+        order.getUser().getUsername(),
+
+        totalItems,
+
+        lines);
   }
 
   private Order getOrderEntityById(Long id) {
-
     return orderRepository.findById(id)
         .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
   }

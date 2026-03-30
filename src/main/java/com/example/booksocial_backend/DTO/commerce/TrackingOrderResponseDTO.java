@@ -25,7 +25,16 @@ import lombok.NoArgsConstructor;
 public class TrackingOrderResponseDTO {
 
     private Long id;
-    private TrackingOrderStatus trackingStatus;
+
+    private TrackingOrderStatus status;
+    private String statusLabel;
+
     private LocalDateTime date;
+
     private Long orderId;
+
+    private Long userId;
+    private String username;
+
+    private Boolean completed;
 }

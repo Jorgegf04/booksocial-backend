@@ -2,30 +2,23 @@ package com.example.booksocial_backend.service;
 
 import java.util.List;
 
-import com.example.booksocial_backend.domain.commerce.OrderLine;
+import com.example.booksocial_backend.DTO.commerce.OrderLineRequestDTO;
+import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
 
 /**
  * Servicio encargado de la gestión de líneas de pedido dentro del sistema.
  *
- * Cada línea representa un producto incluido en un pedido, junto con su
- * cantidad y precio en el momento de la compra.
- *
- * Este servicio se encarga de garantizar la coherencia de los datos
- * dentro del sistema de compra.
- *
- * @author Jorge
- * @since 16/03/2026
- * @version 2.0
+ * Se encarga de la lógica de negocio y evita exponer entidades directamente.
  */
 public interface OrderLineService {
 
-  OrderLine createOrderLine(OrderLine orderLine);
+  OrderLineResponseDTO createOrderLine(OrderLineRequestDTO request);
 
-  OrderLine getOrderLineById(Long id);
+  OrderLineResponseDTO getOrderLineById(Long id);
 
-  List<OrderLine> getAllOrderLines();
+  List<OrderLineResponseDTO> getAllOrderLines();
 
-  List<OrderLine> getOrderLinesByOrder(Long orderId);
+  List<OrderLineResponseDTO> getOrderLinesByOrder(Long orderId);
 
   void deleteOrderLine(Long id);
 }

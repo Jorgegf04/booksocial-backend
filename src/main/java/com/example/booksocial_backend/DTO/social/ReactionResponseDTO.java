@@ -24,6 +24,11 @@ public class ReactionResponseDTO {
 
     private Long id;
     private LocalDateTime date;
+
     private Long userId;
+    private String username;
+
     private Long commentId;
+
+    private Boolean liked;
 }

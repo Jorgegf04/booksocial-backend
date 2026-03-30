@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.repository;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -42,5 +43,7 @@ public interface TrackingOrderRepository extends JpaRepository<TrackingOrder, Lo
    * @return lista de estados ordenados cronológicamente
    */
   List<TrackingOrder> findByOrderIdOrderByDateAsc(Long orderId);
+
+  Optional<TrackingOrder> findFirstByOrder_IdOrderByDateDesc(Long orderId);
 
 }

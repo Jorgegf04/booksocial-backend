@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -12,6 +13,7 @@ import com.example.booksocial_backend.domain.social.Event;
 import com.example.booksocial_backend.domain.user.User;
 
 import com.example.booksocial_backend.repository.EventRepository;
+import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.EventService;
 
 import lombok.RequiredArgsConstructor;
@@ -19,15 +21,15 @@ import lombok.RequiredArgsConstructor;
 /**
  * Implementación del servicio {@link EventService}.
  *
- * Gestiono la lógica de negocio relacionada con los eventos exclusivos,
+ * Gestiona la lógica de negocio relacionada con los eventos exclusivos,
  * incluyendo validaciones de fechas, organización temporal y recuperación
  * de eventos futuros.
  *
- * Evito exponer entidades del dominio directamente mediante el uso de DTOs.
+ * Evita exponer entidades del dominio directamente mediante el uso de DTOs.
  *
  * @author Jorge
  * @since 16/03/2026
- * @version 3.0
+ * @version 3.1
  */
 @Service
 @RequiredArgsConstructor
@@ -35,6 +37,7 @@ import lombok.RequiredArgsConstructor;
 public class EventServiceImpl implements EventService {
 
   private final EventRepository eventRepository;
+  private final UserRepository userRepository;
 
   @Override
   public EventResponseDTO createEvent(EventRequestDTO request) {
@@ -45,12 +48,10 @@ public class EventServiceImpl implements EventService {
     event.setDescription(request.getDescription());
     event.setDate(request.getDate());
 
-    // Mapear usuarios
-    if (request.getUserIds() != null) {
-      event.setUsers(
-          request.getUserIds().stream()
-              .map(id -> User.builder().id(id).build())
-              .toList());
+    // ✔ CORRECTO: lista mutable + usuarios reales
+    if (request.getUserIds() != null && !request.getUserIds().isEmpty()) {
+      List<User> users = userRepository.findAllById(request.getUserIds());
+      event.setUsers(new ArrayList<>(users));
     }
 
     validateEvent(event);
@@ -67,7 +68,6 @@ public class EventServiceImpl implements EventService {
   @Override
   @Transactional(readOnly = true)
   public EventResponseDTO getEventById(Long id) {
-
     return mapToDTO(getEventEntityById(id));
   }
 
@@ -110,11 +110,13 @@ public class EventServiceImpl implements EventService {
     existing.setDescription(request.getDescription());
     existing.setDate(request.getDate());
 
+    // ✔ CORRECTO: NO reemplazar lista → modificarla
     if (request.getUserIds() != null) {
-      existing.setUsers(
-          request.getUserIds().stream()
-              .map(uid -> User.builder().id(uid).build())
-              .toList());
+
+      List<User> users = userRepository.findAllById(request.getUserIds());
+
+      existing.getUsers().clear();
+      existing.getUsers().addAll(users);
     }
 
     validateEvent(existing);
@@ -134,14 +136,22 @@ public class EventServiceImpl implements EventService {
 
   private EventResponseDTO mapToDTO(Event event) {
 
+    List<Long> userIds = event.getUsers().stream()
+        .map(User::getId)
+        .toList();
+
+    List<String> usernames = event.getUsers().stream()
+        .map(User::getUsername)
+        .toList();
+
     return new EventResponseDTO(
         event.getId(),
         event.getTitle(),
         event.getDescription(),
         event.getDate(),
-        event.getUsers().stream()
-            .map(User::getId)
-            .toList());
+        userIds,
+        usernames,
+        userIds.size());
   }
 
   private Event getEventEntityById(Long id) {
