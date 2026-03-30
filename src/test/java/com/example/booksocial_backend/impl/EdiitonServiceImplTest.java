@@ -24,7 +24,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-@SpringBootTest
 class EditionServiceImplTest {
 
   @Mock
