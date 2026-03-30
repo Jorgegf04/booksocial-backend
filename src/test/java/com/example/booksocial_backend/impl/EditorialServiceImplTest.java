@@ -14,10 +14,12 @@ import com.example.booksocial_backend.service.impl.EditorialServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SpringBootTest
 class EditorialServiceImplTest {
 
   @Mock

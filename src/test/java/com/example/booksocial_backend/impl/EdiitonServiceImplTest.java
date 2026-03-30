@@ -19,10 +19,12 @@ import com.example.booksocial_backend.service.impl.EditionServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SpringBootTest
 class EditionServiceImplTest {
 
   @Mock
@@ -166,7 +168,6 @@ class EditionServiceImplTest {
   // =========================
   // UPDATE
   // =========================
-
   @Test
   void shouldUpdateEditionSuccessfully() {
 
@@ -174,14 +175,16 @@ class EditionServiceImplTest {
     existing.setId(1L);
     existing.setIsbn("OLDISBN");
 
-    Edition updated = new Edition();
-    updated.setIsbn("NEWISBN");
-
     Work work = new Work();
     work.setId(1L);
 
     Editorial editorial = new Editorial();
     editorial.setId(1L);
+
+    Edition updated = new Edition();
+    updated.setIsbn("NEWISBN");
+    updated.setWork(work);
+    updated.setEditorial(editorial);
 
     EditionRequestDTO request = new EditionRequestDTO(
         "NEWISBN", LocalDate.now(), 1L, 1L, "Titulo", 5);

@@ -18,10 +18,12 @@ import com.example.booksocial_backend.service.impl.ChapterServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.modelmapper.ModelMapper;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+@SpringBootTest
 class ChapterServiceImplTest {
 
   @Mock
