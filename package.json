@@ -1,0 +1,26 @@
+{
+  "name": "booksocial-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build:css": "sass sass/main.scss static-build/css/styles.css",
+    "watch:css": "sass --watch sass/main.scss static-build/css/styles.css"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jorgegf04/booksocial-backend.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Jorgegf04/booksocial-backend/issues"
+  },
+  "homepage": "https://github.com/Jorgegf04/booksocial-backend#readme",
+  "description": "",
+  "dependencies": {
+    "bootstrap": "^5.3.8",
+    "sass": "^1.99.0"
+  }
+}

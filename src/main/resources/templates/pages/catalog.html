@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+  th:replace="layout/base :: ~{::body}">
+
+  <body>
+
+    <div th:fragment="content">
+
+      <div class="container-fluid">
+
+        <!-- 🔥 HEADER -->
+        <div class="mb-5">
+          <h1 class="display-5 fw-bold text-primary">Catálogo</h1>
+          <p class="text-muted">Explora obras disponibles en BookSocial</p>
+        </div>
+
+        <div class="row">
+
+          <!-- 🧱 SIDEBAR FILTROS -->
+          <aside class="col-lg-3 mb-4">
+
+            <form method="get" th:action="@{/catalog}">
+
+              <!-- 🔹 TITLE -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Título</label>
+                <input type="text" name="title"
+                  th:value="${filter.title}"
+                  class="form-control"
+                  placeholder="Buscar obra...">
+              </div>
+
+              <!-- 🔹 GENRE -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Género</label>
+
+                <select name="genre" class="form-select">
+                  <option value>Todos</option>
+
+                  <option
+                    th:each="g : ${T(com.example.booksocial_backend.domain.catalog.Genre).values()}"
+                    th:value="${g}"
+                    th:text="${g}"
+                    th:selected="${filter.genre == g}">
+                  </option>
+                </select>
+              </div>
+
+              <!-- 🔹 TYPE -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Tipo</label>
+
+                <select name="type" class="form-select">
+                  <option value>Todos</option>
+
+                  <option
+                    th:each="t : ${T(com.example.booksocial_backend.domain.catalog.WorkType).values()}"
+                    th:value="${t}"
+                    th:text="${t}"
+                    th:selected="${filter.type == t}">
+                  </option>
+                </select>
+              </div>
+
+              <!-- 🔹 DEMOGRAPHIC -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Demografía</label>
+
+                <select name="demographic" class="form-select">
+                  <option value>Todos</option>
+
+                  <option
+                    th:each="d : ${T(com.example.booksocial_backend.domain.catalog.Demographic).values()}"
+                    th:value="${d}"
+                    th:text="${d}"
+                    th:selected="${filter.demographic == d}">
+                  </option>
+                </select>
+              </div>
+
+              <!-- 🔹 RATING -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Rating mínimo</label>
+                <input type="range"
+                  name="minRating"
+                  min="0" max="5" step="0.5"
+                  th:value="${filter.minRating}"
+                  class="form-range">
+              </div>
+
+              <!-- 🔹 FECHAS -->
+              <div class="mb-4">
+                <label class="form-label fw-bold">Publicado desde</label>
+                <input type="date"
+                  name="publishedAfter"
+                  th:value="${filter.publishedAfter}"
+                  class="form-control mb-2">
+
+                <label class="form-label fw-bold">Publicado hasta</label>
+                <input type="date"
+                  name="publishedBefore"
+                  th:value="${filter.publishedBefore}"
+                  class="form-control">
+              </div>
+
+              <button class="btn btn-primary w-100">
+                Aplicar filtros
+              </button>
+
+            </form>
+
+          </aside>
+
+          <!-- 🧱 CATÁLOGO -->
+          <div class="col-lg-9">
+
+            <!-- 🔹 INFO -->
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <span class="text-muted">
+                Mostrando <b th:text="${total}">0</b> obras
+              </span>
+            </div>
+
+            <!-- 🔹 GRID -->
+            <div class="row g-4">
+
+              <div class="col-md-6 col-lg-4"
+                th:each="work : ${works}">
+
+                <div class="card card-work h-100 shadow-sm">
+
+                  <!-- IMG -->
+                  <img th:src="${work.img}"
+                    class="card-img-top"
+                    alt="Imagen obra">
+
+                  <!-- BODY -->
+                  <div class="card-body">
+
+                    <h5 class="card-title"
+                      th:text="${work.title}">
+                    </h5>
+
+                    <!-- Autor -->
+                    <p class="text-muted small"
+                      th:if="${work.authors != null}"
+                      th:text="${work.authors[0]}">
+                    </p>
+
+                    <!-- Genre -->
+                    <span class="badge bg-primary"
+                      th:text="${work.genre}">
+                    </span>
+
+                    <!-- Type -->
+                    <span class="badge bg-secondary"
+                      th:text="${work.type}">
+                    </span>
+
+                    <!-- Rating -->
+                    <div class="mt-2">
+                      ⭐ <span th:text="${work.averageRating}"></span>
+                    </div>
+
+                  </div>
+
+                  <!-- FOOTER -->
+                  <div class="card-footer text-center">
+                    <a th:href="@{/works/{id}(id=${work.id})}"
+                      class="btn btn-outline-primary btn-sm">
+                      Ver detalle
+                    </a>
+                  </div>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- 🔹 SIN RESULTADOS -->
+            <div th:if="${#lists.isEmpty(works)}"
+              class="text-center mt-5">
+
+              <p class="text-muted">No se encontraron resultados</p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </body>
+</html>

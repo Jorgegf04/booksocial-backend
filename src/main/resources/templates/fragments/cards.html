@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+  <div th:fragment="workCard(work)">
+
+    <div class="card card-work h-100 shadow-sm">
+
+      <img th:src="${work.img}" class="card-img-top">
+
+      <div class="card-body">
+
+        <h5 th:text="${work.title}"></h5>
+
+        <p class="text-muted small"
+          th:if="${work.authors != null}"
+          th:text="${work.authors[0]}">
+        </p>
+
+        <span class="badge bg-primary"
+          th:text="${work.genre}">
+        </span>
+
+        <span class="badge bg-secondary"
+          th:text="${work.type}">
+        </span>
+
+        <!-- ⭐ RATING PRO -->
+        <div class="mt-2">
+
+          <span th:each="i : ${#numbers.sequence(1,5)}">
+
+            <i class="bi"
+              th:classappend="${i <= work.averageRating} ? 'bi-star-fill text-warning' : 'bi-star text-muted'">
+            </i>
+
+          </span>
+
+          <small class="text-muted ms-1"
+            th:text="${work.averageRating}">
+          </small>
+
+        </div>
+
+      </div>
+
+      <div class="card-footer text-center">
+        <a th:href="@{/works/{id}(id=${work.id})}"
+          class="btn btn-outline-primary btn-sm">
+          Ver detalle
+        </a>
+      </div>
+
+    </div>
+
+  </div>
+
+</html>

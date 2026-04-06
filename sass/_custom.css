@@ -1,0 +1,13 @@
+.card-work {
+  border-radius: 1rem;
+  transition: all 0.2s ease;
+}
+
+.card-work:hover {
+  transform: translateY(-5px);
+}
+
+.card-work img {
+  height: 260px;
+  object-fit: cover;
+}
