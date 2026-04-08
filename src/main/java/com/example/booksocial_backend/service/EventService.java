@@ -33,4 +33,8 @@ public interface EventService {
   EventResponseDTO updateEvent(Long id, EventRequestDTO request);
 
   void deleteEvent(Long id);
+
+  EventResponseDTO joinEvent(Long eventId, Long userId);
+
+  EventResponseDTO leaveEvent(Long eventId, Long userId);
 }

@@ -154,6 +154,29 @@ public class EventServiceImpl implements EventService {
         userIds.size());
   }
 
+  @Override
+  public EventResponseDTO joinEvent(Long eventId, Long userId) {
+    Event event = getEventEntityById(eventId);
+    User user = userRepository.findById(userId)
+        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + userId));
+    boolean alreadyJoined = event.getUsers().stream().anyMatch(u -> u.getId().equals(userId));
+    if (alreadyJoined) {
+      throw new IllegalArgumentException("El usuario ya está inscrito en este evento");
+    }
+    event.getUsers().add(user);
+    return mapToDTO(eventRepository.save(event));
+  }
+
+  @Override
+  public EventResponseDTO leaveEvent(Long eventId, Long userId) {
+    Event event = getEventEntityById(eventId);
+    boolean removed = event.getUsers().removeIf(u -> u.getId().equals(userId));
+    if (!removed) {
+      throw new IllegalArgumentException("El usuario no está inscrito en este evento");
+    }
+    return mapToDTO(eventRepository.save(event));
+  }
+
   private Event getEventEntityById(Long id) {
 
     return eventRepository.findById(id)

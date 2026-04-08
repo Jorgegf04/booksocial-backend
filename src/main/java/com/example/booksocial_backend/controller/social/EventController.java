@@ -88,6 +88,23 @@ public class EventController {
     return ResponseEntity.ok(eventService.updateEvent(id, request));
   }
 
+  // JOIN / LEAVE
+  @Operation(summary = "Inscribirse en evento")
+  @PostMapping("/{id}/join")
+  public ResponseEntity<EventResponseDTO> join(
+      @PathVariable Long id,
+      @RequestParam Long userId) {
+    return ResponseEntity.ok(eventService.joinEvent(id, userId));
+  }
+
+  @Operation(summary = "Abandonar evento")
+  @DeleteMapping("/{id}/leave")
+  public ResponseEntity<EventResponseDTO> leave(
+      @PathVariable Long id,
+      @RequestParam Long userId) {
+    return ResponseEntity.ok(eventService.leaveEvent(id, userId));
+  }
+
   // DELETE
   @Operation(summary = "Eliminar evento")
   @DeleteMapping("/{id}")

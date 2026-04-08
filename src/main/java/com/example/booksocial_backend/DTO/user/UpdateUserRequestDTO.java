@@ -34,4 +34,7 @@ public class UpdateUserRequestDTO {
     @Size(max = 100)
     private String secondName;
 
+    @Size(max = 500)
+    private String img;
+
 }

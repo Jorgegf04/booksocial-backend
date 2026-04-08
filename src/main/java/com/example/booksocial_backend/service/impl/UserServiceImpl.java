@@ -146,6 +146,7 @@ public class UserServiceImpl implements UserService {
     existing.setEmail(email);
     existing.setName(request.getName());
     existing.setSecondName(request.getSecondName());
+    existing.setImg(request.getImg());
 
     return mapToDTO(userRepository.save(existing));
   }
@@ -190,6 +191,7 @@ public class UserServiceImpl implements UserService {
         user.getEmail(),
         user.getName(),
         user.getSecondName(),
+        user.getImg(),
         user.getRegistrationDate(),
         user.getActive(),
         user.getRole());

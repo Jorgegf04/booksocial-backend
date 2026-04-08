@@ -108,6 +108,9 @@ public class User {
   @Column(name = "second_name", length = 100)
   private String secondName;
 
+  @Column(length = 500)
+  private String img;
+
   /**
    * Fecha en la que el usuario se registró en la plataforma.
    * Se asigna automáticamente en el backend al crear el usuario.

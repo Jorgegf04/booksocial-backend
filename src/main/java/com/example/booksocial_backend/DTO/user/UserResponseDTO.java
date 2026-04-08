@@ -29,6 +29,7 @@ public class UserResponseDTO {
     private String email;
     private String name;
     private String secondName;
+    private String img;
     private LocalDate registrationDate;
     private Boolean active;
     private Role role;

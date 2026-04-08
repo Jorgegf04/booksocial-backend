@@ -59,7 +59,15 @@ public class AuthController {
 
     String jwt = jwtUtils.generateJwtToken(authentication);
 
-    return ResponseEntity.ok(new JwtResponse(jwt, "Bearer"));
+    com.example.booksocial_backend.security.service.UserDetailsImpl userDetails =
+        (com.example.booksocial_backend.security.service.UserDetailsImpl) authentication.getPrincipal();
+
+    String role = userDetails.getAuthorities().stream()
+        .findFirst()
+        .map(a -> a.getAuthority().replace("ROLE_", ""))
+        .orElse("USER");
+
+    return ResponseEntity.ok(new JwtResponse(jwt, "Bearer", userDetails.getId(), userDetails.getUsername(), role));
   }
 
   /**
