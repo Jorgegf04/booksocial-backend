@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.service.impl;
 
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -190,7 +191,7 @@ public class CommentServiceImpl implements CommentService {
   }
 
   /**
-   * Mapea las respuestas de un comentario (solo un nivel).
+   * Mapea las respuestas de un comentario de forma recursiva (árbol completo).
    */
   private List<CommentResponseDTO> mapReplies(List<Comment> replies) {
 
@@ -215,7 +216,7 @@ public class CommentServiceImpl implements CommentService {
 
             reply.getParent() != null ? reply.getParent().getId() : null,
 
-            List.of() // sin recursividad
+            mapReplies(reply.getReplies())
         ))
         .toList();
   }

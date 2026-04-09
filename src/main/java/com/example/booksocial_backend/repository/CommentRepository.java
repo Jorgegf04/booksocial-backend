@@ -67,4 +67,12 @@ public interface CommentRepository extends JpaRepository<Comment, Long> {
    */
   List<Comment> findByWorkIdOrderByDateDesc(Long workId);
 
+  /**
+   * Obtiene los comentarios raíz de una obra ordenados por fecha descendente.
+   *
+   * @param workId identificador de la obra
+   * @return lista de comentarios raíz ordenados (más recientes primero)
+   */
+  List<Comment> findByWorkIdAndParentIsNullOrderByDateDesc(Long workId);
+
 }
