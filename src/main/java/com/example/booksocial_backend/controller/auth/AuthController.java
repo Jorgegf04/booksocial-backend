@@ -1,5 +1,7 @@
 package com.example.booksocial_backend.controller.auth;
 
+import java.util.Map;
+
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
@@ -50,10 +52,15 @@ public class AuthController {
   @PostMapping("/login")
   public ResponseEntity<?> login(@RequestBody LoginRequest request) {
 
-    Authentication authentication = authenticationManager.authenticate(
-        new UsernamePasswordAuthenticationToken(
-            request.getUsername(),
-            request.getPassword()));
+    Authentication authentication;
+    try {
+      authentication = authenticationManager.authenticate(
+          new UsernamePasswordAuthenticationToken(
+              request.getUsername(),
+              request.getPassword()));
+    } catch (org.springframework.security.core.AuthenticationException e) {
+      return ResponseEntity.status(org.springframework.http.HttpStatus.UNAUTHORIZED).build();
+    }
 
     SecurityContextHolder.getContext().setAuthentication(authentication);
 
@@ -83,6 +90,6 @@ public class AuthController {
 
     userService.registerUser(request);
 
-    return ResponseEntity.ok("Usuario registrado correctamente");
+    return ResponseEntity.ok(Map.of("message", "Usuario registrado correctamente"));
   }
 }

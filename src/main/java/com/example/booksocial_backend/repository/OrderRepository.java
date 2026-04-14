@@ -3,6 +3,8 @@ package com.example.booksocial_backend.repository;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.example.booksocial_backend.domain.commerce.Order;
@@ -28,11 +30,17 @@ import com.example.booksocial_backend.domain.commerce.Order;
 public interface OrderRepository extends JpaRepository<Order, Long> {
 
   /**
-   * Obtiene los pedidos realizados por un usuario.
+   * Obtiene los pedidos realizados por un usuario, cargando todas las
+   * asociaciones necesarias en una sola consulta para evitar LazyInitializationException.
    *
    * @param userId identificador del usuario
-   * @return lista de pedidos del usuario
+   * @return lista de pedidos del usuario con líneas, productos y ediciones cargados
    */
-  List<Order> findByUserId(Long userId);
+  @Query("SELECT DISTINCT o FROM Order o " +
+         "LEFT JOIN FETCH o.orderLines ol " +
+         "LEFT JOIN FETCH ol.product p " +
+         "LEFT JOIN FETCH p.edition " +
+         "WHERE o.user.id = :userId")
+  List<Order> findByUserId(@Param("userId") Long userId);
 
 }

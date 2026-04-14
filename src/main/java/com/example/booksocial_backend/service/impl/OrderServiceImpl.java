@@ -18,6 +18,7 @@ import com.example.booksocial_backend.domain.user.User;
 
 import com.example.booksocial_backend.repository.OrderRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
+import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.OrderService;
 
 import lombok.RequiredArgsConstructor;
@@ -29,6 +30,7 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
+  private final UserRepository userRepository;
 
   @Override
   public OrderResponseDTO createOrder(OrderRequestDTO request) {
@@ -37,8 +39,12 @@ public class OrderServiceImpl implements OrderService {
       throw new IllegalArgumentException("El pedido debe contener al menos una línea de pedido");
     }
 
+    // getReferenceById devuelve un proxy Hibernate por ID sin SELECT extra —
+    // es la forma correcta de asignar un @ManyToOne cuando solo se necesita la FK.
+    User user = userRepository.getReferenceById(request.getUserId());
+
     Order order = Order.builder()
-        .user(User.builder().id(request.getUserId()).build())
+        .user(user)
         .date(LocalDateTime.now())
         .build();
 
@@ -94,6 +100,7 @@ public class OrderServiceImpl implements OrderService {
   public List<OrderResponseDTO> getOrdersByUser(Long userId) {
     return orderRepository.findByUserId(userId)
         .stream()
+        .sorted((a, b) -> b.getDate().compareTo(a.getDate()))
         .map(this::mapToDTO)
         .toList();
   }
