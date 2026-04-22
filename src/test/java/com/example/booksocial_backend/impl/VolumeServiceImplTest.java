@@ -27,6 +27,17 @@ import com.example.booksocial_backend.service.impl.VolumeServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.VolumeServiceImpl}.
+ *
+ * <p>Cubre la creación de volúmenes de cómic dentro de una edición con validación de número
+ * de volumen positivo y único por edición, la búsqueda individual y en lista (todos /
+ * por edición / ordenados por número), la actualización y la eliminación.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class VolumeServiceImplTest {
 
   @Mock

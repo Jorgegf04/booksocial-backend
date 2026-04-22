@@ -12,8 +12,10 @@ import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.domain.commerce.Order;
+import com.example.booksocial_backend.domain.user.User;
 import com.example.booksocial_backend.repository.OrderRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
+import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.impl.OrderServiceImpl;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +29,16 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.OrderServiceImpl}.
+ *
+ * <p>Verifica la creación de pedidos con sus líneas, el cálculo del total,
+ * la reducción de stock de los productos involucrados y la cancelación de pedidos.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class OrderServiceImplTest {
 
   @Mock
@@ -34,6 +46,9 @@ class OrderServiceImplTest {
 
   @Mock
   private ProductRepository productRepository;
+
+  @Mock
+  private UserRepository userRepository;
 
   @InjectMocks
   private OrderServiceImpl service;
@@ -55,6 +70,9 @@ class OrderServiceImplTest {
 
     order = new Order();
     order.setId(1L);
+
+    // getReferenceById devuelve un proxy sin SELECT; el mock devuelve un User con id=1
+    when(userRepository.getReferenceById(1L)).thenReturn(User.builder().id(1L).build());
   }
 
   // =========================

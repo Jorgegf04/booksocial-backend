@@ -10,6 +10,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+/**
+ * DTO de filtrado para la búsqueda avanzada de obras en el catálogo.
+ *
+ * <p>Todos los campos son opcionales; si se omite un campo, ese criterio
+ * no se aplica al filtrado. El servicio {@code WorkServiceImpl} construye
+ * la consulta combinando únicamente los campos informados.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

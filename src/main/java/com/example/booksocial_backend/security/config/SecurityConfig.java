@@ -21,6 +21,26 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.example.booksocial_backend.security.jwt.AuthEntryPointJwt;
 import com.example.booksocial_backend.security.jwt.AuthTokenFilter;
 
+/**
+ * Configuración central de Spring Security para el backend de BookSocial.
+ *
+ * <p>Define una cadena de filtros de seguridad exclusiva para el prefijo
+ * {@code /api/**} con las siguientes características:</p>
+ * <ul>
+ *   <li>CSRF desactivado (API REST stateless).</li>
+ *   <li>Sesiones stateless: no se crea ni gestiona ninguna sesión HTTP.</li>
+ *   <li>Autenticación mediante token JWT incluido en la cabecera {@code Authorization: Bearer}.</li>
+ *   <li>El filtro {@link com.example.booksocial_backend.security.jwt.AuthTokenFilter} intercepta
+ *       cada petición, extrae y valida el token JWT antes de delegar en la cadena de seguridad.</li>
+ *   <li>Todos los endpoints públicos de la API están marcados con {@code permitAll()}
+ *       para facilitar el acceso desde el frontend sin necesidad de token.</li>
+ *   <li>CORS habilitado con la configuración por defecto de Spring.</li>
+ * </ul>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity

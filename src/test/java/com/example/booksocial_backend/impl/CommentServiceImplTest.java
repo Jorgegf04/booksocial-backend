@@ -22,6 +22,17 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.CommentServiceImpl}.
+ *
+ * <p>Verifica la lógica de negocio del sistema de comentarios jerárquicos:
+ * creación de comentarios raíz, respuestas anidadas, validaciones y eliminación.
+ * Usa Mockito para aislar la capa de servicio de la base de datos.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class CommentServiceImplTest {
 
   @Mock

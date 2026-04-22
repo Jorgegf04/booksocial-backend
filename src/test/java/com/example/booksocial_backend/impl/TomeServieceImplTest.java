@@ -26,6 +26,18 @@ import com.example.booksocial_backend.service.impl.TomeServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.TomeServiceImpl}.
+ *
+ * <p>Verifica la creación de tomos dentro de una edición de manga con validación de número
+ * de tomo único por edición, la búsqueda individual, el listado completo y ordenado por
+ * número de tomo, la actualización y la eliminación. El número de tomo debe ser positivo
+ * y no puede repetirse en la misma edición.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class TomeServiceImplTest {
 
   @Mock

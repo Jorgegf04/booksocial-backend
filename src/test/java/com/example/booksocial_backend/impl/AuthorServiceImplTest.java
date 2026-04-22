@@ -19,6 +19,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.AuthorServiceImpl}.
+ *
+ * <p>Cubre la creación de autores con validación de nombre único y campos obligatorios,
+ * la búsqueda por ID, el listado completo, la actualización con control de duplicados
+ * y la eliminación de autores del catálogo.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class AuthorServiceImplTest {
 
   @Mock

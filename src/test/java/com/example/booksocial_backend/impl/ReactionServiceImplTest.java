@@ -25,6 +25,18 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.ReactionServiceImpl}.
+ *
+ * <p>Cubre el mecanismo de toggle de likes: si el usuario aún no ha reaccionado se crea
+ * una nueva {@link com.example.booksocial_backend.domain.social.Reaction} (liked=true);
+ * si ya existe se elimina (liked=false). También verifica el conteo de reacciones por
+ * comentario y la eliminación directa mediante {@code removeReaction}.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class ReactionServiceImplTest {
 
   @Mock

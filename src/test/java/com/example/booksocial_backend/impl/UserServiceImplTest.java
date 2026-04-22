@@ -27,6 +27,17 @@ import com.example.booksocial_backend.repository.UserFollowRepository;
 import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.impl.UserServiceImpl;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.UserServiceImpl}.
+ *
+ * <p>Cubre el ciclo de vida completo del usuario (CRUD, activación) y
+ * el sistema de seguimiento social (follow/unfollow, getFollowers, getFollowing).
+ * Emplea MockitoExtension para inyectar mocks de repositorios y PasswordEncoder.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class UserServiceImplTest {

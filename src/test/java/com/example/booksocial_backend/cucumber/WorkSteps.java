@@ -12,6 +12,28 @@ import io.cucumber.java.en.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * Definiciones de steps Cucumber para los tests de aceptación de autenticación y obras.
+ *
+ * <p>Cubre tres áreas funcionales mediante llamadas HTTP reales al servidor levantado
+ * por {@link SpringContextConfig}:</p>
+ * <ul>
+ *   <li><b>AUTH/Registro:</b> POST /api/auth/register — valida código de estado devuelto.</li>
+ *   <li><b>AUTH/Login:</b>    POST /api/auth/login    — verifica que se recibe un JWT no vacío
+ *       con type="Bearer".</li>
+ *   <li><b>Works/Crear:</b>   POST /api/works         — verifica estado 201 y título en respuesta.</li>
+ *   <li><b>Works/Listar:</b>  GET  /api/works         — verifica estado 200.</li>
+ *   <li><b>Works/Buscar:</b>  GET  /api/works/search?title=… — verifica que la lista no está vacía
+ *       y contiene el título esperado.</li>
+ * </ul>
+ *
+ * <p>El campo {@code jwtToken} se rellena automáticamente tras un login exitoso y puede
+ * usarse en steps posteriores del mismo escenario para llamadas autenticadas.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 public class WorkSteps {
 
   @Autowired

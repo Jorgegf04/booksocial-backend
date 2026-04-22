@@ -23,6 +23,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.ChapterServiceImpl}.
+ *
+ * <p>Verifica la creación de capítulos dentro de un tomo (manga): lanza excepción si el
+ * tomo no existe o si el número de capítulo no es positivo. Cubre también la búsqueda
+ * por ID con {@link com.example.booksocial_backend.exception.ChapterNotFoundException},
+ * el listado completo y la eliminación.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class ChapterServiceImplTest {
 
   @Mock

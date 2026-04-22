@@ -19,6 +19,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.EditorialServiceImpl}.
+ *
+ * <p>Verifica la creación de editoriales con validación de nombre único y no vacío,
+ * la búsqueda por ID, el listado completo, la actualización con control de nombre
+ * duplicado y la eliminación de editoriales.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class EditorialServiceImplTest {
 
   @Mock

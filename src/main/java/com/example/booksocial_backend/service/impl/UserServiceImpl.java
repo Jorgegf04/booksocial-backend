@@ -20,6 +20,23 @@ import com.example.booksocial_backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
 
+/**
+ * Implementación del servicio {@link UserService}.
+ *
+ * <p>Gestiona el ciclo de vida completo de los usuarios de BookSocial:
+ * registro, consulta, actualización, baja lógica y el sistema de
+ * seguimiento social (follow/unfollow).</p>
+ *
+ * <h3>Sistema de seguimiento entre usuarios</h3>
+ * <p>La relación de seguimiento se modela con la entidad {@code UserFollow},
+ * que almacena el par (follower, following) junto a la fecha del seguimiento.
+ * Una restricción de unicidad en base de datos impide duplicados.
+ * No se permite que un usuario se siga a sí mismo.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 @Service
 @RequiredArgsConstructor
 @Transactional

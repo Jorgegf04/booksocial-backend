@@ -28,6 +28,18 @@ import com.example.booksocial_backend.service.impl.WorkServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.WorkServiceImpl}.
+ *
+ * <p>Verifica la creación de obras con resolución de autores por nombre, las validaciones
+ * de título y género obligatorios, la búsqueda individual y en lista, la búsqueda por
+ * título parcial, el filtrado por género, la actualización parcial de campos y la
+ * eliminación. Incluye también el rechazo de lotes vacíos en {@code createMany}.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class WorkServiceImplTest {
 
   @Mock

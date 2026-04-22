@@ -24,6 +24,17 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.EditionServiceImpl}.
+ *
+ * <p>Cubre la creación de ediciones vinculadas a una obra y una editorial, las validaciones
+ * de existencia de dichas entidades, la búsqueda individual y en lista, la actualización
+ * con control de ISBN duplicado y la eliminación de ediciones del catálogo.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class EditionServiceImplTest {
 
   @Mock

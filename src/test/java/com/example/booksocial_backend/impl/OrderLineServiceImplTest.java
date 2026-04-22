@@ -28,6 +28,18 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.OrderLineServiceImpl}.
+ *
+ * <p>Verifica la creación de líneas de pedido: comprueba que el precio unitario se toma
+ * del producto en el momento de la creación, que el stock se decrementa correctamente
+ * y que se lanza excepción ante stock insuficiente, producto u orden inexistentes.
+ * Cubre también la búsqueda por ID y por pedido, y la eliminación de líneas.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class OrderLineServiceImplTest {
 
   @Mock

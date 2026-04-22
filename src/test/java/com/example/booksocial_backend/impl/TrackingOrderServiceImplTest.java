@@ -27,6 +27,17 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.TrackingOrderServiceImpl}.
+ *
+ * <p>Verifica la creación de estados de tracking, las validaciones de transición
+ * de estados (PREPARING→SHIPPED→IN_TRANSIT→DELIVERED) y que no se puedan añadir
+ * nuevos estados a pedidos ya entregados o cancelados.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class TrackingOrderServiceImplTest {
 
   @Mock

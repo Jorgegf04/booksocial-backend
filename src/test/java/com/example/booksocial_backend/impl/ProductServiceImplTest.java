@@ -28,6 +28,18 @@ import com.example.booksocial_backend.service.impl.ProductServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.ProductServiceImpl}.
+ *
+ * <p>Cubre la creación de productos vinculados a una edición con validación de precio
+ * positivo, la búsqueda individual y en lista (todos / disponibles / por edición),
+ * la actualización de precio y stock, la gestión de inventario mediante
+ * {@code decreaseStock} y la eliminación de productos.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class ProductServiceImplTest {
 
   @Mock

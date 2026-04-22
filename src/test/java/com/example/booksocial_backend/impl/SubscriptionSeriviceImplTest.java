@@ -23,6 +23,18 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.SubscriptionServiceImpl}.
+ *
+ * <p>Verifica la activación de suscripciones (30 días desde hoy) con rechazo de suscripciones
+ * ya activas, la cancelación con persistencia del estado {@code activated=false}, la consulta
+ * por usuario y la comprobación de suscripción activa mediante
+ * {@code hasActiveSubscription}.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class SubscriptionServiceImplTest {
 
   @Mock

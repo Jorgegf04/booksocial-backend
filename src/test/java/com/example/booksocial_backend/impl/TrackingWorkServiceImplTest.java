@@ -27,6 +27,17 @@ import org.mockito.quality.Strictness;
 
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
+/**
+ * Tests unitarios de {@link com.example.booksocial_backend.service.impl.TrackingWorkServiceImpl}.
+ *
+ * <p>Cubre la creación de seguimientos de obras (biblioteca/wishlist),
+ * la restricción de duplicados por par (userId, workId) y
+ * la actualización de estado de lectura.</p>
+ *
+ * @author Jorge
+ * @version 1.4
+ * @since 2026-04-22
+ */
 class TrackingWorkServiceImplTest {
 
   @Mock
