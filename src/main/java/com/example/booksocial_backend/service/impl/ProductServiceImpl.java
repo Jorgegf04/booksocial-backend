@@ -10,6 +10,8 @@ import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.DTO.catalog.ProductRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.ProductResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
+import com.example.booksocial_backend.domain.catalog.Editorial;
+import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.ProductService;
@@ -158,20 +160,24 @@ public class ProductServiceImpl implements ProductService {
    */
   private ProductResponseDTO mapToDTO(Product product) {
 
+    Edition edition = product.getEdition();
+    Work work = edition != null ? edition.getWork() : null;
+    Editorial editorial = edition != null ? edition.getEditorial() : null;
+
     return new ProductResponseDTO(
         product.getId(),
         product.getPrice(),
         product.getStock(),
 
-        product.getEdition().getId(),
-        product.getEdition().getTitle(),
-        product.getEdition().getIsbn(),
-        product.getEdition().getTotalTomes(),
+        edition != null ? edition.getId() : null,
+        edition != null ? edition.getTitle() : null,
+        edition != null ? edition.getIsbn() : null,
+        edition != null ? edition.getTotalTomes() : null,
 
-        product.getEdition().getWork().getId(),
-        product.getEdition().getWork().getTitle(),
+        work != null ? work.getId() : null,
+        work != null ? work.getTitle() : null,
 
-        product.getEdition().getEditorial().getName());
+        editorial != null ? editorial.getName() : null);
   }
 
   /**

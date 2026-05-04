@@ -42,7 +42,7 @@ public class ReactionServiceImpl implements ReactionService {
     boolean exists = reactionRepository
         .existsByUserIdAndCommentId(request.getUserId(), request.getCommentId());
 
-    // 🔴 TOGGLE OFF (quitar like)
+    // TOGGLE OFF (quitar like)
     if (exists) {
 
       Reaction existing = reactionRepository

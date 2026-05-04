@@ -136,11 +136,13 @@ public class EventServiceImpl implements EventService {
 
   private EventResponseDTO mapToDTO(Event event) {
 
-    List<Long> userIds = event.getUsers().stream()
+    List<User> safeUsers = event.getUsers() != null ? event.getUsers() : List.of();
+
+    List<Long> userIds = safeUsers.stream()
         .map(User::getId)
         .toList();
 
-    List<String> usernames = event.getUsers().stream()
+    List<String> usernames = safeUsers.stream()
         .map(User::getUsername)
         .toList();
 

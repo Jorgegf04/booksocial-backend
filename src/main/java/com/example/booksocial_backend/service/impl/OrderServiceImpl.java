@@ -54,7 +54,6 @@ public class OrderServiceImpl implements OrderService {
           Product product = productRepository.findById(dto.getProductId())
               .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
 
-          // ✅ Validar stock
           if (product.getStock() < dto.getQuantity()) {
             throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getId());
           }
@@ -62,7 +61,7 @@ public class OrderServiceImpl implements OrderService {
           return OrderLine.builder()
               .product(product)
               .quantity(dto.getQuantity())
-              .unitaryPrice(product.getPrice()) // 🔥 precio seguro
+              .unitaryPrice(product.getPrice())
               .order(order)
               .build();
         })
@@ -118,16 +117,18 @@ public class OrderServiceImpl implements OrderService {
 
   private OrderResponseDTO mapToDTO(Order order) {
 
-    List<OrderLineResponseDTO> lines = order.getOrderLines().stream()
+    List<OrderLine> safeLines = order.getOrderLines() != null ? order.getOrderLines() : List.of();
+
+    List<OrderLineResponseDTO> lines = safeLines.stream()
         .map(l -> new OrderLineResponseDTO(
             l.getProduct().getId(),
-            l.getProduct().getEdition().getTitle(),
+            l.getProduct().getEdition() != null ? l.getProduct().getEdition().getTitle() : null,
             l.getProduct().getPrice(),
             l.getQuantity(),
             l.getQuantity() * l.getProduct().getPrice()))
         .toList();
 
-    int totalItems = order.getOrderLines().stream()
+    int totalItems = safeLines.stream()
         .mapToInt(OrderLine::getQuantity)
         .sum();
 

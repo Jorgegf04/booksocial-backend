@@ -238,4 +238,34 @@ public class AuthorController {
     authorService.deleteAuthor(id);
     return ResponseEntity.noContent().build();
   }
+
+  // =========================
+  // FOLLOW
+  // =========================
+
+  @Operation(summary = "Seguir autor")
+  @PostMapping("/{id}/follow")
+  public ResponseEntity<Void> followAuthor(
+      @PathVariable Long id,
+      @RequestParam Long userId) {
+    authorService.followAuthor(userId, id);
+    return ResponseEntity.ok().build();
+  }
+
+  @Operation(summary = "Dejar de seguir autor")
+  @DeleteMapping("/{id}/follow")
+  public ResponseEntity<Void> unfollowAuthor(
+      @PathVariable Long id,
+      @RequestParam Long userId) {
+    authorService.unfollowAuthor(userId, id);
+    return ResponseEntity.noContent().build();
+  }
+
+  @Operation(summary = "¿El usuario sigue a este autor?")
+  @GetMapping("/{id}/following")
+  public ResponseEntity<Boolean> isFollowing(
+      @PathVariable Long id,
+      @RequestParam Long userId) {
+    return ResponseEntity.ok(authorService.isFollowing(userId, id));
+  }
 }

@@ -25,5 +25,6 @@ public class AuthorRequestDTO {
     private String name;
     private String nationality;
     private LocalDate birthDate;
+    private String img;
 
 }

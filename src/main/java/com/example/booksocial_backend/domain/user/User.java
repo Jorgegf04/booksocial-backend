@@ -3,8 +3,6 @@ package com.example.booksocial_backend.domain.user;
 import java.time.LocalDate;
 import java.util.List;
 
-import org.springframework.jca.support.LocalConnectionFactoryBean;
-
 import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -27,7 +25,6 @@ import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -178,5 +175,4 @@ public class User {
 
   @OneToMany(mappedBy = "following")
   private List<UserFollow> followers;
-
 }

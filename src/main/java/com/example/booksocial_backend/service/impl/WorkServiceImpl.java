@@ -16,8 +16,10 @@ import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 import com.example.booksocial_backend.domain.catalog.Genre;
+import com.example.booksocial_backend.repository.AuthorFollowRepository;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
+import com.example.booksocial_backend.service.EmailService;
 import com.example.booksocial_backend.service.WorkService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,6 +32,8 @@ public class WorkServiceImpl implements WorkService {
   private final WorkRepository workRepository;
   private final ModelMapper modelMapper;
   private final AuthorRepository authorRepository;
+  private final AuthorFollowRepository authorFollowRepository;
+  private final EmailService emailService;
 
   @Override
   public WorkResponseDTO createWork(WorkRequestDTO request) {
@@ -45,7 +49,17 @@ public class WorkServiceImpl implements WorkService {
       work.setAuthors(resolveAuthorsByName(request.getAuthors()));
     }
 
-    return mapWorkToDTO(workRepository.save(work));
+    Work saved = workRepository.save(work);
+
+    saved.getAuthors().forEach(author ->
+        authorFollowRepository.findByAuthorId(author.getId()).forEach(follow -> {
+          try {
+            emailService.sendNewWorkNotification(
+                follow.getUser().getEmail(), author.getName(), saved.getTitle());
+          } catch (Exception ignored) {}
+        }));
+
+    return mapWorkToDTO(saved);
   }
 
   @Override

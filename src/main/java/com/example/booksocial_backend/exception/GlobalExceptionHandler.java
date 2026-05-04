@@ -12,16 +12,21 @@ import jakarta.servlet.http.HttpServletRequest;
 /**
  * Manejador global de excepciones para la API REST de BookSocial.
  *
- * <p>Captura las excepciones de dominio y las convierte en respuestas HTTP
- * estructuradas usando {@link ExceptionBody}. Centraliza el tratamiento de errores
- * evitando duplicar código en cada controlador.</p>
+ * <p>
+ * Captura las excepciones de dominio y las convierte en respuestas HTTP
+ * estructuradas usando {@link ExceptionBody}. Centraliza el tratamiento de
+ * errores
+ * evitando duplicar código en cada controlador.
+ * </p>
  *
- * <p>Excepciones contempladas:</p>
+ * <p>
+ * Excepciones contempladas:
+ * </p>
  * <ul>
- *   <li>Entidades no encontradas → 404 NOT FOUND</li>
- *   <li>Entidades duplicadas y errores de validación → 400 BAD REQUEST</li>
- *   <li>JSON mal formado → 400 BAD REQUEST</li>
- *   <li>Cualquier otra excepción → 500 INTERNAL SERVER ERROR</li>
+ * <li>Entidades no encontradas → 404 NOT FOUND</li>
+ * <li>Entidades duplicadas y errores de validación → 400 BAD REQUEST</li>
+ * <li>JSON mal formado → 400 BAD REQUEST</li>
+ * <li>Cualquier otra excepción → 500 INTERNAL SERVER ERROR</li>
  * </ul>
  *
  * @author Jorge

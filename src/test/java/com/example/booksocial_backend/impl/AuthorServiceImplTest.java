@@ -9,9 +9,12 @@ import java.util.Optional;
 
 import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
-import com.example.booksocial_backend.repository.AuthorRepository;
-import com.example.booksocial_backend.service.impl.AuthorServiceImpl;
 import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
+import com.example.booksocial_backend.repository.AuthorFollowRepository;
+import com.example.booksocial_backend.repository.AuthorRepository;
+import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.service.EmailService;
+import com.example.booksocial_backend.service.impl.AuthorServiceImpl;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,20 +23,14 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * Tests unitarios de {@link com.example.booksocial_backend.service.impl.AuthorServiceImpl}.
- *
- * <p>Cubre la creación de autores con validación de nombre único y campos obligatorios,
- * la búsqueda por ID, el listado completo, la actualización con control de duplicados
- * y la eliminación de autores del catálogo.</p>
- *
- * @author Jorge
- * @version 1.4
- * @since 2026-04-22
+ * Tests unitarios de {@link AuthorServiceImpl}.
  */
 class AuthorServiceImplTest {
 
-  @Mock
-  private AuthorRepository authorRepository;
+  @Mock private AuthorRepository authorRepository;
+  @Mock private AuthorFollowRepository authorFollowRepository;
+  @Mock private UserRepository userRepository;
+  @Mock private EmailService emailService;
 
   @InjectMocks
   private AuthorServiceImpl authorService;
@@ -41,6 +38,8 @@ class AuthorServiceImplTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    // followerCount por defecto 0 en todos los mapeos
+    when(authorFollowRepository.countByAuthorId(anyLong())).thenReturn(0L);
   }
 
   // =========================
@@ -49,20 +48,13 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldCreateAuthorSuccessfully() {
-    AuthorRequestDTO request = new AuthorRequestDTO(
-        "Tolkien",
-        "UK",
-        LocalDate.of(1892, 1, 3));
+    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.of(1892, 1, 3), null);
 
     when(authorRepository.existsByName("Tolkien")).thenReturn(false);
 
     Author savedAuthor = Author.builder()
-        .id(1L)
-        .name("Tolkien")
-        .nationality("UK")
-        .birthDate(request.getBirthDate())
-        .works(List.of())
-        .build();
+        .id(1L).name("Tolkien").nationality("UK")
+        .birthDate(request.getBirthDate()).works(List.of()).build();
 
     when(authorRepository.save(any(Author.class))).thenReturn(savedAuthor);
 
@@ -74,35 +66,23 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldThrowExceptionWhenAuthorAlreadyExists() {
-    AuthorRequestDTO request = new AuthorRequestDTO(
-        "Tolkien",
-        "UK",
-        LocalDate.now());
+    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.now(), null);
 
     when(authorRepository.existsByName("Tolkien")).thenReturn(true);
 
-    assertThrows(AuthorAlreadyExistsException.class, () -> {
-      authorService.createAuthor(request);
-    });
+    assertThrows(AuthorAlreadyExistsException.class, () -> authorService.createAuthor(request));
   }
 
   @Test
   void shouldThrowExceptionWhenRequestIsNull() {
-    assertThrows(IllegalArgumentException.class, () -> {
-      authorService.createAuthor(null);
-    });
+    assertThrows(IllegalArgumentException.class, () -> authorService.createAuthor(null));
   }
 
   @Test
   void shouldThrowExceptionWhenNameIsEmpty() {
-    AuthorRequestDTO request = new AuthorRequestDTO(
-        "   ",
-        "UK",
-        LocalDate.now());
+    AuthorRequestDTO request = new AuthorRequestDTO("   ", "UK", LocalDate.now(), null);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      authorService.createAuthor(request);
-    });
+    assertThrows(IllegalArgumentException.class, () -> authorService.createAuthor(request));
   }
 
   // =========================
@@ -111,11 +91,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldGetAuthorById() {
-    Author author = Author.builder()
-        .id(1L)
-        .name("Tolkien")
-        .works(List.of())
-        .build();
+    Author author = Author.builder().id(1L).name("Tolkien").works(List.of()).build();
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
 
@@ -128,9 +104,7 @@ class AuthorServiceImplTest {
   void shouldThrowExceptionWhenAuthorNotFound() {
     when(authorRepository.findById(1L)).thenReturn(Optional.empty());
 
-    assertThrows(RuntimeException.class, () -> {
-      authorService.getAuthorById(1L);
-    });
+    assertThrows(RuntimeException.class, () -> authorService.getAuthorById(1L));
   }
 
   // =========================
@@ -139,11 +113,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldReturnAllAuthors() {
-    Author author = Author.builder()
-        .id(1L)
-        .name("Tolkien")
-        .works(List.of())
-        .build();
+    Author author = Author.builder().id(1L).name("Tolkien").works(List.of()).build();
 
     when(authorRepository.findAll()).thenReturn(List.of(author));
 
@@ -158,16 +128,8 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldUpdateAuthorSuccessfully() {
-    Author existing = Author.builder()
-        .id(1L)
-        .name("Old Name")
-        .works(List.of())
-        .build();
-
-    AuthorRequestDTO request = new AuthorRequestDTO(
-        "New Name",
-        "Spain",
-        LocalDate.now());
+    Author existing = Author.builder().id(1L).name("Old Name").works(List.of()).build();
+    AuthorRequestDTO request = new AuthorRequestDTO("New Name", "Spain", LocalDate.now(), null);
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(existing));
     when(authorRepository.existsByName("New Name")).thenReturn(false);
@@ -180,23 +142,13 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldThrowExceptionWhenUpdatingWithExistingName() {
-    Author existing = Author.builder()
-        .id(1L)
-        .name("Old Name")
-        .works(List.of())
-        .build();
-
-    AuthorRequestDTO request = new AuthorRequestDTO(
-        "Existing Name",
-        "Spain",
-        LocalDate.now());
+    Author existing = Author.builder().id(1L).name("Old Name").works(List.of()).build();
+    AuthorRequestDTO request = new AuthorRequestDTO("Existing Name", "Spain", LocalDate.now(), null);
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(existing));
     when(authorRepository.existsByName("Existing Name")).thenReturn(true);
 
-    assertThrows(IllegalArgumentException.class, () -> {
-      authorService.updateAuthor(1L, request);
-    });
+    assertThrows(IllegalArgumentException.class, () -> authorService.updateAuthor(1L, request));
   }
 
   // =========================
@@ -205,11 +157,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldDeleteAuthor() {
-    Author author = Author.builder()
-        .id(1L)
-        .name("Tolkien")
-        .works(List.of())
-        .build();
+    Author author = Author.builder().id(1L).name("Tolkien").works(List.of()).build();
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(author));
 

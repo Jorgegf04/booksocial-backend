@@ -73,6 +73,9 @@ public class Author {
   @Column(name = "birth_date")
   private LocalDate birthDate;
 
+  @Column(length = 500)
+  private String img;
+
   /**
    * Lista de obras en las que este autor ha participado.
    * La relación es gestionada por la entidad {@link Work} (mappedBy).
