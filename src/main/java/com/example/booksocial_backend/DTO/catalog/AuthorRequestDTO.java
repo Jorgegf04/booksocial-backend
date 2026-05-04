@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.DTO.catalog;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,5 +27,6 @@ public class AuthorRequestDTO {
     private String nationality;
     private LocalDate birthDate;
     private String img;
+    private List<Long> workIds;
 
 }

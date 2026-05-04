@@ -109,6 +109,8 @@ public class SecurityConfig {
             .requestMatchers("/api/events/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/subscriptions/**").permitAll() // puedes quitarlo luego si quieres proteger
             .requestMatchers("/api/tracking-works/**").permitAll()
+            .requestMatchers("/api/upload").permitAll()
+            .requestMatchers("/api/uploads/**").permitAll()
 
             .anyRequest().authenticated());
 
