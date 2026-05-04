@@ -22,8 +22,10 @@ import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 import com.example.booksocial_backend.domain.catalog.Genre;
 import com.example.booksocial_backend.domain.catalog.Work;
+import com.example.booksocial_backend.repository.AuthorFollowRepository;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
+import com.example.booksocial_backend.service.EmailService;
 import com.example.booksocial_backend.service.impl.WorkServiceImpl;
 
 @ExtendWith(MockitoExtension.class)
@@ -50,6 +52,12 @@ class WorkServiceImplTest {
 
   @Mock
   private AuthorRepository authorRepository;
+
+  @Mock
+  private AuthorFollowRepository authorFollowRepository;
+
+  @Mock
+  private EmailService emailService;
 
   @InjectMocks
   private WorkServiceImpl service;
@@ -84,6 +92,7 @@ class WorkServiceImplTest {
     when(modelMapper.map(request, Work.class)).thenReturn(work);
     when(authorRepository.findByNameIgnoreCase("Masashi Kishimoto")).thenReturn(Optional.of(author));
     when(workRepository.save(any())).thenReturn(work);
+    when(authorFollowRepository.findByAuthorId(anyLong())).thenReturn(List.of());
 
     var result = service.createWork(request);
 
