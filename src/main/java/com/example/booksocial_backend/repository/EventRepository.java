@@ -24,4 +24,6 @@ public interface EventRepository extends JpaRepository<Event, Long> {
    */
   List<Event> findByDateAfter(LocalDateTime date);
 
+  boolean existsByTitle(String title);
+
 }

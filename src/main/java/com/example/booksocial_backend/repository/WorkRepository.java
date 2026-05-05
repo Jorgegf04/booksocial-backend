@@ -2,6 +2,7 @@ package com.example.booksocial_backend.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -40,6 +41,8 @@ public interface WorkRepository extends JpaRepository<Work, Long> {
     /**
      * Busco obras por título (búsqueda parcial).
      */
+    Optional<Work> findByTitle(String title);
+
     List<Work> findByTitleContainingIgnoreCase(String title);
 
     /**
