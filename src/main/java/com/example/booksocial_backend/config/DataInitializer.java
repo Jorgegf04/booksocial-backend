@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -47,11 +48,19 @@ public class DataInitializer implements ApplicationRunner {
         private final EventRepository eventRepository;
         private final PasswordEncoder passwordEncoder;
 
+        @Value("${seeder.force-reseed:false}")
+        private boolean forceReseed;
+
         @Override
         @Transactional
         public void run(ApplicationArguments args) {
 
                 seedAdmin();
+
+                if (forceReseed) {
+                        log.warn("[DataInitializer] FORCE_RESEED=true → borrando catálogo existente...");
+                        clearCatalog();
+                }
 
                 if (workRepository.count() > 0) {
                         log.info("[DataInitializer] Catálogo ya presente, omitiendo siembra.");
@@ -426,6 +435,16 @@ public class DataInitializer implements ApplicationRunner {
         }
 
         // ── Helpers ───────────────────────────────────────────────────────────────
+
+        private void clearCatalog() {
+                productRepository.deleteAll();
+                editionRepository.deleteAll();
+                workRepository.deleteAll();
+                authorRepository.deleteAll();
+                editorialRepository.deleteAll();
+                eventRepository.deleteAll();
+                log.info("[DataInitializer] Catálogo borrado correctamente.");
+        }
 
         private void seedAdmin() {
                 if (!userRepository.existsByUsername("admin")) {
