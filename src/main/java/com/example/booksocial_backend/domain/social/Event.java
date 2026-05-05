@@ -27,7 +27,6 @@ import com.example.booksocial_backend.domain.user.User;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Event {
 
   /**
@@ -51,6 +50,13 @@ public class Event {
   @Size(max = 1000)
   @Column(length = 1000)
   private String description;
+
+  /**
+   * Imagen representativa del evento.
+   */
+  @Size(max = 500)
+  @Column(length = 500)
+  private String img;
 
   /**
    * Fecha del evento.

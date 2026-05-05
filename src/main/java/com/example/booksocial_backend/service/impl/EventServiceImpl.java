@@ -47,6 +47,7 @@ public class EventServiceImpl implements EventService {
 
     event.setTitle(request.getTitle().trim());
     event.setDescription(request.getDescription());
+    event.setImg(request.getImg());
     event.setDate(request.getDate());
 
     // ✔ CORRECTO: lista mutable + usuarios reales
@@ -109,6 +110,7 @@ public class EventServiceImpl implements EventService {
 
     existing.setTitle(request.getTitle().trim());
     existing.setDescription(request.getDescription());
+    if (request.getImg() != null) existing.setImg(request.getImg());
     existing.setDate(request.getDate());
 
     // ✔ CORRECTO: NO reemplazar lista → modificarla
@@ -151,6 +153,7 @@ public class EventServiceImpl implements EventService {
         event.getId(),
         event.getTitle(),
         event.getDescription(),
+        event.getImg(),
         event.getDate(),
         userIds,
         usernames,

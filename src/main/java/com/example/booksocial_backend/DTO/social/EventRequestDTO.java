@@ -30,6 +30,8 @@ public class EventRequestDTO {
 
     private String description;
 
+    private String img;
+
     @NotNull
     private LocalDateTime date;
 

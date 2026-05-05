@@ -95,7 +95,7 @@ public class Work {
    * Valoración media calculada a partir de las opiniones de los usuarios.
    */
   @Min(0)
-  @Max(5)
+  @Max(10)
   private Double averageRating;
 
   /**

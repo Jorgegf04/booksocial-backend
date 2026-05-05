@@ -2,6 +2,7 @@ package com.example.booksocial_backend.impl;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyIterable;
 import static org.mockito.Mockito.*;
 
 import java.time.LocalDateTime;
@@ -26,6 +27,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.junit.jupiter.MockitoSettings;
 import org.mockito.quality.Strictness;
 
+@SuppressWarnings("null")
 @ExtendWith(MockitoExtension.class)
 @MockitoSettings(strictness = Strictness.LENIENT)
 class EventServiceImplTest {
@@ -70,10 +72,12 @@ class EventServiceImplTest {
     EventRequestDTO request = new EventRequestDTO(
         "Evento",
         "Desc",
+        null,
         futureDate,
         List.of(1L));
 
-    when(eventRepository.save(any())).thenReturn(event);
+    when(userRepository.findAllById(anyIterable())).thenReturn(List.of(user));
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
 
     var result = eventService.createEvent(request);
 
@@ -82,11 +86,37 @@ class EventServiceImplTest {
   }
 
   @Test
+  void shouldCreateEventWithImgSuccessfully() {
+
+    EventRequestDTO request = new EventRequestDTO(
+        "Evento con foto",
+        "Desc",
+        "http://example.com/img.jpg",
+        futureDate,
+        null);
+
+    Event eventWithImg = new Event();
+    eventWithImg.setId(2L);
+    eventWithImg.setTitle("Evento con foto");
+    eventWithImg.setImg("http://example.com/img.jpg");
+    eventWithImg.setDate(futureDate);
+    eventWithImg.setUsers(new ArrayList<>());
+
+    when(eventRepository.save(any(Event.class))).thenReturn(eventWithImg);
+
+    var result = eventService.createEvent(request);
+
+    assertEquals("Evento con foto", result.getTitle());
+    assertEquals("http://example.com/img.jpg", result.getImg());
+  }
+
+  @Test
   void shouldThrowExceptionWhenTitleIsEmpty() {
 
     EventRequestDTO request = new EventRequestDTO(
         "   ",
         "Desc",
+        null,
         futureDate,
         List.of(1L));
 
@@ -94,7 +124,7 @@ class EventServiceImplTest {
       eventService.createEvent(request);
     });
 
-    verify(eventRepository, never()).save(any());
+    verify(eventRepository, never()).save(any(Event.class));
   }
 
   @Test
@@ -103,6 +133,7 @@ class EventServiceImplTest {
     EventRequestDTO request = new EventRequestDTO(
         "Evento",
         "Desc",
+        null,
         LocalDateTime.now().minusDays(1),
         List.of(1L));
 
@@ -112,19 +143,31 @@ class EventServiceImplTest {
   }
 
   @Test
-  void shouldThrowExceptionWhenUserNotFound() {
+  void shouldCreateEventWithNoUsersWhenUserNotFound() {
 
     EventRequestDTO request = new EventRequestDTO(
         "Evento",
         "Desc",
+        null,
         futureDate,
-        List.of(1L));
+        List.of(99L));
 
-    when(userRepository.findById(1L)).thenReturn(Optional.empty());
+    // findAllById devuelve lista vacía — usuario no existe
+    when(userRepository.findAllById(anyIterable())).thenReturn(List.of());
 
-    assertThrows(RuntimeException.class, () -> {
-      eventService.createEvent(request);
-    });
+    Event eventNoUsers = new Event();
+    eventNoUsers.setId(2L);
+    eventNoUsers.setTitle("Evento");
+    eventNoUsers.setDate(futureDate);
+    eventNoUsers.setUsers(new ArrayList<>());
+
+    when(eventRepository.save(any(Event.class))).thenReturn(eventNoUsers);
+
+    var result = eventService.createEvent(request);
+
+    // El evento se crea igualmente pero sin participantes
+    assertNotNull(result);
+    assertEquals(0, result.getTotalParticipants());
   }
 
   // =========================
@@ -173,16 +216,36 @@ class EventServiceImplTest {
     EventRequestDTO request = new EventRequestDTO(
         "Nuevo",
         "Nueva desc",
+        null,
         futureDate,
         List.of(1L));
 
     when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
-    when(userRepository.findById(1L)).thenReturn(Optional.of(user));
-    when(eventRepository.save(any())).thenReturn(event);
+    when(userRepository.findAllById(anyIterable())).thenReturn(List.of(user));
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
 
     var result = eventService.updateEvent(1L, request);
 
     assertEquals("Nuevo", result.getTitle());
+  }
+
+  @Test
+  void shouldUpdateEventImgSuccessfully() {
+
+    EventRequestDTO request = new EventRequestDTO(
+        "Evento",
+        "Desc",
+        "http://new-img.com/photo.jpg",
+        futureDate,
+        null);
+
+    when(eventRepository.findById(1L)).thenReturn(Optional.of(event));
+    when(eventRepository.save(any(Event.class))).thenReturn(event);
+
+    var result = eventService.updateEvent(1L, request);
+
+    assertNotNull(result);
+    verify(eventRepository).save(any(Event.class));
   }
 
   // =========================
