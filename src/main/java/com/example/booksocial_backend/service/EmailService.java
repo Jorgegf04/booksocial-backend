@@ -1,24 +1,25 @@
 package com.example.booksocial_backend.service;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class EmailService {
 
-    private final JavaMailSender mailSender;
+    @Autowired(required = false)
+    private JavaMailSender mailSender;
 
     @Value("${spring.mail.username:}")
     private String fromEmail;
 
     public void sendFollowConfirmation(String toEmail, String authorName) {
+        if (mailSender == null || fromEmail == null || fromEmail.isBlank()) return;
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(toEmail);
@@ -38,6 +39,7 @@ public class EmailService {
     }
 
     public void sendNewWorkNotification(String toEmail, String authorName, String workTitle) {
+        if (mailSender == null || fromEmail == null || fromEmail.isBlank()) return;
         try {
             SimpleMailMessage msg = new SimpleMailMessage();
             msg.setTo(toEmail);

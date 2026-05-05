@@ -66,7 +66,7 @@ public class OrderLineServiceImpl implements OrderLineService {
 
     // 2. Buscar producto
     Product product = productRepository.findById(request.getProductId())
-        .orElseThrow(() -> new RuntimeException("Producto no encontrado: " + request.getProductId()));
+        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado: " + request.getProductId()));
 
     // 🔥 CONTROL DE STOCK (MUY IMPORTANTE)
     if (product.getStock() < request.getQuantity()) {
@@ -75,7 +75,7 @@ public class OrderLineServiceImpl implements OrderLineService {
 
     // 3. Buscar pedido
     Order order = orderRepository.findById(request.getOrderId())
-        .orElseThrow(() -> new RuntimeException("Pedido no encontrado: " + request.getOrderId()));
+        .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado: " + request.getOrderId()));
 
     // 4. Construir entidad
     OrderLine line = new OrderLine();
@@ -105,7 +105,7 @@ public class OrderLineServiceImpl implements OrderLineService {
   public OrderLineResponseDTO getOrderLineById(Long id) {
 
     OrderLine line = orderLineRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Línea de pedido no encontrada: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Línea de pedido no encontrada: " + id));
 
     return mapToDTO(line);
   }
@@ -138,7 +138,7 @@ public class OrderLineServiceImpl implements OrderLineService {
   public void deleteOrderLine(Long id) {
 
     OrderLine line = orderLineRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Línea de pedido no encontrada: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Línea de pedido no encontrada: " + id));
 
     orderLineRepository.delete(line);
   }
@@ -148,12 +148,18 @@ public class OrderLineServiceImpl implements OrderLineService {
   // =========================
 
   private OrderLineResponseDTO mapToDTO(OrderLine line) {
+    Product product = line.getProduct();
+    String editionTitle = (product != null && product.getEdition() != null)
+        ? product.getEdition().getTitle()
+        : null;
 
     return new OrderLineResponseDTO(
-        line.getProduct().getId(),
-        line.getProduct().getEdition().getTitle(),
+        product != null ? product.getId() : null,
+        editionTitle,
         line.getUnitaryPrice(),
         line.getQuantity(),
-        line.getUnitaryPrice() * line.getQuantity());
+        line.getUnitaryPrice() != null && line.getQuantity() != null
+            ? line.getUnitaryPrice() * line.getQuantity()
+            : null);
   }
 }

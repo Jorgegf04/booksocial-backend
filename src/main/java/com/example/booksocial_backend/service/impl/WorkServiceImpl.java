@@ -93,10 +93,24 @@ public class WorkServiceImpl implements WorkService {
         })
         .toList();
 
-    return workRepository.saveAll(works)
-        .stream()
-        .map(this::mapWorkToDTO)
-        .toList();
+    List<Work> saved = workRepository.saveAll(List.copyOf(works));
+
+    saved.forEach(work -> {
+      List<Author> authors = work.getAuthors();
+      if (authors != null) {
+        authors.forEach(author ->
+            authorFollowRepository.findByAuthorId(author.getId()).forEach(follow -> {
+              try {
+                if (follow.getUser() != null && follow.getUser().getEmail() != null) {
+                  emailService.sendNewWorkNotification(
+                      follow.getUser().getEmail(), author.getName(), work.getTitle());
+                }
+              } catch (Exception ignored) {}
+            }));
+      }
+    });
+
+    return saved.stream().map(this::mapWorkToDTO).toList();
   }
 
   @Override
