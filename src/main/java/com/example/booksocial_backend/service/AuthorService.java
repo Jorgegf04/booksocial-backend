@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
+import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 
 public interface AuthorService {
 
@@ -30,4 +31,6 @@ public interface AuthorService {
   void unfollowAuthor(Long userId, Long authorId);
 
   boolean isFollowing(Long userId, Long authorId);
+
+  List<UserResponseDTO> getFollowers(Long authorId);
 }

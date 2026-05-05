@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
+import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 import com.example.booksocial_backend.service.AuthorService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -267,5 +268,11 @@ public class AuthorController {
       @PathVariable Long id,
       @RequestParam Long userId) {
     return ResponseEntity.ok(authorService.isFollowing(userId, id));
+  }
+
+  @Operation(summary = "Seguidores del autor")
+  @GetMapping("/{id}/followers")
+  public ResponseEntity<List<UserResponseDTO>> getFollowers(@PathVariable Long id) {
+    return ResponseEntity.ok(authorService.getFollowers(id));
   }
 }

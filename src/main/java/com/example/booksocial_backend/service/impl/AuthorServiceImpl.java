@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.booksocial_backend.DTO.catalog.AuthorRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.AuthorResponseDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
+import com.example.booksocial_backend.DTO.user.UserResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Author;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.social.AuthorFollow;
@@ -183,6 +184,19 @@ public class AuthorServiceImpl implements AuthorService {
   @Transactional(readOnly = true)
   public boolean isFollowing(Long userId, Long authorId) {
     return authorFollowRepository.existsByUserIdAndAuthorId(userId, authorId);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public List<UserResponseDTO> getFollowers(Long authorId) {
+    return authorFollowRepository.findByAuthorId(authorId).stream()
+        .map(af -> {
+          User u = af.getUser();
+          return new UserResponseDTO(u.getId(), u.getUsername(), u.getEmail(),
+              u.getName(), u.getSecondName(), u.getImg(),
+              u.getRegistrationDate(), u.getActive(), u.getRole());
+        })
+        .toList();
   }
 
   // =========================
