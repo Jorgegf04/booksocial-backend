@@ -2,8 +2,10 @@ package com.example.booksocial_backend.exception;
 
 import java.time.LocalDateTime;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.CannotCreateTransactionException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -84,6 +86,31 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
   public ResponseEntity<?> handleJsonError(Exception ex, HttpServletRequest request) {
     return buildResponse("JSON mal formado", HttpStatus.BAD_REQUEST, request);
+  }
+
+  // =========================
+  // AUTHOR DUPLICADO
+  // =========================
+
+  @ExceptionHandler(AuthorAlreadyExistsException.class)
+  public ResponseEntity<?> handleAuthorExists(AuthorAlreadyExistsException ex, HttpServletRequest request) {
+    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  // =========================
+  // BASE DE DATOS
+  // =========================
+
+  @ExceptionHandler(CannotCreateTransactionException.class)
+  public ResponseEntity<?> handleCannotCreateTransaction(CannotCreateTransactionException ex, HttpServletRequest request) {
+    return buildResponse("No se puede conectar con la base de datos. Verifique que MySQL está activo.",
+        HttpStatus.SERVICE_UNAVAILABLE, request);
+  }
+
+  @ExceptionHandler(DataAccessException.class)
+  public ResponseEntity<?> handleDataAccess(DataAccessException ex, HttpServletRequest request) {
+    return buildResponse("Error de acceso a datos. Por favor inténtelo más tarde.",
+        HttpStatus.SERVICE_UNAVAILABLE, request);
   }
 
   // =========================

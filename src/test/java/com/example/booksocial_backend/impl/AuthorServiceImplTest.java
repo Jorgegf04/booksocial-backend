@@ -13,6 +13,7 @@ import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
 import com.example.booksocial_backend.repository.AuthorFollowRepository;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.repository.WorkRepository;
 import com.example.booksocial_backend.service.EmailService;
 import com.example.booksocial_backend.service.impl.AuthorServiceImpl;
 
@@ -30,6 +31,7 @@ class AuthorServiceImplTest {
   @Mock private AuthorRepository authorRepository;
   @Mock private AuthorFollowRepository authorFollowRepository;
   @Mock private UserRepository userRepository;
+  @Mock private WorkRepository workRepository;
   @Mock private EmailService emailService;
 
   @InjectMocks
@@ -48,7 +50,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldCreateAuthorSuccessfully() {
-    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.of(1892, 1, 3), null);
+    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.of(1892, 1, 3), null, null);
 
     when(authorRepository.existsByName("Tolkien")).thenReturn(false);
 
@@ -66,7 +68,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldThrowExceptionWhenAuthorAlreadyExists() {
-    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.now(), null);
+    AuthorRequestDTO request = new AuthorRequestDTO("Tolkien", "UK", LocalDate.now(), null, null);
 
     when(authorRepository.existsByName("Tolkien")).thenReturn(true);
 
@@ -80,7 +82,7 @@ class AuthorServiceImplTest {
 
   @Test
   void shouldThrowExceptionWhenNameIsEmpty() {
-    AuthorRequestDTO request = new AuthorRequestDTO("   ", "UK", LocalDate.now(), null);
+    AuthorRequestDTO request = new AuthorRequestDTO("   ", "UK", LocalDate.now(), null, null);
 
     assertThrows(IllegalArgumentException.class, () -> authorService.createAuthor(request));
   }
@@ -129,7 +131,7 @@ class AuthorServiceImplTest {
   @Test
   void shouldUpdateAuthorSuccessfully() {
     Author existing = Author.builder().id(1L).name("Old Name").works(List.of()).build();
-    AuthorRequestDTO request = new AuthorRequestDTO("New Name", "Spain", LocalDate.now(), null);
+    AuthorRequestDTO request = new AuthorRequestDTO("New Name", "Spain", LocalDate.now(), null, null);
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(existing));
     when(authorRepository.existsByName("New Name")).thenReturn(false);
@@ -143,7 +145,7 @@ class AuthorServiceImplTest {
   @Test
   void shouldThrowExceptionWhenUpdatingWithExistingName() {
     Author existing = Author.builder().id(1L).name("Old Name").works(List.of()).build();
-    AuthorRequestDTO request = new AuthorRequestDTO("Existing Name", "Spain", LocalDate.now(), null);
+    AuthorRequestDTO request = new AuthorRequestDTO("Existing Name", "Spain", LocalDate.now(), null, null);
 
     when(authorRepository.findById(1L)).thenReturn(Optional.of(existing));
     when(authorRepository.existsByName("Existing Name")).thenReturn(true);
