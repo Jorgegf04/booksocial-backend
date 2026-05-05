@@ -1,5 +1,8 @@
 package com.example.booksocial_backend.domain.commerce;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 import com.example.booksocial_backend.domain.catalog.Product;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
@@ -60,6 +63,7 @@ public class OrderLine {
    */
   @ManyToOne
   @NotNull
-  @JoinColumn(name = "product_id", nullable = false)
+  @JoinColumn(name = "product_id", nullable = false, foreignKey = @ForeignKey(name = "fk_orderline_product"))
+  @OnDelete(action = OnDeleteAction.CASCADE)
   private Product product;
 }

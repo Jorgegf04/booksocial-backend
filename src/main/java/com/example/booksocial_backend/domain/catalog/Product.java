@@ -1,5 +1,9 @@
 package com.example.booksocial_backend.domain.catalog;
 
+import java.util.List;
+
+import com.example.booksocial_backend.domain.commerce.OrderLine;
+
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -57,4 +61,7 @@ public class Product {
   @ManyToOne(fetch = FetchType.LAZY)
   @JoinColumn(name = "edition_id", nullable = false)
   private Edition edition;
+
+  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  private List<OrderLine> orderLines;
 }
