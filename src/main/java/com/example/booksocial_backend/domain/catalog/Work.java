@@ -117,6 +117,7 @@ public class Work {
    * Autores asociados a la obra.
    * Relación muchos a muchos.
    */
+  @Builder.Default
   @ToString.Exclude
   @ManyToMany
   @JoinTable(name = "WORK_AUTHOR", joinColumns = @JoinColumn(name = "work_id"), inverseJoinColumns = @JoinColumn(name = "author_id"))
@@ -125,6 +126,7 @@ public class Work {
   /**
    * Ediciones publicadas de esta obra.
    */
+  @Builder.Default
   @ToString.Exclude
   @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Edition> editions = new ArrayList<>();
@@ -149,6 +151,7 @@ public class Work {
    * y evitar cargar innecesariamente los seguimientos.
    * </p>
    */
+  @Builder.Default
   @JsonIgnore
   @ToString.Exclude
   @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)

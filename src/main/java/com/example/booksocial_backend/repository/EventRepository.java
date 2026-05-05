@@ -2,6 +2,7 @@ package com.example.booksocial_backend.repository;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -25,5 +26,7 @@ public interface EventRepository extends JpaRepository<Event, Long> {
   List<Event> findByDateAfter(LocalDateTime date);
 
   boolean existsByTitle(String title);
+
+  Optional<Event> findByTitle(String title);
 
 }

@@ -51,13 +51,16 @@ public class WorkServiceImpl implements WorkService {
 
     Work saved = workRepository.save(work);
 
-    saved.getAuthors().forEach(author ->
-        authorFollowRepository.findByAuthorId(author.getId()).forEach(follow -> {
-          try {
-            emailService.sendNewWorkNotification(
-                follow.getUser().getEmail(), author.getName(), saved.getTitle());
-          } catch (Exception ignored) {}
-        }));
+    List<Author> savedAuthors = saved.getAuthors();
+    if (savedAuthors != null) {
+      savedAuthors.forEach(author ->
+          authorFollowRepository.findByAuthorId(author.getId()).forEach(follow -> {
+            try {
+              emailService.sendNewWorkNotification(
+                  follow.getUser().getEmail(), author.getName(), saved.getTitle());
+            } catch (Exception ignored) {}
+          }));
+    }
 
     return mapWorkToDTO(saved);
   }
@@ -224,11 +227,11 @@ public class WorkServiceImpl implements WorkService {
     dto.setImg(work.getImg());
     dto.setAverageRating(work.getAverageRating());
 
+    List<Author> authors = work.getAuthors();
     dto.setAuthors(
-        work.getAuthors()
-            .stream()
-            .map(Author::getName)
-            .toList());
+        authors != null
+            ? authors.stream().map(Author::getName).toList()
+            : List.of());
 
     return dto;
   }
