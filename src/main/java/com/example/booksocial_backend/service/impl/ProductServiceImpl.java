@@ -47,7 +47,7 @@ public class ProductServiceImpl implements ProductService {
 
     // Set manual de relación
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new RuntimeException("Edition no encontrada con id: " + request.getEditionId()));
+        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + request.getEditionId()));
 
     product.setEdition(edition);
 
@@ -115,7 +115,7 @@ public class ProductServiceImpl implements ProductService {
     Product updated = modelMapper.map(request, Product.class);
 
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new RuntimeException("Edition no encontrada con id: " + request.getEditionId()));
+        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + request.getEditionId()));
 
     updated.setEdition(edition);
 
@@ -134,7 +134,7 @@ public class ProductServiceImpl implements ProductService {
   public void decreaseStock(Long id, int quantity) {
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
 
     if (quantity <= 0) {
       throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
@@ -186,7 +186,7 @@ public class ProductServiceImpl implements ProductService {
   private Product getProductEntityById(Long id) {
 
     return productRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Producto no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
   }
 
   /**

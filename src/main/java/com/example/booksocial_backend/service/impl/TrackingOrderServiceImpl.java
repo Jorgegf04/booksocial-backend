@@ -46,7 +46,7 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
     tracking.setStatus(request.getTrackingStatus());
     tracking.setDate(LocalDateTime.now());
     Order order = orderRepository.findById(request.getOrderId())
-        .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + request.getOrderId()));
+        .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con id: " + request.getOrderId()));
 
     tracking.setOrder(order);
 
@@ -103,16 +103,16 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
   }
 
   private TrackingOrderResponseDTO mapToDTO(TrackingOrder tracking) {
-
+    Order order = tracking.getOrder();
     return new TrackingOrderResponseDTO(
         tracking.getId(),
         tracking.getStatus(),
-        mapStatusLabel(tracking.getStatus()),
+        tracking.getStatus() != null ? mapStatusLabel(tracking.getStatus()) : null,
         tracking.getDate(),
-        tracking.getOrder().getId(),
+        order != null ? order.getId() : null,
 
-        tracking.getOrder().getUser().getId(),
-        tracking.getOrder().getUser().getUsername(),
+        (order != null && order.getUser() != null) ? order.getUser().getId() : null,
+        (order != null && order.getUser() != null) ? order.getUser().getUsername() : null,
 
         tracking.getStatus() == TrackingOrderStatus.DELIVERED);
   }
@@ -130,7 +130,7 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
   private TrackingOrder getTrackingEntityById(Long id) {
 
     return trackingRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Tracking no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Tracking no encontrado con id: " + id));
   }
 
   /**

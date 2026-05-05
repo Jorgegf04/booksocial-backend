@@ -43,7 +43,7 @@ public class VolumeServiceImpl implements VolumeService {
     Volume volume = modelMapper.map(request, Volume.class);
 
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new RuntimeException("Edición no encontrada"));
+        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada"));
 
     volume.setEdition(edition);
 
@@ -112,7 +112,7 @@ public class VolumeServiceImpl implements VolumeService {
     Volume updated = modelMapper.map(request, Volume.class);
 
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new RuntimeException("Edición no encontrada"));
+        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada"));
 
     updated.setEdition(edition);
 
@@ -151,14 +151,14 @@ public class VolumeServiceImpl implements VolumeService {
    * Convierte Volume → VolumeDTO.
    */
   private VolumeResponseDTO mapToDTO(Volume volume) {
-
+    Edition edition = volume.getEdition();
     return new VolumeResponseDTO(
         volume.getId(),
         volume.getVolumeNumber(),
         volume.getTitle(),
-        volume.getEdition().getId(),
-        volume.getEdition().getIsbn(),
-        volume.getEdition().getWork().getTitle());
+        edition != null ? edition.getId() : null,
+        edition != null ? edition.getIsbn() : null,
+        (edition != null && edition.getWork() != null) ? edition.getWork().getTitle() : null);
   }
 
   /**
@@ -167,7 +167,7 @@ public class VolumeServiceImpl implements VolumeService {
   private Volume getVolumeEntityById(Long id) {
 
     return volumeRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Volumen no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Volumen no encontrado con id: " + id));
   }
 
   /**

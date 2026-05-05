@@ -21,7 +21,6 @@ import lombok.NoArgsConstructor;
 public class OrderLineRequestDTO {
 
   private Long productId;
-  private Long orderId;
   private Integer quantity;
 
 }

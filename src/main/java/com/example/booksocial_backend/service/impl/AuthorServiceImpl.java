@@ -17,6 +17,8 @@ import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.social.AuthorFollow;
 import com.example.booksocial_backend.domain.user.User;
 import com.example.booksocial_backend.exception.AuthorAlreadyExistsException;
+import com.example.booksocial_backend.exception.AuthorNotFoundException;
+import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.repository.AuthorFollowRepository;
 import com.example.booksocial_backend.repository.AuthorRepository;
 import com.example.booksocial_backend.repository.UserRepository;
@@ -162,7 +164,7 @@ public class AuthorServiceImpl implements AuthorService {
     if (authorFollowRepository.existsByUserIdAndAuthorId(userId, authorId)) return;
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado: " + userId));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + userId));
     Author author = getAuthorEntityById(authorId);
 
     authorFollowRepository.save(AuthorFollow.builder()
@@ -190,6 +192,7 @@ public class AuthorServiceImpl implements AuthorService {
   @Transactional(readOnly = true)
   public List<UserResponseDTO> getFollowers(Long authorId) {
     return authorFollowRepository.findByAuthorId(authorId).stream()
+        .filter(af -> af.getUser() != null)
         .map(af -> {
           User u = af.getUser();
           return new UserResponseDTO(u.getId(), u.getUsername(), u.getEmail(),
@@ -265,7 +268,7 @@ public class AuthorServiceImpl implements AuthorService {
 
   private Author getAuthorEntityById(Long id) {
     return authorRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Autor no encontrado con id: " + id));
+        .orElseThrow(() -> new AuthorNotFoundException("Autor no encontrado con id: " + id));
   }
 
   private void validateAuthorRequest(AuthorRequestDTO request) {

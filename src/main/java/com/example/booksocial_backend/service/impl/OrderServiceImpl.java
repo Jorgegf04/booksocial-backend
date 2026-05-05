@@ -52,9 +52,9 @@ public class OrderServiceImpl implements OrderService {
         .map(dto -> {
 
           Product product = productRepository.findById(dto.getProductId())
-              .orElseThrow(() -> new RuntimeException("Producto no encontrado"));
+              .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + dto.getProductId()));
 
-          if (product.getStock() < dto.getQuantity()) {
+          if (product.getStock() == null || product.getStock() < dto.getQuantity()) {
             throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getId());
           }
 
@@ -147,7 +147,7 @@ public class OrderServiceImpl implements OrderService {
 
   private Order getOrderEntityById(Long id) {
     return orderRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Pedido no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con id: " + id));
   }
 
   private void validateOrder(Order order) {

@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
 import com.example.booksocial_backend.DTO.social.*;
+import com.example.booksocial_backend.exception.WorkNotFoundException;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.example.booksocial_backend.domain.social.TrackingWorkStatus;
@@ -55,7 +56,7 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
     }
 
     Work work = workRepository.findById(request.getWorkId())
-        .orElseThrow(() -> new RuntimeException("Obra no encontrada con id: " + request.getWorkId()));
+        .orElseThrow(() -> new WorkNotFoundException("Obra no encontrada con id: " + request.getWorkId()));
 
     TrackingWork tracking = TrackingWork.builder()
         .user(User.builder().id(request.getUserId()).build())
@@ -116,7 +117,7 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
     }
 
     TrackingWork tracking = repository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Seguimiento no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Seguimiento no encontrado con id: " + id));
 
     tracking.setStatus(request.getStatus());
 
@@ -124,18 +125,17 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
   }
 
   private TrackingWorkResponseDTO map(TrackingWork t) {
-
     return new TrackingWorkResponseDTO(
         t.getId(),
 
-        t.getUser().getId(),
-        t.getUser().getUsername(),
+        t.getUser() != null ? t.getUser().getId() : null,
+        t.getUser() != null ? t.getUser().getUsername() : null,
 
-        t.getWork().getId(),
-        t.getWork().getTitle(),
+        t.getWork() != null ? t.getWork().getId() : null,
+        t.getWork() != null ? t.getWork().getTitle() : null,
 
         t.getStatus(),
-        mapStatusLabel(t.getStatus()),
+        t.getStatus() != null ? mapStatusLabel(t.getStatus()) : null,
 
         t.getDate(),
 

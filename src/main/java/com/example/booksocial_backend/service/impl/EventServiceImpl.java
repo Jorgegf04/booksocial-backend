@@ -14,6 +14,7 @@ import com.example.booksocial_backend.domain.user.User;
 
 import com.example.booksocial_backend.repository.EventRepository;
 import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.service.EventService;
 
 import lombok.RequiredArgsConstructor;
@@ -160,18 +161,23 @@ public class EventServiceImpl implements EventService {
   public EventResponseDTO joinEvent(Long eventId, Long userId) {
     Event event = getEventEntityById(eventId);
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + userId));
-    boolean alreadyJoined = event.getUsers().stream().anyMatch(u -> u.getId().equals(userId));
+        .orElseThrow(() -> new UserNotFoundException(userId));
+    List<User> users = event.getUsers() != null ? event.getUsers() : new ArrayList<>();
+    if (event.getUsers() == null) event.setUsers(users);
+    boolean alreadyJoined = users.stream().anyMatch(u -> u.getId().equals(userId));
     if (alreadyJoined) {
       throw new IllegalArgumentException("El usuario ya está inscrito en este evento");
     }
-    event.getUsers().add(user);
+    users.add(user);
     return mapToDTO(eventRepository.save(event));
   }
 
   @Override
   public EventResponseDTO leaveEvent(Long eventId, Long userId) {
     Event event = getEventEntityById(eventId);
+    if (event.getUsers() == null) {
+      throw new IllegalArgumentException("El usuario no está inscrito en este evento");
+    }
     boolean removed = event.getUsers().removeIf(u -> u.getId().equals(userId));
     if (!removed) {
       throw new IllegalArgumentException("El usuario no está inscrito en este evento");
@@ -180,9 +186,8 @@ public class EventServiceImpl implements EventService {
   }
 
   private Event getEventEntityById(Long id) {
-
     return eventRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Evento no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Evento no encontrado con id: " + id));
   }
 
   /**

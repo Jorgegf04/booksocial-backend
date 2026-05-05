@@ -12,6 +12,7 @@ import com.example.booksocial_backend.domain.catalog.Chapter;
 import com.example.booksocial_backend.domain.catalog.Tome;
 import com.example.booksocial_backend.exception.ChapterAlreadyExistsException;
 import com.example.booksocial_backend.exception.ChapterNotFoundException;
+import com.example.booksocial_backend.exception.TomeNotFoundException;
 import com.example.booksocial_backend.repository.ChapterRepository;
 import com.example.booksocial_backend.repository.TomeRepository;
 import com.example.booksocial_backend.service.ChapterService;
@@ -33,7 +34,7 @@ public class ChapterServiceImpl implements ChapterService {
     Chapter chapter = modelMapper.map(request, Chapter.class);
 
     Tome tome = tomeRepository.findById(request.getTomeId())
-        .orElseThrow(() -> new RuntimeException("Tome no encontrado con id: " + request.getTomeId()));
+        .orElseThrow(() -> new TomeNotFoundException(request.getTomeId()));
 
     chapter.setTome(tome);
 
@@ -93,14 +94,14 @@ public class ChapterServiceImpl implements ChapterService {
   }
 
   private ChapterResponseDTO mapToDTO(Chapter chapter) {
-
+    Tome tome = chapter.getTome();
     return new ChapterResponseDTO(
         chapter.getId(),
         chapter.getChapterNumber(),
         chapter.getTitle(),
-        chapter.getTome().getId(),
-        chapter.getTome().getTitle(),
-        chapter.getTome().getEdition().getTitle());
+        tome != null ? tome.getId() : null,
+        tome != null ? tome.getTitle() : null,
+        (tome != null && tome.getEdition() != null) ? tome.getEdition().getTitle() : null);
   }
 
   private Chapter getChapterEntityById(Long id) {

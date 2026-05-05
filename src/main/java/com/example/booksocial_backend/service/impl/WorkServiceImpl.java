@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.exception.AuthorNotFoundException;
+import com.example.booksocial_backend.exception.WorkNotFoundException;
 import com.example.booksocial_backend.DTO.catalog.WorkFilterDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.WorkResponseDTO;
@@ -56,8 +57,10 @@ public class WorkServiceImpl implements WorkService {
       savedAuthors.forEach(author ->
           authorFollowRepository.findByAuthorId(author.getId()).forEach(follow -> {
             try {
-              emailService.sendNewWorkNotification(
-                  follow.getUser().getEmail(), author.getName(), saved.getTitle());
+              if (follow.getUser() != null && follow.getUser().getEmail() != null) {
+                emailService.sendNewWorkNotification(
+                    follow.getUser().getEmail(), author.getName(), saved.getTitle());
+              }
             } catch (Exception ignored) {}
           }));
     }
@@ -242,7 +245,7 @@ public class WorkServiceImpl implements WorkService {
 
   private Work getWorkEntityById(Long id) {
     return workRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Obra no encontrada con id: " + id));
+        .orElseThrow(() -> new WorkNotFoundException("Obra no encontrada con id: " + id));
   }
 
   private List<Author> resolveAuthorsByName(List<String> authorNames) {

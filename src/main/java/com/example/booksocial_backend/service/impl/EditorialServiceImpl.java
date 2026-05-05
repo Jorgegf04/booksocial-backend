@@ -155,9 +155,8 @@ public class EditorialServiceImpl implements EditorialService {
    * Obtiene la entidad Editorial o lanza excepción si no existe.
    */
   private Editorial getEditorialEntityById(Long id) {
-
     return editorialRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Editorial no encontrada con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Editorial no encontrada con id: " + id));
   }
 
   /**

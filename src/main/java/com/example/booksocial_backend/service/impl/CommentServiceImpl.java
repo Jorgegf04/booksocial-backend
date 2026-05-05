@@ -13,6 +13,8 @@ import com.example.booksocial_backend.DTO.social.CommentRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.user.User;
 
+import com.example.booksocial_backend.exception.UserNotFoundException;
+import com.example.booksocial_backend.exception.WorkNotFoundException;
 import com.example.booksocial_backend.repository.CommentRepository;
 import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.repository.WorkRepository;
@@ -50,10 +52,10 @@ public class CommentServiceImpl implements CommentService {
   public CommentResponseDTO createComment(CommentRequestDTO request) {
 
     User user = userRepository.findById(request.getUserId())
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + request.getUserId()));
 
     Work work = workRepository.findById(request.getWorkId())
-        .orElseThrow(() -> new RuntimeException("Obra no encontrada"));
+        .orElseThrow(() -> new WorkNotFoundException("Obra no encontrada con id: " + request.getWorkId()));
 
     Comment comment = new Comment();
 
@@ -76,10 +78,10 @@ public class CommentServiceImpl implements CommentService {
     Comment parent = getCommentEntityById(parentId);
 
     User user = userRepository.findById(request.getUserId())
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + request.getUserId()));
 
     Work work = workRepository.findById(request.getWorkId())
-        .orElseThrow(() -> new RuntimeException("Obra no encontrada"));
+        .orElseThrow(() -> new WorkNotFoundException("Obra no encontrada con id: " + request.getWorkId()));
 
     if (!parent.getWork().getId().equals(request.getWorkId())) {
       throw new IllegalArgumentException("La respuesta debe pertenecer a la misma obra");
@@ -170,7 +172,10 @@ public class CommentServiceImpl implements CommentService {
    * Incluye únicamente un nivel de respuestas para evitar recursividad infinita.
    */
   private CommentResponseDTO mapToDTO(Comment comment) {
+    return mapToDTOWithDepth(comment, 0);
+  }
 
+  private CommentResponseDTO mapToDTOWithDepth(Comment comment, int depth) {
     return new CommentResponseDTO(
         comment.getId(),
         comment.getContent(),
@@ -179,52 +184,31 @@ public class CommentServiceImpl implements CommentService {
         comment.getUpdatedAt(),
         comment.getEdited(),
 
-        comment.getUser().getId(),
-        comment.getUser().getUsername(),
+        comment.getUser() != null ? comment.getUser().getId() : null,
+        comment.getUser() != null ? comment.getUser().getUsername() : null,
 
-        comment.getWork().getId(),
-        comment.getWork().getTitle(),
+        comment.getWork() != null ? comment.getWork().getId() : null,
+        comment.getWork() != null ? comment.getWork().getTitle() : null,
 
         comment.getParent() != null ? comment.getParent().getId() : null,
 
-        mapReplies(comment.getReplies()));
+        mapReplies(comment.getReplies(), depth + 1));
   }
 
-  /**
-   * Mapea las respuestas de un comentario de forma recursiva (árbol completo).
-   */
-  private List<CommentResponseDTO> mapReplies(List<Comment> replies) {
+  private static final int MAX_REPLY_DEPTH = 3;
 
-    if (replies == null || replies.isEmpty()) {
+  private List<CommentResponseDTO> mapReplies(List<Comment> replies, int depth) {
+    if (replies == null || replies.isEmpty() || depth > MAX_REPLY_DEPTH) {
       return List.of();
     }
-
     return replies.stream()
-        .map(reply -> new CommentResponseDTO(
-            reply.getId(),
-            reply.getContent(),
-            reply.getDate(),
-
-            reply.getUpdatedAt(),
-            reply.getEdited(),
-
-            reply.getUser().getId(),
-            reply.getUser().getUsername(),
-
-            reply.getWork().getId(),
-            reply.getWork().getTitle(),
-
-            reply.getParent() != null ? reply.getParent().getId() : null,
-
-            mapReplies(reply.getReplies())
-        ))
+        .map(reply -> mapToDTOWithDepth(reply, depth))
         .toList();
   }
 
   private Comment getCommentEntityById(Long id) {
-
     return commentRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Comentario no encontrado con id: " + id));
+        .orElseThrow(() -> new IllegalArgumentException("Comentario no encontrado con id: " + id));
   }
 
   /**
@@ -254,8 +238,8 @@ public class CommentServiceImpl implements CommentService {
 
     Comment comment = getCommentEntityById(commentId);
 
-    if (!comment.getUser().getId().equals(request.getUserId())) {
-      throw new RuntimeException("No tienes permiso para editar este comentario");
+    if (comment.getUser() == null || !comment.getUser().getId().equals(request.getUserId())) {
+      throw new IllegalArgumentException("No tienes permiso para editar este comentario");
     }
 
     comment.setContent(request.getContent().trim());

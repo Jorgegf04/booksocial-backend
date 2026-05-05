@@ -47,7 +47,7 @@ public class ReactionServiceImpl implements ReactionService {
 
       Reaction existing = reactionRepository
           .findByUserIdAndCommentId(request.getUserId(), request.getCommentId())
-          .orElseThrow();
+          .orElseThrow(() -> new IllegalArgumentException("Reacción no encontrada"));
 
       String username = existing.getUser().getUsername();
 
@@ -101,7 +101,7 @@ public class ReactionServiceImpl implements ReactionService {
 
     Reaction reaction = reactionRepository
         .findByUserIdAndCommentId(userId, commentId)
-        .orElseThrow(() -> new RuntimeException("No existe reacción"));
+        .orElseThrow(() -> new IllegalArgumentException("No existe reacción para ese usuario y comentario"));
 
     reactionRepository.delete(reaction);
   }

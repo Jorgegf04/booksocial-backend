@@ -114,6 +114,15 @@ public class GlobalExceptionHandler {
   }
 
   // =========================
+  // ILLEGAL ARGUMENT
+  // =========================
+
+  @ExceptionHandler(IllegalArgumentException.class)
+  public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  // =========================
   // GENERIC
   // =========================
 

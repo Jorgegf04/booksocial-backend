@@ -2,7 +2,6 @@ package com.example.booksocial_backend.service.impl;
 
 import java.util.List;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,7 +39,6 @@ public class EditionServiceImpl implements EditionService {
   private final EditionRepository editionRepository;
   private final WorkRepository workRepository;
   private final EditorialRepository editorialRepository;
-  private final ModelMapper modelMapper;
 
   @Override
   public EditionResponseDTO createEdition(EditionRequestDTO request) {
@@ -112,7 +110,22 @@ public class EditionServiceImpl implements EditionService {
 
     Edition existing = getEditionEntityById(id);
 
-    Edition updated = modelMapper.map(request, Edition.class);
+    if (request.getIsbn() == null || request.getIsbn().trim().isEmpty()) {
+      throw new IllegalArgumentException("El ISBN es obligatorio");
+    }
+    if (request.getWorkId() == null) {
+      throw new IllegalArgumentException("La edición debe estar asociada a una obra válida");
+    }
+    if (request.getEditorialId() == null) {
+      throw new IllegalArgumentException("La edición debe estar asociada a una editorial válida");
+    }
+
+    String normalizedIsbn = request.getIsbn().trim();
+
+    if (!existing.getIsbn().equalsIgnoreCase(normalizedIsbn)
+        && editionRepository.findByIsbn(normalizedIsbn).isPresent()) {
+      throw new IllegalArgumentException("Ya existe otra edición con ese ISBN");
+    }
 
     Work work = workRepository.findById(request.getWorkId())
         .orElseThrow(() -> new RuntimeException("Work no encontrada con id: " + request.getWorkId()));
@@ -120,17 +133,10 @@ public class EditionServiceImpl implements EditionService {
     Editorial editorial = editorialRepository.findById(request.getEditorialId())
         .orElseThrow(() -> new RuntimeException("Editorial no encontrada con id: " + request.getEditorialId()));
 
-    validateEdition(updated);
-
-    String normalizedIsbn = updated.getIsbn().trim();
-
-    if (!existing.getIsbn().equalsIgnoreCase(normalizedIsbn)
-        && editionRepository.findByIsbn(normalizedIsbn).isPresent()) {
-      throw new IllegalArgumentException("Ya existe otra edición con ese ISBN");
-    }
-
     existing.setIsbn(normalizedIsbn);
-    existing.setEditionDate(updated.getEditionDate());
+    existing.setEditionDate(request.getEditionDate());
+    existing.setTitle(request.getTitle());
+    existing.setTotalTomes(request.getTotalTomes());
     existing.setWork(work);
     existing.setEditorial(editorial);
 
@@ -180,27 +186,4 @@ public class EditionServiceImpl implements EditionService {
         .orElseThrow(() -> new RuntimeException("Edición no encontrada con id: " + id));
   }
 
-  /**
-   * Valida los datos básicos de una edición.
-   *
-   * @param edition edición a validar
-   */
-  private void validateEdition(Edition edition) {
-
-    if (edition == null) {
-      throw new IllegalArgumentException("La edición no puede ser nula");
-    }
-
-    if (edition.getIsbn() == null || edition.getIsbn().trim().isEmpty()) {
-      throw new IllegalArgumentException("El ISBN es obligatorio");
-    }
-
-    if (edition.getWork() == null || edition.getWork().getId() == null) {
-      throw new IllegalArgumentException("La edición debe estar asociada a una obra válida");
-    }
-
-    if (edition.getEditorial() == null || edition.getEditorial().getId() == null) {
-      throw new IllegalArgumentException("La edición debe estar asociada a una editorial válida");
-    }
-  }
 }

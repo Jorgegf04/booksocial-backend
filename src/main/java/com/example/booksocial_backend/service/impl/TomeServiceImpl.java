@@ -12,6 +12,7 @@ import com.example.booksocial_backend.DTO.catalog.TomeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.TomeRepository;
+import com.example.booksocial_backend.exception.TomeNotFoundException;
 import com.example.booksocial_backend.service.TomeService;
 
 import lombok.RequiredArgsConstructor;
@@ -152,7 +153,7 @@ public class TomeServiceImpl implements TomeService {
   private void updateEditionTotalTomes(Long editionId) {
 
     Edition edition = editionRepository.findById(editionId)
-        .orElseThrow(() -> new RuntimeException("Edition no encontrada"));
+        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + editionId));
 
     int total = tomeRepository.findByEditionId(editionId).size();
 
@@ -185,7 +186,7 @@ public class TomeServiceImpl implements TomeService {
   private Tome getTomeEntityById(Long id) {
 
     return tomeRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Tomo no encontrado con id: " + id));
+        .orElseThrow(() -> new TomeNotFoundException("Tomo no encontrado con id: " + id));
   }
 
   /**

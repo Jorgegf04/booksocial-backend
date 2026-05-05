@@ -48,7 +48,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   public void cancelSubscription(Long userId) {
 
     Subscription subscription = subscriptionRepository.findByUserId(userId)
-        .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+        .orElseThrow(() -> new IllegalArgumentException("Suscripción no encontrada para el usuario: " + userId));
 
     subscription.setActivated(false);
   }
@@ -58,7 +58,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   public SubscriptionResponseDTO getSubscriptionByUserId(Long userId) {
 
     Subscription subscription = subscriptionRepository.findByUserId(userId)
-        .orElseThrow(() -> new RuntimeException("Suscripción no encontrada"));
+        .orElseThrow(() -> new IllegalArgumentException("Suscripción no encontrada para el usuario: " + userId));
 
     return mapToDTO(subscription);
   }
@@ -70,12 +70,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   }
 
   private SubscriptionResponseDTO mapToDTO(Subscription subscription) {
-
     return new SubscriptionResponseDTO(
         subscription.getId(),
         subscription.getStartDate(),
         subscription.getEndDate(),
         subscription.getActivated(),
-        subscription.getUser().getId());
+        subscription.getUser() != null ? subscription.getUser().getId() : null);
   }
 }

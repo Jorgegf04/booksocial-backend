@@ -16,6 +16,7 @@ import com.example.booksocial_backend.domain.user.User;
 import com.example.booksocial_backend.domain.user.UserFollow;
 import com.example.booksocial_backend.repository.UserFollowRepository;
 import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -89,7 +90,7 @@ public class UserServiceImpl implements UserService {
   public UserResponseDTO getUserById(Long id) {
 
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado con id: " + id));
+        .orElseThrow(() -> new UserNotFoundException(id));
 
     return mapToDTO(user);
   }
@@ -99,7 +100,7 @@ public class UserServiceImpl implements UserService {
   public UserResponseDTO getUserByUsername(String username) {
 
     User user = userRepository.findByUsername(username)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     return mapToDTO(user);
   }
@@ -144,7 +145,7 @@ public class UserServiceImpl implements UserService {
     validateUpdateRequest(request);
 
     User existing = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     String username = request.getUsername().trim();
     String email = request.getEmail().trim().toLowerCase();
@@ -176,7 +177,7 @@ public class UserServiceImpl implements UserService {
   public void deleteUser(Long id) {
 
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     userRepository.delete(user);
   }
@@ -189,7 +190,7 @@ public class UserServiceImpl implements UserService {
   public UserResponseDTO setUserActive(Long id, Boolean active) {
 
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     user.setActive(active);
 
@@ -286,10 +287,10 @@ public class UserServiceImpl implements UserService {
     }
 
     User follower = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     User following = userRepository.findById(targetId)
-        .orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario objetivo no encontrado"));
 
     if (userFollowRepository.existsByFollowerAndFollowing(follower, following)) {
       throw new IllegalArgumentException("Ya sigues a este usuario");
@@ -308,14 +309,14 @@ public class UserServiceImpl implements UserService {
   public void unfollowUser(Long userId, Long targetId) {
 
     User follower = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     User following = userRepository.findById(targetId)
-        .orElseThrow(() -> new RuntimeException("Usuario objetivo no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario objetivo no encontrado"));
 
     UserFollow relation = userFollowRepository
         .findByFollowerAndFollowing(follower, following)
-        .orElseThrow(() -> new RuntimeException("No existe la relación"));
+        .orElseThrow(() -> new IllegalArgumentException("No sigues a este usuario"));
 
     userFollowRepository.delete(relation);
   }
@@ -325,7 +326,7 @@ public class UserServiceImpl implements UserService {
   public List<UserResponseDTO> getFollowers(Long userId) {
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     return userFollowRepository.findByFollowing(user)
         .stream()
@@ -338,7 +339,7 @@ public class UserServiceImpl implements UserService {
   public List<UserResponseDTO> getFollowing(Long userId) {
 
     User user = userRepository.findById(userId)
-        .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
 
     return userFollowRepository.findByFollower(user)
         .stream()
