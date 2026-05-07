@@ -62,6 +62,6 @@ public class Product {
   @JoinColumn(name = "edition_id", nullable = false)
   private Edition edition;
 
-  @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   private List<OrderLine> orderLines;
 }

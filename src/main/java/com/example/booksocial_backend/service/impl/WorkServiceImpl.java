@@ -2,8 +2,11 @@ package com.example.booksocial_backend.service.impl;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -30,6 +33,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class WorkServiceImpl implements WorkService {
 
+  private static final Logger log = LoggerFactory.getLogger(WorkServiceImpl.class);
+
   private final WorkRepository workRepository;
   private final ModelMapper modelMapper;
   private final AuthorRepository authorRepository;
@@ -39,6 +44,7 @@ public class WorkServiceImpl implements WorkService {
   @Override
   public WorkResponseDTO createWork(WorkRequestDTO request) {
 
+    log.info("[WORK] [CREATE] [START] title='{}'", request != null ? request.getTitle() : "null");
     validateWorkRequest(request);
 
     Work work = modelMapper.map(request, Work.class);
@@ -50,7 +56,8 @@ public class WorkServiceImpl implements WorkService {
       work.setAuthors(resolveAuthorsByName(request.getAuthors()));
     }
 
-    Work saved = workRepository.save(work);
+    Work saved = Objects.requireNonNull(workRepository.save(work));
+    log.info("[WORK] [CREATE] [SUCCESS] id={} title='{}'", saved.getId(), saved.getTitle());
 
     List<Author> savedAuthors = saved.getAuthors();
     if (savedAuthors != null) {
@@ -61,7 +68,9 @@ public class WorkServiceImpl implements WorkService {
                 emailService.sendNewWorkNotification(
                     follow.getUser().getEmail(), author.getName(), saved.getTitle());
               }
-            } catch (Exception ignored) {}
+            } catch (Exception e) {
+              log.warn("[WORK] [EMAIL] Error al notificar a seguidor: {}", e.getMessage());
+            }
           }));
     }
 
@@ -105,7 +114,9 @@ public class WorkServiceImpl implements WorkService {
                   emailService.sendNewWorkNotification(
                       follow.getUser().getEmail(), author.getName(), work.getTitle());
                 }
-              } catch (Exception ignored) {}
+              } catch (Exception e) {
+              log.warn("[WORK] [EMAIL] Error al notificar a seguidor: {}", e.getMessage());
+            }
             }));
       }
     });
@@ -185,6 +196,7 @@ public class WorkServiceImpl implements WorkService {
   @Override
   public WorkResponseDTO updateWork(Long id, WorkRequestDTO request) {
 
+    log.info("[WORK] [UPDATE] [START] id={}", id);
     Work existing = getWorkEntityById(id);
 
     if (request.getTitle() != null) {
@@ -218,12 +230,17 @@ public class WorkServiceImpl implements WorkService {
 
     validateWork(existing);
 
-    return mapWorkToDTO(workRepository.save(existing));
+    Work saved = Objects.requireNonNull(workRepository.save(existing));
+    log.info("[WORK] [UPDATE] [SUCCESS] id={} title='{}'", saved.getId(), saved.getTitle());
+    return mapWorkToDTO(saved);
   }
 
   @Override
   public void deleteWork(Long id) {
-    workRepository.delete(getWorkEntityById(id));
+    log.info("[WORK] [DELETE] [START] id={}", id);
+    Work work = getWorkEntityById(id);
+    workRepository.delete(Objects.requireNonNull(work));
+    log.info("[WORK] [DELETE] [SUCCESS] id={} title='{}'", id, work.getTitle());
   }
 
   // =========================
@@ -284,6 +301,10 @@ public class WorkServiceImpl implements WorkService {
 
     if (request.getGenre() == null) {
       throw new IllegalArgumentException("El género es obligatorio");
+    }
+
+    if (request.getType() == null) {
+      throw new IllegalArgumentException("El tipo de obra es obligatorio");
     }
   }
 

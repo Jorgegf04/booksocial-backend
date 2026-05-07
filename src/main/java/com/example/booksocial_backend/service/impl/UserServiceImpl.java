@@ -16,8 +16,12 @@ import com.example.booksocial_backend.domain.user.User;
 import com.example.booksocial_backend.domain.user.UserFollow;
 import com.example.booksocial_backend.repository.UserFollowRepository;
 import com.example.booksocial_backend.repository.UserRepository;
+import com.example.booksocial_backend.exception.UserAlreadyExistsException;
 import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.service.UserService;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +47,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class UserServiceImpl implements UserService {
 
+  private static final Logger log = LoggerFactory.getLogger(UserServiceImpl.class);
+
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final UserFollowRepository userFollowRepository;
@@ -59,12 +65,16 @@ public class UserServiceImpl implements UserService {
     String username = request.getUsername().trim();
     String email = request.getEmail().trim().toLowerCase();
 
+    log.info("[USER] [CREATE] [START] username='{}'", username);
+
     if (userRepository.existsByUsername(username)) {
-      throw new IllegalArgumentException("El username ya existe");
+      log.warn("[USER] [CREATE] [CONFLICT] Username ya existe: '{}'", username);
+      throw new UserAlreadyExistsException("El username '" + username + "' ya está en uso");
     }
 
     if (userRepository.existsByEmail(email)) {
-      throw new IllegalArgumentException("El email ya está registrado");
+      log.warn("[USER] [CREATE] [CONFLICT] Email ya existe: '{}'", email);
+      throw new UserAlreadyExistsException("El email '" + email + "' ya está registrado");
     }
 
     User user = User.builder()
@@ -142,30 +152,36 @@ public class UserServiceImpl implements UserService {
   @Override
   public UserResponseDTO updateUser(Long id, UpdateUserRequestDTO request) {
 
-    validateUpdateRequest(request);
+    if (request == null) throw new IllegalArgumentException("Datos de actualización inválidos");
 
     User existing = userRepository.findById(id)
-        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + id));
 
-    String username = request.getUsername().trim();
-    String email = request.getEmail().trim().toLowerCase();
+    log.info("[USER] [UPDATE] [START] id={}", id);
 
-    if (!existing.getUsername().equalsIgnoreCase(username)
-        && userRepository.existsByUsername(username)) {
-      throw new IllegalArgumentException("El username ya existe");
+    if (request.getUsername() != null && !request.getUsername().isBlank()) {
+      String username = request.getUsername().trim();
+      if (!existing.getUsername().equalsIgnoreCase(username) && userRepository.existsByUsername(username)) {
+        log.warn("[USER] [UPDATE] [CONFLICT] Username ya existe: '{}'", username);
+        throw new UserAlreadyExistsException("El username '" + username + "' ya está en uso");
+      }
+      existing.setUsername(username);
     }
 
-    if (!existing.getEmail().equalsIgnoreCase(email)
-        && userRepository.existsByEmail(email)) {
-      throw new IllegalArgumentException("El email ya está registrado");
+    if (request.getEmail() != null && !request.getEmail().isBlank()) {
+      String email = request.getEmail().trim().toLowerCase();
+      if (!existing.getEmail().equalsIgnoreCase(email) && userRepository.existsByEmail(email)) {
+        log.warn("[USER] [UPDATE] [CONFLICT] Email ya existe: '{}'", email);
+        throw new UserAlreadyExistsException("El email '" + email + "' ya está registrado");
+      }
+      existing.setEmail(email);
     }
 
-    existing.setUsername(username);
-    existing.setEmail(email);
-    existing.setName(request.getName());
-    existing.setSecondName(request.getSecondName());
-    existing.setImg(request.getImg());
+    if (request.getName() != null) existing.setName(request.getName());
+    if (request.getSecondName() != null) existing.setSecondName(request.getSecondName());
+    if (request.getImg() != null) existing.setImg(request.getImg());
 
+    log.info("[USER] [UPDATE] [SUCCESS] id={}", id);
     return mapToDTO(userRepository.save(existing));
   }
 
@@ -177,9 +193,12 @@ public class UserServiceImpl implements UserService {
   public void deleteUser(Long id) {
 
     User user = userRepository.findById(id)
-        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado"));
+        .orElseThrow(() -> new UserNotFoundException("Usuario no encontrado con id: " + id));
 
-    userRepository.delete(user);
+    log.info("[USER] [DELETE] [START] id={} username='{}'", id, user.getUsername());
+    user.setActive(false);
+    userRepository.save(user);
+    log.info("[USER] [DELETE] [SUCCESS] Borrado lógico aplicado a id={}", id);
   }
 
   // ==============================
@@ -238,30 +257,15 @@ public class UserServiceImpl implements UserService {
     }
   }
 
-  private void validateUpdateRequest(UpdateUserRequestDTO request) {
-
-    if (request == null) {
-      throw new IllegalArgumentException("Datos de actualización inválidos");
-    }
-
-    if (request.getUsername() == null || request.getUsername().trim().isEmpty()) {
-      throw new IllegalArgumentException("El username es obligatorio");
-    }
-
-    if (request.getEmail() == null || request.getEmail().trim().isEmpty()) {
-      throw new IllegalArgumentException("El email es obligatorio");
-    }
-  }
-
   @Override
   public void registerUser(RegisterRequest request) {
 
     if (userRepository.existsByUsername(request.getUsername())) {
-      throw new IllegalArgumentException("El username ya existe");
+      throw new UserAlreadyExistsException("El username '" + request.getUsername() + "' ya está en uso");
     }
 
     if (userRepository.existsByEmail(request.getEmail())) {
-      throw new IllegalArgumentException("El email ya existe");
+      throw new UserAlreadyExistsException("El email '" + request.getEmail() + "' ya está registrado");
     }
 
     User user = new User();

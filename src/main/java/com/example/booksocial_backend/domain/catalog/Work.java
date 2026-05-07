@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.example.booksocial_backend.domain.social.Comment;
 import com.example.booksocial_backend.domain.social.TrackingWork;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
@@ -156,4 +157,10 @@ public class Work {
   @ToString.Exclude
   @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<TrackingWork> trackingWorks = new ArrayList<>();
+
+  @Builder.Default
+  @JsonIgnore
+  @ToString.Exclude
+  @OneToMany(mappedBy = "work", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+  private List<Comment> comments = new ArrayList<>();
 }

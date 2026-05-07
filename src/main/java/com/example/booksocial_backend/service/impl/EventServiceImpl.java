@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,9 +14,10 @@ import com.example.booksocial_backend.DTO.social.EventResponseDTO;
 import com.example.booksocial_backend.domain.social.Event;
 import com.example.booksocial_backend.domain.user.User;
 
+import com.example.booksocial_backend.exception.EventNotFoundException;
+import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.repository.EventRepository;
 import com.example.booksocial_backend.repository.UserRepository;
-import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.service.EventService;
 
 import lombok.RequiredArgsConstructor;
@@ -37,14 +40,20 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class EventServiceImpl implements EventService {
 
+  private static final Logger log = LoggerFactory.getLogger(EventServiceImpl.class);
+
   private final EventRepository eventRepository;
   private final UserRepository userRepository;
 
   @Override
   public EventResponseDTO createEvent(EventRequestDTO request) {
 
+    if (request == null) throw new IllegalArgumentException("La request del evento no puede ser nula");
+    log.info("[EVENT] [CREATE] [START] title='{}'", request.getTitle());
     Event event = new Event();
 
+    if (request.getTitle() == null || request.getTitle().isBlank())
+      throw new IllegalArgumentException("El título del evento es obligatorio");
     event.setTitle(request.getTitle().trim());
     event.setDescription(request.getDescription());
     event.setImg(request.getImg());
@@ -106,12 +115,14 @@ public class EventServiceImpl implements EventService {
   @Override
   public EventResponseDTO updateEvent(Long id, EventRequestDTO request) {
 
+    log.info("[EVENT] [UPDATE] [START] id={}", id);
     Event existing = getEventEntityById(id);
 
-    existing.setTitle(request.getTitle().trim());
-    existing.setDescription(request.getDescription());
+    if (request.getTitle() != null && !request.getTitle().isBlank())
+      existing.setTitle(request.getTitle().trim());
+    if (request.getDescription() != null) existing.setDescription(request.getDescription());
     if (request.getImg() != null) existing.setImg(request.getImg());
-    existing.setDate(request.getDate());
+    if (request.getDate() != null) existing.setDate(request.getDate());
 
     // ✔ CORRECTO: NO reemplazar lista → modificarla
     if (request.getUserIds() != null) {
@@ -134,7 +145,9 @@ public class EventServiceImpl implements EventService {
   @Override
   public void deleteEvent(Long id) {
 
+    log.info("[EVENT] [DELETE] [START] id={}", id);
     eventRepository.delete(getEventEntityById(id));
+    log.info("[EVENT] [DELETE] [SUCCESS] id={}", id);
   }
 
   private EventResponseDTO mapToDTO(Event event) {
@@ -190,7 +203,7 @@ public class EventServiceImpl implements EventService {
 
   private Event getEventEntityById(Long id) {
     return eventRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Evento no encontrado con id: " + id));
+        .orElseThrow(() -> new EventNotFoundException(id));
   }
 
   /**

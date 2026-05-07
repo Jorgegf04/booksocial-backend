@@ -3,11 +3,14 @@ package com.example.booksocial_backend.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
 import com.example.booksocial_backend.DTO.social.*;
+import com.example.booksocial_backend.exception.TrackingWorkAlreadyExistsException;
+import com.example.booksocial_backend.exception.TrackingWorkNotFoundException;
 import com.example.booksocial_backend.exception.WorkNotFoundException;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.social.TrackingWork;
@@ -43,6 +46,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class TrackingWorkServiceImpl implements TrackingWorkService {
 
+  private static final Logger log = LoggerFactory.getLogger(TrackingWorkServiceImpl.class);
+
   private final TrackingWorkRepository repository; // ✔ CORRECTO
   private final WorkRepository workRepository;
 
@@ -50,9 +55,10 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
   public TrackingWorkResponseDTO create(TrackingWorkRequestDTO request) {
 
     validateRequest(request);
+    log.info("[TRACKING_WORK] [CREATE] [START] userId={} workId={}", request.getUserId(), request.getWorkId());
 
     if (repository.existsByUserIdAndWorkId(request.getUserId(), request.getWorkId())) {
-      throw new IllegalArgumentException("El usuario ya sigue esta obra");
+      throw new TrackingWorkAlreadyExistsException(request.getUserId(), request.getWorkId());
     }
 
     Work work = workRepository.findById(request.getWorkId())
@@ -106,7 +112,9 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
   @Override
   public void delete(Long id) {
 
+    log.info("[TRACKING_WORK] [DELETE] [START] id={}", id);
     repository.deleteById(id);
+    log.info("[TRACKING_WORK] [DELETE] [SUCCESS] id={}", id);
   }
 
   @Override
@@ -116,8 +124,9 @@ public class TrackingWorkServiceImpl implements TrackingWorkService {
       throw new IllegalArgumentException("El estado es obligatorio");
     }
 
+    log.info("[TRACKING_WORK] [UPDATE_STATUS] [START] id={} status={}", id, request.getStatus());
     TrackingWork tracking = repository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Seguimiento no encontrado con id: " + id));
+        .orElseThrow(() -> new TrackingWorkNotFoundException(id));
 
     tracking.setStatus(request.getStatus());
 

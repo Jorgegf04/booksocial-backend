@@ -4,6 +4,8 @@ import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +15,7 @@ import com.example.booksocial_backend.DTO.social.CommentRequestDTO;
 import com.example.booksocial_backend.domain.catalog.Work;
 import com.example.booksocial_backend.domain.user.User;
 
+import com.example.booksocial_backend.exception.CommentNotFoundException;
 import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.exception.WorkNotFoundException;
 import com.example.booksocial_backend.repository.CommentRepository;
@@ -43,6 +46,8 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 @Transactional
 public class CommentServiceImpl implements CommentService {
+
+  private static final Logger log = LoggerFactory.getLogger(CommentServiceImpl.class);
 
   private final CommentRepository commentRepository;
   private final UserRepository userRepository;
@@ -160,10 +165,10 @@ public class CommentServiceImpl implements CommentService {
 
   @Override
   public void deleteComment(Long id) {
-
+    log.info("[COMMENT] [DELETE] [START] id={}", id);
     Comment comment = getCommentEntityById(id);
-
     commentRepository.delete(comment);
+    log.info("[COMMENT] [DELETE] [SUCCESS] id={}", id);
   }
 
   /**
@@ -208,7 +213,7 @@ public class CommentServiceImpl implements CommentService {
 
   private Comment getCommentEntityById(Long id) {
     return commentRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Comentario no encontrado con id: " + id));
+        .orElseThrow(() -> new CommentNotFoundException(id));
   }
 
   /**

@@ -71,7 +71,7 @@ public class Editorial {
    * La clave foránea reside en la tabla de ediciones.
    */
   @ToString.Exclude
-  @OneToMany(mappedBy = "editorial", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+  @OneToMany(mappedBy = "editorial", fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE })
   private List<Edition> editions = new ArrayList<>();
 
 }

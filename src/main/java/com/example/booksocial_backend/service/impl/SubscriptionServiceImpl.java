@@ -2,6 +2,8 @@ package com.example.booksocial_backend.service.impl;
 
 import java.time.LocalDate;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -9,7 +11,8 @@ import com.example.booksocial_backend.DTO.user.SubscriptionRequestDTO;
 import com.example.booksocial_backend.DTO.user.SubscriptionResponseDTO;
 import com.example.booksocial_backend.domain.user.Subscription;
 import com.example.booksocial_backend.domain.user.User;
-
+import com.example.booksocial_backend.exception.SubscriptionAlreadyActiveException;
+import com.example.booksocial_backend.exception.SubscriptionNotFoundException;
 import com.example.booksocial_backend.repository.SubscriptionRepository;
 import com.example.booksocial_backend.service.SubscriptionService;
 
@@ -20,13 +23,16 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class SubscriptionServiceImpl implements SubscriptionService {
 
+  private static final Logger log = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
+
   private final SubscriptionRepository subscriptionRepository;
 
   @Override
   public SubscriptionResponseDTO activateSubscription(SubscriptionRequestDTO request) {
 
+    log.info("[SUBSCRIPTION] [ACTIVATE] [START] userId={}", request.getUserId());
     if (subscriptionRepository.existsByUserIdAndActivatedTrue(request.getUserId())) {
-      throw new IllegalArgumentException("El usuario ya tiene una suscripción activa");
+      throw new SubscriptionAlreadyActiveException(request.getUserId());
     }
 
     Subscription subscription = new Subscription();
@@ -47,10 +53,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   @Override
   public void cancelSubscription(Long userId) {
 
+    log.info("[SUBSCRIPTION] [CANCEL] [START] userId={}", userId);
     Subscription subscription = subscriptionRepository.findByUserId(userId)
-        .orElseThrow(() -> new IllegalArgumentException("Suscripción no encontrada para el usuario: " + userId));
+        .orElseThrow(() -> new SubscriptionNotFoundException(userId));
 
     subscription.setActivated(false);
+    log.info("[SUBSCRIPTION] [CANCEL] [SUCCESS] userId={}", userId);
   }
 
   @Override
@@ -58,7 +66,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   public SubscriptionResponseDTO getSubscriptionByUserId(Long userId) {
 
     Subscription subscription = subscriptionRepository.findByUserId(userId)
-        .orElseThrow(() -> new IllegalArgumentException("Suscripción no encontrada para el usuario: " + userId));
+        .orElseThrow(() -> new SubscriptionNotFoundException(userId));
 
     return mapToDTO(subscription);
   }

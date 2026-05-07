@@ -92,13 +92,15 @@ public class Comment {
   /**
    * Relacion con las respuestas
    */
+  @Builder.Default
   @ToString.Exclude
-  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
   private List<Comment> replies = new ArrayList<>();
 
   /**
    * Reacciones de un comentario
    */
+  @Builder.Default
   @OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
   @ToString.Exclude
   private List<Reaction> reactions = new ArrayList<>();

@@ -2,54 +2,43 @@ package com.example.booksocial_backend.exception;
 
 import java.time.LocalDateTime;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 
 /**
  * Manejador global de excepciones para la API REST de BookSocial.
- *
- * <p>
- * Captura las excepciones de dominio y las convierte en respuestas HTTP
- * estructuradas usando {@link ExceptionBody}. Centraliza el tratamiento de
- * errores
- * evitando duplicar código en cada controlador.
- * </p>
- *
- * <p>
- * Excepciones contempladas:
- * </p>
- * <ul>
- * <li>Entidades no encontradas → 404 NOT FOUND</li>
- * <li>Entidades duplicadas y errores de validación → 400 BAD REQUEST</li>
- * <li>JSON mal formado → 400 BAD REQUEST</li>
- * <li>Cualquier otra excepción → 500 INTERNAL SERVER ERROR</li>
- * </ul>
- *
- * @author Jorge
- * @version 1.4
- * @since 2026-04-22
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+  private static final Logger log = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
   // =========================
   // USER
   // =========================
 
   @ExceptionHandler(UserNotFoundException.class)
-  public ResponseEntity<?> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleUserNotFound(UserNotFoundException ex, HttpServletRequest request) {
+    log.warn("[USER] [READ] [NOT_FOUND] {}", ex.getMessage());
     return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 
   @ExceptionHandler(UserAlreadyExistsException.class)
-  public ResponseEntity<?> handleUserExists(UserAlreadyExistsException ex, HttpServletRequest request) {
-    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  public ResponseEntity<ExceptionBody> handleUserExists(UserAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[USER] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
   }
 
   // =========================
@@ -57,8 +46,15 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(AuthorNotFoundException.class)
-  public ResponseEntity<?> handleAuthorNotFound(AuthorNotFoundException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleAuthorNotFound(AuthorNotFoundException ex, HttpServletRequest request) {
+    log.warn("[AUTHOR] [READ] [NOT_FOUND] {}", ex.getMessage());
     return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(AuthorAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleAuthorExists(AuthorAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[AUTHOR] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
   }
 
   // =========================
@@ -66,7 +62,172 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(WorkNotFoundException.class)
-  public ResponseEntity<?> handleWorkNotFound(WorkNotFoundException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleWorkNotFound(WorkNotFoundException ex, HttpServletRequest request) {
+    log.warn("[WORK] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  // =========================
+  // EDITION / EDITORIAL / VOLUME / PRODUCT
+  // =========================
+
+  @ExceptionHandler(EditionNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleEditionNotFound(EditionNotFoundException ex, HttpServletRequest request) {
+    log.warn("[EDITION] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(EditorialNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleEditorialNotFound(EditorialNotFoundException ex, HttpServletRequest request) {
+    log.warn("[EDITORIAL] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(VolumeNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleVolumeNotFound(VolumeNotFoundException ex, HttpServletRequest request) {
+    log.warn("[VOLUME] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(ProductNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleProductNotFound(ProductNotFoundException ex, HttpServletRequest request) {
+    log.warn("[PRODUCT] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  // =========================
+  // ORDER / ORDER LINE
+  // =========================
+
+  @ExceptionHandler(OrderNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleOrderNotFound(OrderNotFoundException ex, HttpServletRequest request) {
+    log.warn("[ORDER] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(OrderLineNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleOrderLineNotFound(OrderLineNotFoundException ex, HttpServletRequest request) {
+    log.warn("[ORDER_LINE] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  // =========================
+  // COMMENT / REACTION
+  // =========================
+
+  @ExceptionHandler(CommentNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleCommentNotFound(CommentNotFoundException ex, HttpServletRequest request) {
+    log.warn("[COMMENT] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(ReactionNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleReactionNotFound(ReactionNotFoundException ex, HttpServletRequest request) {
+    log.warn("[REACTION] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  // =========================
+  // SUBSCRIPTION / EVENT / TRACKING
+  // =========================
+
+  @ExceptionHandler(SubscriptionNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleSubscriptionNotFound(SubscriptionNotFoundException ex, HttpServletRequest request) {
+    log.warn("[SUBSCRIPTION] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(SubscriptionAlreadyActiveException.class)
+  public ResponseEntity<ExceptionBody> handleSubscriptionAlreadyActive(SubscriptionAlreadyActiveException ex, HttpServletRequest request) {
+    log.warn("[SUBSCRIPTION] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  @ExceptionHandler(EventNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleEventNotFound(EventNotFoundException ex, HttpServletRequest request) {
+    log.warn("[EVENT] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(TrackingWorkNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleTrackingWorkNotFound(TrackingWorkNotFoundException ex, HttpServletRequest request) {
+    log.warn("[TRACKING_WORK] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(TrackingWorkAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleTrackingWorkExists(TrackingWorkAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[TRACKING_WORK] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  @ExceptionHandler(TrackingOrderNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleTrackingOrderNotFound(TrackingOrderNotFoundException ex, HttpServletRequest request) {
+    log.warn("[TRACKING_ORDER] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  // =========================
+  // EDITORIAL (EXTENDED)
+  // =========================
+
+  @ExceptionHandler(EditorialAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleEditorialExists(EditorialAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[EDITORIAL] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  @ExceptionHandler(EditorialHasEditionsException.class)
+  public ResponseEntity<ExceptionBody> handleEditorialHasEditions(EditorialHasEditionsException ex, HttpServletRequest request) {
+    log.warn("[EDITORIAL] [DELETE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  // =========================
+  // EDITION (EXTENDED)
+  // =========================
+
+  @ExceptionHandler(EditionAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleEditionExists(EditionAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[EDITION] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  @ExceptionHandler(EditionHasOrderLinesException.class)
+  public ResponseEntity<ExceptionBody> handleEditionHasOrderLines(EditionHasOrderLinesException ex, HttpServletRequest request) {
+    log.warn("[EDITION] [DELETE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  // =========================
+  // TOME (EXTENDED)
+  // =========================
+
+  @ExceptionHandler(TomeAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleTomeExists(TomeAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[TOME] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  // =========================
+  // CHAPTER / TOME
+  // =========================
+
+  @ExceptionHandler(ChapterNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleChapterNotFound(ChapterNotFoundException ex, HttpServletRequest request) {
+    log.warn("[CHAPTER] [READ] [NOT_FOUND] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
+  }
+
+  @ExceptionHandler(ChapterAlreadyExistsException.class)
+  public ResponseEntity<ExceptionBody> handleChapterExists(ChapterAlreadyExistsException ex, HttpServletRequest request) {
+    log.warn("[CHAPTER] [CREATE] [CONFLICT] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.CONFLICT, request);
+  }
+
+  @ExceptionHandler(TomeNotFoundException.class)
+  public ResponseEntity<ExceptionBody> handleTomeNotFound(TomeNotFoundException ex, HttpServletRequest request) {
+    log.warn("[TOME] [READ] [NOT_FOUND] {}", ex.getMessage());
     return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 
@@ -75,8 +236,31 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(ValidationException.class)
-  public ResponseEntity<?> handleValidation(ValidationException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleValidation(ValidationException ex, HttpServletRequest request) {
+    log.warn("[VALIDATION] [ERROR] {}", ex.getMessage());
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ExceptionBody> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
+    String message = ex.getBindingResult().getFieldErrors().stream()
+        .findFirst()
+        .map(FieldError::getDefaultMessage)
+        .orElse("Datos de entrada inválidos");
+    log.warn("[VALIDATION] [BEAN] [ERROR] campo='{}' mensaje='{}'",
+        ex.getBindingResult().getFieldErrors().stream().findFirst().map(FieldError::getField).orElse("?"),
+        message);
+    return buildResponse(message, HttpStatus.BAD_REQUEST, request);
+  }
+
+  @ExceptionHandler(ConstraintViolationException.class)
+  public ResponseEntity<ExceptionBody> handleConstraintViolation(ConstraintViolationException ex, HttpServletRequest request) {
+    String message = ex.getConstraintViolations().stream()
+        .findFirst()
+        .map(cv -> cv.getPropertyPath() + ": " + cv.getMessage())
+        .orElse("Restricción de validación violada");
+    log.warn("[VALIDATION] [CONSTRAINT] [ERROR] {}", message);
+    return buildResponse(message, HttpStatus.BAD_REQUEST, request);
   }
 
   // =========================
@@ -84,17 +268,34 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(org.springframework.http.converter.HttpMessageNotReadableException.class)
-  public ResponseEntity<?> handleJsonError(Exception ex, HttpServletRequest request) {
-    return buildResponse("JSON mal formado", HttpStatus.BAD_REQUEST, request);
+  public ResponseEntity<ExceptionBody> handleJsonError(Exception ex, HttpServletRequest request) {
+    log.warn("[REQUEST] [PARSE] [ERROR] JSON mal formado: {}", ex.getMessage());
+    return buildResponse("El cuerpo de la petición tiene formato inválido", HttpStatus.BAD_REQUEST, request);
   }
 
   // =========================
-  // AUTHOR DUPLICADO
+  // INTEGRIDAD DE DATOS (FK, UNIQUE, NOT NULL en BD)
+  // DEBE ir ANTES que DataAccessException porque es subclase
   // =========================
 
-  @ExceptionHandler(AuthorAlreadyExistsException.class)
-  public ResponseEntity<?> handleAuthorExists(AuthorAlreadyExistsException ex, HttpServletRequest request) {
-    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
+  @ExceptionHandler(DataIntegrityViolationException.class)
+  public ResponseEntity<ExceptionBody> handleDataIntegrity(DataIntegrityViolationException ex, HttpServletRequest request) {
+    Throwable root = ex.getRootCause();
+    String rootMsg = (root != null) ? root.getMessage() : ex.getMessage();
+    log.warn("[DB] [INTEGRITY] [CONFLICT] {}", rootMsg);
+
+    String userMessage;
+    if (rootMsg != null && rootMsg.toLowerCase().contains("duplicate")) {
+      userMessage = "Ya existe un registro con esos datos (clave duplicada)";
+    } else if (rootMsg != null && rootMsg.toLowerCase().contains("foreign key")) {
+      userMessage = "No se puede eliminar el registro porque tiene datos relacionados (pedidos, comentarios u otras referencias)";
+    } else if (rootMsg != null && rootMsg.toLowerCase().contains("cannot be null")) {
+      userMessage = "Faltan campos obligatorios en la base de datos";
+    } else {
+      userMessage = "Operación no permitida por restricción de integridad de datos";
+    }
+
+    return buildResponse(userMessage, HttpStatus.CONFLICT, request);
   }
 
   // =========================
@@ -102,13 +303,15 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(CannotCreateTransactionException.class)
-  public ResponseEntity<?> handleCannotCreateTransaction(CannotCreateTransactionException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleCannotCreateTransaction(CannotCreateTransactionException ex, HttpServletRequest request) {
+    log.error("[DB] [CONNECTION] [ERROR] No se puede conectar con la base de datos: {}", ex.getMessage());
     return buildResponse("No se puede conectar con la base de datos. Verifique que MySQL está activo.",
         HttpStatus.SERVICE_UNAVAILABLE, request);
   }
 
   @ExceptionHandler(DataAccessException.class)
-  public ResponseEntity<?> handleDataAccess(DataAccessException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleDataAccess(DataAccessException ex, HttpServletRequest request) {
+    log.error("[DB] [ACCESS] [ERROR] Error de acceso a datos en {}: {}", request.getRequestURI(), ex.getMessage());
     return buildResponse("Error de acceso a datos. Por favor inténtelo más tarde.",
         HttpStatus.SERVICE_UNAVAILABLE, request);
   }
@@ -118,7 +321,8 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(IllegalArgumentException.class)
-  public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+  public ResponseEntity<ExceptionBody> handleIllegalArgument(IllegalArgumentException ex, HttpServletRequest request) {
+    log.warn("[REQUEST] [VALIDATION] [ERROR] {}", ex.getMessage());
     return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
   }
 
@@ -127,10 +331,8 @@ public class GlobalExceptionHandler {
   // =========================
 
   @ExceptionHandler(Exception.class)
-  public ResponseEntity<?> handleGeneric(Exception ex, HttpServletRequest request) {
-
-    ex.printStackTrace();
-
+  public ResponseEntity<ExceptionBody> handleGeneric(Exception ex, HttpServletRequest request) {
+    log.error("[SYSTEM] [UNHANDLED] [ERROR] {} en {}: {}", ex.getClass().getSimpleName(), request.getRequestURI(), ex.getMessage(), ex);
     return buildResponse("Error interno del servidor", HttpStatus.INTERNAL_SERVER_ERROR, request);
   }
 
@@ -138,41 +340,12 @@ public class GlobalExceptionHandler {
   // BUILDER
   // =========================
 
-  private ResponseEntity<?> buildResponse(String message, HttpStatus status, HttpServletRequest request) {
-
-    return ResponseEntity.status(status).body(
+  private ResponseEntity<ExceptionBody> buildResponse(String message, HttpStatus status, HttpServletRequest request) {
+    return ResponseEntity.status(status.value()).body(
         new ExceptionBody(
             LocalDateTime.now(),
             status.value(),
             message,
             request.getRequestURI()));
-  }
-
-  // =========================
-  // CHAPTER
-  // =========================
-
-  @ExceptionHandler(ChapterNotFoundException.class)
-  public ResponseEntity<?> handleChapterNotFound(
-      ChapterNotFoundException ex,
-      HttpServletRequest request) {
-
-    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
-  }
-
-  @ExceptionHandler(ChapterAlreadyExistsException.class)
-  public ResponseEntity<?> handleChapterExists(
-      ChapterAlreadyExistsException ex,
-      HttpServletRequest request) {
-
-    return buildResponse(ex.getMessage(), HttpStatus.BAD_REQUEST, request);
-  }
-
-  @ExceptionHandler(TomeNotFoundException.class)
-  public ResponseEntity<?> handleTomeNotFound(
-      TomeNotFoundException ex,
-      HttpServletRequest request) {
-
-    return buildResponse(ex.getMessage(), HttpStatus.NOT_FOUND, request);
   }
 }

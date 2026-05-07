@@ -1,7 +1,6 @@
 package com.example.booksocial_backend.domain.catalog;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -44,11 +43,10 @@ public class Tome {
   private Integer numberTome;
 
   /**
-   * Titutlo del tomo
+   * Título del tomo (opcional).
    */
-  @NotBlank
   @Size(max = 150)
-  @Column(nullable = false)
+  @Column(length = 150)
   private String title;
 
   /**
@@ -62,6 +60,7 @@ public class Tome {
   /**
    * Capítulos incluidos en este tomo.
    */
+  @Builder.Default
   @ToString.Exclude
   @OneToMany(mappedBy = "tome", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Chapter> chapters = new ArrayList<>();

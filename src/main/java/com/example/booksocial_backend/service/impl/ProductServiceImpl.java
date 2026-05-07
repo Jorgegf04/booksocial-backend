@@ -3,6 +3,8 @@ package com.example.booksocial_backend.service.impl;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +14,8 @@ import com.example.booksocial_backend.DTO.catalog.ProductResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.domain.catalog.Editorial;
 import com.example.booksocial_backend.domain.catalog.Work;
+import com.example.booksocial_backend.exception.EditionNotFoundException;
+import com.example.booksocial_backend.exception.ProductNotFoundException;
 import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
 import com.example.booksocial_backend.service.ProductService;
@@ -36,6 +40,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class ProductServiceImpl implements ProductService {
 
+  private static final Logger log = LoggerFactory.getLogger(ProductServiceImpl.class);
+
   private final ProductRepository productRepository;
   private final EditionRepository editionRepository;
   private final ModelMapper modelMapper;
@@ -43,11 +49,11 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ProductResponseDTO createProduct(ProductRequestDTO request) {
 
+    log.info("[PRODUCT] [CREATE] [START] editionId={}", request.getEditionId());
     Product product = modelMapper.map(request, Product.class);
 
-    // Set manual de relación
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + request.getEditionId()));
+        .orElseThrow(() -> new EditionNotFoundException("Edición no encontrada con id: " + request.getEditionId()));
 
     product.setEdition(edition);
 
@@ -110,12 +116,13 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public ProductResponseDTO updateProduct(Long id, ProductRequestDTO request) {
 
+    log.info("[PRODUCT] [UPDATE] [START] id={}", id);
     Product existing = getProductEntityById(id);
 
     Product updated = modelMapper.map(request, Product.class);
 
     Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + request.getEditionId()));
+        .orElseThrow(() -> new EditionNotFoundException("Edición no encontrada con id: " + request.getEditionId()));
 
     updated.setEdition(edition);
 
@@ -134,7 +141,7 @@ public class ProductServiceImpl implements ProductService {
   public void decreaseStock(Long id, int quantity) {
 
     Product product = productRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
+        .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado con id: " + id));
 
     if (quantity <= 0) {
       throw new IllegalArgumentException("La cantidad debe ser mayor que 0");
@@ -150,9 +157,10 @@ public class ProductServiceImpl implements ProductService {
   @Override
   public void deleteProduct(Long id) {
 
+    log.info("[PRODUCT] [DELETE] [START] id={}", id);
     Product product = getProductEntityById(id);
-
     productRepository.delete(product);
+    log.info("[PRODUCT] [DELETE] [SUCCESS] id={}", id);
   }
 
   /**
@@ -186,7 +194,7 @@ public class ProductServiceImpl implements ProductService {
   private Product getProductEntityById(Long id) {
 
     return productRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + id));
+        .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado con id: " + id));
   }
 
   /**

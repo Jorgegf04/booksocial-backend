@@ -3,8 +3,11 @@ package com.example.booksocial_backend.service.impl;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -33,6 +36,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class AuthorServiceImpl implements AuthorService {
 
+  private static final Logger log = LoggerFactory.getLogger(AuthorServiceImpl.class);
+
   private final AuthorRepository authorRepository;
   private final AuthorFollowRepository authorFollowRepository;
   private final UserRepository userRepository;
@@ -42,11 +47,13 @@ public class AuthorServiceImpl implements AuthorService {
   @Override
   public AuthorResponseDTO createAuthor(AuthorRequestDTO request) {
 
+    log.info("[AUTHOR] [CREATE] [START] name='{}'", request != null ? request.getName() : "null");
     validateAuthorRequest(request);
 
     String normalizedName = request.getName().trim();
 
     if (authorRepository.existsByName(normalizedName)) {
+      log.warn("[AUTHOR] [CREATE] [CONFLICT] Ya existe autor con nombre='{}'", normalizedName);
       throw new AuthorAlreadyExistsException(normalizedName);
     }
 
@@ -58,6 +65,7 @@ public class AuthorServiceImpl implements AuthorService {
         .build();
 
     Author saved = authorRepository.save(author);
+    log.info("[AUTHOR] [CREATE] [SUCCESS] id={} name='{}'", saved.getId(), saved.getName());
     Long savedId = saved.getId();
 
     if (savedId != null && request.getWorkIds() != null && !request.getWorkIds().isEmpty()) {
@@ -129,6 +137,7 @@ public class AuthorServiceImpl implements AuthorService {
   @Override
   public AuthorResponseDTO updateAuthor(Long id, AuthorRequestDTO request) {
 
+    log.info("[AUTHOR] [UPDATE] [START] id={}", id);
     Author existing = getAuthorEntityById(id);
 
     String normalizedName = request.getName().trim();
@@ -156,7 +165,21 @@ public class AuthorServiceImpl implements AuthorService {
 
   @Override
   public void deleteAuthor(Long id) {
-    authorRepository.delete(getAuthorEntityById(id));
+    log.info("[AUTHOR] [DELETE] [START] id={}", id);
+    Author author = getAuthorEntityById(id);
+
+    List<Work> worksWithAuthor = workRepository.findByAuthorId(id);
+    worksWithAuthor.forEach(w -> {
+      w.getAuthors().removeIf(a -> id.equals(a.getId()));
+      workRepository.save(w);
+    });
+    log.info("[AUTHOR] [DELETE] Desasociadas {} obra(s) del autor id={}", worksWithAuthor.size(), id);
+
+    authorFollowRepository.deleteByAuthorId(id);
+    log.info("[AUTHOR] [DELETE] Eliminados follows del autor id={}", id);
+
+    authorRepository.delete(author);
+    log.info("[AUTHOR] [DELETE] [SUCCESS] id={} name='{}'", id, author.getName());
   }
 
   @Override

@@ -3,6 +3,8 @@ package com.example.booksocial_backend.service.impl;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,6 +14,8 @@ import com.example.booksocial_backend.DTO.catalog.TomeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
 import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.TomeRepository;
+import com.example.booksocial_backend.exception.EditionNotFoundException;
+import com.example.booksocial_backend.exception.TomeAlreadyExistsException;
 import com.example.booksocial_backend.exception.TomeNotFoundException;
 import com.example.booksocial_backend.service.TomeService;
 
@@ -35,6 +39,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class TomeServiceImpl implements TomeService {
 
+  private static final Logger log = LoggerFactory.getLogger(TomeServiceImpl.class);
+
   private final TomeRepository tomeRepository;
   private final EditionRepository editionRepository;
   private final ModelMapper modelMapper;
@@ -42,9 +48,9 @@ public class TomeServiceImpl implements TomeService {
   @Override
   public TomeResponseDTO createTome(TomeRequestDTO request) {
 
+    log.info("[TOME] [CREATE] [START] editionId={} number={}", request.getEditionId(), request.getNumberTome());
     Tome tome = modelMapper.map(request, Tome.class);
 
-    // Set manual relación
     tome.setEdition(Edition.builder().id(request.getEditionId()).build());
 
     validateTome(tome);
@@ -55,11 +61,12 @@ public class TomeServiceImpl implements TomeService {
         .anyMatch(t -> t.getNumberTome().equals(request.getNumberTome()));
 
     if (exists) {
-      throw new IllegalArgumentException("Ya existe un tomo con ese número en la edición");
+      throw new TomeAlreadyExistsException(request.getNumberTome(), request.getEditionId());
     }
 
     Tome saved = tomeRepository.save(tome);
     updateEditionTotalTomes(saved.getEdition().getId());
+    log.info("[TOME] [CREATE] [SUCCESS] id={} number={}", saved.getId(), saved.getNumberTome());
     return mapToDTO(saved);
   }
 
@@ -105,6 +112,7 @@ public class TomeServiceImpl implements TomeService {
   @Override
   public TomeResponseDTO updateTome(Long id, TomeRequestDTO request) {
 
+    log.info("[TOME] [UPDATE] [START] id={}", id);
     Tome existing = getTomeEntityById(id);
 
     Long oldEditionId = existing.getEdition().getId(); // 🔥 guardar anterior
@@ -123,7 +131,7 @@ public class TomeServiceImpl implements TomeService {
           .anyMatch(t -> t.getNumberTome().equals(request.getNumberTome()));
 
       if (exists) {
-        throw new IllegalArgumentException("Ya existe otro tomo con ese número");
+        throw new TomeAlreadyExistsException(request.getNumberTome(), request.getEditionId());
       }
     }
 
@@ -141,19 +149,18 @@ public class TomeServiceImpl implements TomeService {
   @Override
   public void deleteTome(Long id) {
 
+    log.info("[TOME] [DELETE] [START] id={}", id);
     Tome tome = getTomeEntityById(id);
-
     Long editionId = tome.getEdition().getId();
-
     tomeRepository.delete(tome);
-
     updateEditionTotalTomes(editionId);
+    log.info("[TOME] [DELETE] [SUCCESS] id={}", id);
   }
 
   private void updateEditionTotalTomes(Long editionId) {
 
     Edition edition = editionRepository.findById(editionId)
-        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada con id: " + editionId));
+        .orElseThrow(() -> new EditionNotFoundException("Edición no encontrada con id: " + editionId));
 
     int total = tomeRepository.findByEditionId(editionId).size();
 

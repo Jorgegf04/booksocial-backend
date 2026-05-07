@@ -3,6 +3,8 @@ package com.example.booksocial_backend.service.impl;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -13,6 +15,8 @@ import com.example.booksocial_backend.domain.commerce.TrackingOrderStatus;
 import com.example.booksocial_backend.DTO.commerce.TrackingOrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.TrackingOrderResponseDTO;
 import com.example.booksocial_backend.domain.commerce.Order;
+import com.example.booksocial_backend.exception.OrderNotFoundException;
+import com.example.booksocial_backend.exception.TrackingOrderNotFoundException;
 import com.example.booksocial_backend.repository.OrderRepository;
 import com.example.booksocial_backend.repository.TrackingOrderRepository;
 import com.example.booksocial_backend.service.TrackingOrderService;
@@ -35,18 +39,21 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class TrackingOrderServiceImpl implements TrackingOrderService {
 
+  private static final Logger log = LoggerFactory.getLogger(TrackingOrderServiceImpl.class);
+
   private final TrackingOrderRepository trackingRepository;
   private final OrderRepository orderRepository;
 
   @Override
   public TrackingOrderResponseDTO addTracking(TrackingOrderRequestDTO request) {
 
+    log.info("[TRACKING_ORDER] [ADD] [START] orderId={} status={}", request.getOrderId(), request.getTrackingStatus());
     TrackingOrder tracking = new TrackingOrder();
 
     tracking.setStatus(request.getTrackingStatus());
     tracking.setDate(LocalDateTime.now());
     Order order = orderRepository.findById(request.getOrderId())
-        .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con id: " + request.getOrderId()));
+        .orElseThrow(() -> new OrderNotFoundException(request.getOrderId()));
 
     tracking.setOrder(order);
 
@@ -99,7 +106,9 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
   @Override
   public void deleteTracking(Long id) {
 
+    log.info("[TRACKING_ORDER] [DELETE] [START] id={}", id);
     trackingRepository.delete(getTrackingEntityById(id));
+    log.info("[TRACKING_ORDER] [DELETE] [SUCCESS] id={}", id);
   }
 
   private TrackingOrderResponseDTO mapToDTO(TrackingOrder tracking) {
@@ -130,7 +139,7 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
   private TrackingOrder getTrackingEntityById(Long id) {
 
     return trackingRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Tracking no encontrado con id: " + id));
+        .orElseThrow(() -> new TrackingOrderNotFoundException(id));
   }
 
   /**

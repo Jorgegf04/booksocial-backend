@@ -3,6 +3,8 @@ package com.example.booksocial_backend.service.impl;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,6 +26,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class ChapterServiceImpl implements ChapterService {
 
+  private static final Logger log = LoggerFactory.getLogger(ChapterServiceImpl.class);
+
   private final ChapterRepository chapterRepository;
   private final TomeRepository tomeRepository;
   private final ModelMapper modelMapper;
@@ -31,28 +35,25 @@ public class ChapterServiceImpl implements ChapterService {
   @Override
   public ChapterResponseDTO createChapter(ChapterRequestDTO request) {
 
+    log.info("[CHAPTER] [CREATE] [START] tomeId={} number={}", request.getTomeId(), request.getChapterNumber());
     Chapter chapter = modelMapper.map(request, Chapter.class);
 
     Tome tome = tomeRepository.findById(request.getTomeId())
         .orElseThrow(() -> new TomeNotFoundException(request.getTomeId()));
 
     chapter.setTome(tome);
-
     validateChapter(chapter);
 
-    List<Chapter> existingChapters = chapterRepository.findByTomeId(request.getTomeId());
-
-    boolean exists = existingChapters.stream()
+    boolean exists = chapterRepository.findByTomeId(request.getTomeId()).stream()
         .anyMatch(c -> c.getChapterNumber().equals(request.getChapterNumber()));
 
     if (exists) {
-      throw new ChapterAlreadyExistsException(
-          request.getChapterNumber(),
-          request.getTomeId());
+      log.warn("[CHAPTER] [CREATE] [CONFLICT] Ya existe capítulo número={} en tomeId={}", request.getChapterNumber(), request.getTomeId());
+      throw new ChapterAlreadyExistsException(request.getChapterNumber(), request.getTomeId());
     }
 
     Chapter saved = chapterRepository.save(chapter);
-
+    log.info("[CHAPTER] [CREATE] [SUCCESS] id={} number={}", saved.getId(), saved.getChapterNumber());
     return mapToDTO(saved);
   }
 
@@ -88,9 +89,10 @@ public class ChapterServiceImpl implements ChapterService {
   @Override
   public void deleteChapter(Long id) {
 
+    log.info("[CHAPTER] [DELETE] [START] id={}", id);
     Chapter chapter = getChapterEntityById(id);
-
     chapterRepository.delete(chapter);
+    log.info("[CHAPTER] [DELETE] [SUCCESS] id={}", id);
   }
 
   private ChapterResponseDTO mapToDTO(Chapter chapter) {

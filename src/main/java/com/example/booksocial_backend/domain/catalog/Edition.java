@@ -61,6 +61,7 @@ public class Edition {
 
   private Integer totalTomes;
 
+  @Builder.Default
   @OneToMany(mappedBy = "edition", cascade = CascadeType.ALL, orphanRemoval = true)
   private List<Tome> tomes = new ArrayList<>();
   /**
@@ -83,6 +84,7 @@ public class Edition {
   /**
    * Productos asociados a esta edición.
    */
+  @Builder.Default
   @ToString.Exclude
   @JsonIgnore
   @OneToMany(mappedBy = "edition", cascade = CascadeType.ALL, orphanRemoval = true)

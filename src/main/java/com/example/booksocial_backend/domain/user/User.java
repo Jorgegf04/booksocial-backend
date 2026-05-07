@@ -1,6 +1,7 @@
 package com.example.booksocial_backend.domain.user;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.booksocial_backend.domain.social.TrackingWork;
@@ -165,14 +166,17 @@ public class User {
    * cargar innecesariamente los seguimientos.
    * </p>
    */
+  @Builder.Default
   @JsonIgnore
   @ToString.Exclude
   @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-  private List<TrackingWork> trackingWorks;
+  private List<TrackingWork> trackingWorks = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "follower")
-  private List<UserFollow> following;
+  private List<UserFollow> following = new ArrayList<>();
 
+  @Builder.Default
   @OneToMany(mappedBy = "following")
-  private List<UserFollow> followers;
+  private List<UserFollow> followers = new ArrayList<>();
 }

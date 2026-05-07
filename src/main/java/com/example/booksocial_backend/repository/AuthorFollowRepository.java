@@ -24,4 +24,8 @@ public interface AuthorFollowRepository extends JpaRepository<AuthorFollow, Long
     @Modifying
     @Query("DELETE FROM AuthorFollow af WHERE af.user.id = :userId AND af.author.id = :authorId")
     void deleteByUserIdAndAuthorId(Long userId, Long authorId);
+
+    @Modifying
+    @Query("DELETE FROM AuthorFollow af WHERE af.author.id = :authorId")
+    void deleteByAuthorId(Long authorId);
 }

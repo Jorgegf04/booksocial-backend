@@ -1,8 +1,11 @@
 package com.example.booksocial_backend.service.impl;
 
 import java.util.List;
+import java.util.Objects;
 
 import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -10,28 +13,20 @@ import com.example.booksocial_backend.domain.catalog.Volume;
 import com.example.booksocial_backend.DTO.catalog.VolumeRequestDTO;
 import com.example.booksocial_backend.DTO.catalog.VolumeResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Edition;
+import com.example.booksocial_backend.exception.EditionNotFoundException;
+import com.example.booksocial_backend.exception.VolumeNotFoundException;
 import com.example.booksocial_backend.repository.EditionRepository;
 import com.example.booksocial_backend.repository.VolumeRepository;
 import com.example.booksocial_backend.service.VolumeService;
 
 import lombok.RequiredArgsConstructor;
 
-/**
- * Implementación del servicio {@link VolumeService}.
- *
- * Gestiona la lógica de negocio relacionada con los volúmenes,
- * garantizando la correcta organización dentro de una edición.
- *
- * Evita duplicados y permite recuperar volúmenes ordenados.
- *
- * @author Jorge
- * @since 16/03/2026
- * @version 3.0
- */
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class VolumeServiceImpl implements VolumeService {
+
+  private static final Logger log = LoggerFactory.getLogger(VolumeServiceImpl.class);
 
   private final VolumeRepository volumeRepository;
   private final EditionRepository editionRepository;
@@ -40,18 +35,17 @@ public class VolumeServiceImpl implements VolumeService {
   @Override
   public VolumeResponseDTO createVolume(VolumeRequestDTO request) {
 
+    log.info("[VOLUME] [CREATE] [START] editionId={} number={}", request.getEditionId(), request.getVolumeNumber());
+
+    Edition edition = editionRepository.findById(Objects.requireNonNull(request.getEditionId()))
+        .orElseThrow(() -> new EditionNotFoundException("Edición no encontrada con id: " + request.getEditionId()));
+
     Volume volume = modelMapper.map(request, Volume.class);
-
-    Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada"));
-
     volume.setEdition(edition);
 
     validateVolume(volume);
 
-    List<Volume> existing = volumeRepository.findByEditionId(request.getEditionId());
-
-    boolean exists = existing.stream()
+    boolean exists = volumeRepository.findByEditionId(request.getEditionId()).stream()
         .anyMatch(v -> v.getVolumeNumber().equals(request.getVolumeNumber()));
 
     if (exists) {
@@ -60,24 +54,20 @@ public class VolumeServiceImpl implements VolumeService {
 
     volume.setTitle(volume.getTitle().trim());
 
-    Volume saved = volumeRepository.save(volume);
-
+    Volume saved = Objects.requireNonNull(volumeRepository.save(volume));
+    log.info("[VOLUME] [CREATE] [SUCCESS] id={} number={}", saved.getId(), saved.getVolumeNumber());
     return mapToDTO(saved);
   }
 
   @Override
   @Transactional(readOnly = true)
   public VolumeResponseDTO getVolumeById(Long id) {
-
-    Volume volume = getVolumeEntityById(id);
-
-    return mapToDTO(volume);
+    return mapToDTO(getVolumeEntityById(id));
   }
 
   @Override
   @Transactional(readOnly = true)
   public List<VolumeResponseDTO> getAllVolumes() {
-
     return volumeRepository.findAll()
         .stream()
         .map(this::mapToDTO)
@@ -87,7 +77,6 @@ public class VolumeServiceImpl implements VolumeService {
   @Override
   @Transactional(readOnly = true)
   public List<VolumeResponseDTO> getVolumesByEdition(Long editionId) {
-
     return volumeRepository.findByEditionId(editionId)
         .stream()
         .map(this::mapToDTO)
@@ -97,7 +86,6 @@ public class VolumeServiceImpl implements VolumeService {
   @Override
   @Transactional(readOnly = true)
   public List<VolumeResponseDTO> getVolumesByEditionOrdered(Long editionId) {
-
     return volumeRepository.findByEditionIdOrderByVolumeNumberAsc(editionId)
         .stream()
         .map(this::mapToDTO)
@@ -107,24 +95,19 @@ public class VolumeServiceImpl implements VolumeService {
   @Override
   public VolumeResponseDTO updateVolume(Long id, VolumeRequestDTO request) {
 
+    log.info("[VOLUME] [UPDATE] [START] id={}", id);
     Volume existing = getVolumeEntityById(id);
 
+    Edition edition = editionRepository.findById(Objects.requireNonNull(request.getEditionId()))
+        .orElseThrow(() -> new EditionNotFoundException("Edición no encontrada con id: " + request.getEditionId()));
+
     Volume updated = modelMapper.map(request, Volume.class);
-
-    Edition edition = editionRepository.findById(request.getEditionId())
-        .orElseThrow(() -> new IllegalArgumentException("Edición no encontrada"));
-
     updated.setEdition(edition);
-
     validateVolume(updated);
 
     if (!existing.getVolumeNumber().equals(updated.getVolumeNumber())) {
-
-      List<Volume> volumes = volumeRepository.findByEditionId(request.getEditionId());
-
-      boolean exists = volumes.stream()
+      boolean exists = volumeRepository.findByEditionId(request.getEditionId()).stream()
           .anyMatch(v -> v.getVolumeNumber().equals(request.getVolumeNumber()));
-
       if (exists) {
         throw new IllegalArgumentException("Ya existe otro volumen con ese número");
       }
@@ -134,22 +117,19 @@ public class VolumeServiceImpl implements VolumeService {
     existing.setTitle(updated.getTitle().trim());
     existing.setEdition(updated.getEdition());
 
-    Volume saved = volumeRepository.save(existing);
-
+    Volume saved = Objects.requireNonNull(volumeRepository.save(existing));
+    log.info("[VOLUME] [UPDATE] [SUCCESS] id={} number={}", saved.getId(), saved.getVolumeNumber());
     return mapToDTO(saved);
   }
 
   @Override
   public void deleteVolume(Long id) {
-
+    log.info("[VOLUME] [DELETE] [START] id={}", id);
     Volume volume = getVolumeEntityById(id);
-
-    volumeRepository.delete(volume);
+    volumeRepository.delete(Objects.requireNonNull(volume));
+    log.info("[VOLUME] [DELETE] [SUCCESS] id={}", id);
   }
 
-  /**
-   * Convierte Volume → VolumeDTO.
-   */
   private VolumeResponseDTO mapToDTO(Volume volume) {
     Edition edition = volume.getEdition();
     return new VolumeResponseDTO(
@@ -161,32 +141,21 @@ public class VolumeServiceImpl implements VolumeService {
         (edition != null && edition.getWork() != null) ? edition.getWork().getTitle() : null);
   }
 
-  /**
-   * Obtiene la entidad Volume o lanza excepción si no existe.
-   */
   private Volume getVolumeEntityById(Long id) {
-
     return volumeRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Volumen no encontrado con id: " + id));
+        .orElseThrow(() -> new VolumeNotFoundException("Volumen no encontrado con id: " + id));
   }
 
-  /**
-   * Valida los datos de un volumen.
-   */
   private void validateVolume(Volume volume) {
-
     if (volume == null) {
       throw new IllegalArgumentException("El volumen no puede ser nulo");
     }
-
     if (volume.getVolumeNumber() == null || volume.getVolumeNumber() <= 0) {
       throw new IllegalArgumentException("El número de volumen debe ser positivo");
     }
-
     if (volume.getTitle() == null || volume.getTitle().trim().isEmpty()) {
       throw new IllegalArgumentException("El título es obligatorio");
     }
-
     if (volume.getEdition() == null || volume.getEdition().getId() == null) {
       throw new IllegalArgumentException("El volumen debe pertenecer a una edición válida");
     }

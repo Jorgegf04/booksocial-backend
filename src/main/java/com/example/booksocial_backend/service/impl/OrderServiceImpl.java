@@ -4,17 +4,20 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.domain.commerce.Order;
 import com.example.booksocial_backend.domain.commerce.OrderLine;
-import com.example.booksocial_backend.DTO.commerce.OrderLineRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderLineResponseDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.user.User;
+import com.example.booksocial_backend.exception.OrderNotFoundException;
+import com.example.booksocial_backend.exception.ProductNotFoundException;
 
 import com.example.booksocial_backend.repository.OrderRepository;
 import com.example.booksocial_backend.repository.ProductRepository;
@@ -28,6 +31,8 @@ import lombok.RequiredArgsConstructor;
 @Transactional
 public class OrderServiceImpl implements OrderService {
 
+  private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+
   private final OrderRepository orderRepository;
   private final ProductRepository productRepository;
   private final UserRepository userRepository;
@@ -35,12 +40,12 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public OrderResponseDTO createOrder(OrderRequestDTO request) {
 
+    log.info("[ORDER] [CREATE] [START] userId={}", request.getUserId());
+
     if (request.getOrderLines() == null || request.getOrderLines().isEmpty()) {
       throw new IllegalArgumentException("El pedido debe contener al menos una línea de pedido");
     }
 
-    // getReferenceById devuelve un proxy Hibernate por ID sin SELECT extra —
-    // es la forma correcta de asignar un @ManyToOne cuando solo se necesita la FK.
     User user = userRepository.getReferenceById(request.getUserId());
 
     Order order = Order.builder()
@@ -50,13 +55,16 @@ public class OrderServiceImpl implements OrderService {
 
     List<OrderLine> lines = request.getOrderLines().stream()
         .map(dto -> {
-
           Product product = productRepository.findById(dto.getProductId())
-              .orElseThrow(() -> new IllegalArgumentException("Producto no encontrado con id: " + dto.getProductId()));
+              .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado con id: " + dto.getProductId()));
 
           if (product.getStock() == null || product.getStock() < dto.getQuantity()) {
-            throw new IllegalArgumentException("Stock insuficiente para el producto: " + product.getId());
+            log.warn("[ORDER] [CREATE] [WARN] Stock insuficiente para productId={}", product.getId());
+            throw new IllegalArgumentException("Stock insuficiente para el producto con id: " + product.getId());
           }
+
+          product.setStock(product.getStock() - dto.getQuantity());
+          productRepository.save(product);
 
           return OrderLine.builder()
               .product(product)
@@ -69,19 +77,18 @@ public class OrderServiceImpl implements OrderService {
 
     order.setOrderLines(new ArrayList<>(lines));
 
-    validateOrder(order);
-
     double total = calculateTotal(lines);
     order.setTotal(total);
 
     Order saved = orderRepository.save(order);
-
+    log.info("[ORDER] [CREATE] [SUCCESS] id={} total={}", saved.getId(), saved.getTotal());
     return mapToDTO(saved);
   }
 
   @Override
   @Transactional(readOnly = true)
   public OrderResponseDTO getOrderById(Long id) {
+    log.info("[ORDER] [READ] id={}", id);
     return mapToDTO(getOrderEntityById(id));
   }
 
@@ -106,7 +113,10 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   public void deleteOrder(Long id) {
-    orderRepository.delete(getOrderEntityById(id));
+    log.info("[ORDER] [DELETE] [START] id={}", id);
+    Order order = getOrderEntityById(id);
+    orderRepository.delete(order);
+    log.info("[ORDER] [DELETE] [SUCCESS] id={}", id);
   }
 
   private double calculateTotal(List<OrderLine> lines) {
@@ -136,32 +146,14 @@ public class OrderServiceImpl implements OrderService {
         order.getId(),
         order.getDate(),
         order.getTotal(),
-
         order.getUser().getId(),
         order.getUser().getUsername(),
-
         totalItems,
-
         lines);
   }
 
   private Order getOrderEntityById(Long id) {
     return orderRepository.findById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Pedido no encontrado con id: " + id));
-  }
-
-  private void validateOrder(Order order) {
-
-    if (order == null) {
-      throw new IllegalArgumentException("El pedido no puede ser nulo");
-    }
-
-    if (order.getUser() == null || order.getUser().getId() == null) {
-      throw new IllegalArgumentException("El pedido debe tener un usuario válido");
-    }
-
-    if (order.getOrderLines() == null || order.getOrderLines().isEmpty()) {
-      throw new IllegalArgumentException("El pedido debe contener al menos una línea");
-    }
+        .orElseThrow(() -> new OrderNotFoundException(id));
   }
 }
