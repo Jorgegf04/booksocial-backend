@@ -54,7 +54,7 @@ public class Edition {
    * Fecha de publicación de la edición.
    */
   @PastOrPresent
-  @Column(nullable = false)
+  @Column(name = "edition_date")
   private LocalDate editionDate;
 
   private String title;

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.social.EventRequestDTO;
@@ -32,28 +33,23 @@ public class EventController {
 
   private final EventService eventService;
 
-  // CREATE
+  // CREATE — solo ADMIN
   @Operation(summary = "Crear evento")
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
-  public ResponseEntity<EventResponseDTO> create(
-      @Valid @RequestBody EventRequestDTO request) {
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(eventService.createEvent(request));
+  public ResponseEntity<EventResponseDTO> create(@Valid @RequestBody EventRequestDTO request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(eventService.createEvent(request));
   }
 
   @Operation(summary = "Creación masiva de eventos")
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
-  public ResponseEntity<List<EventResponseDTO>> createMany(
-      @Valid @RequestBody List<EventRequestDTO> requests) {
-
+  public ResponseEntity<List<EventResponseDTO>> createMany(@Valid @RequestBody List<EventRequestDTO> requests) {
     return ResponseEntity.status(HttpStatus.CREATED)
-        .body(requests.stream()
-            .map(eventService::createEvent)
-            .toList());
+        .body(requests.stream().map(eventService::createEvent).toList());
   }
 
-  // READ
+  // READ — público (todos pueden ver que existen los eventos)
   @Operation(summary = "Obtener evento por ID")
   @GetMapping("/{id}")
   public ResponseEntity<EventResponseDTO> getById(@PathVariable Long id) {
@@ -78,35 +74,33 @@ public class EventController {
     return ResponseEntity.ok(eventService.getUpcomingEvents());
   }
 
-  // UPDATE
+  // UPDATE — solo ADMIN
   @Operation(summary = "Actualizar evento")
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
-  public ResponseEntity<EventResponseDTO> update(
-      @PathVariable Long id,
+  public ResponseEntity<EventResponseDTO> update(@PathVariable Long id,
       @Valid @RequestBody EventRequestDTO request) {
-
     return ResponseEntity.ok(eventService.updateEvent(id, request));
   }
 
-  // JOIN / LEAVE
+  // JOIN / LEAVE — solo SUBSCRIBED o ADMIN
   @Operation(summary = "Inscribirse en evento")
+  @PreAuthorize("hasAnyRole('SUBSCRIBED', 'ADMIN')")
   @PostMapping("/{id}/join")
-  public ResponseEntity<EventResponseDTO> join(
-      @PathVariable Long id,
-      @RequestParam Long userId) {
+  public ResponseEntity<EventResponseDTO> join(@PathVariable Long id, @RequestParam Long userId) {
     return ResponseEntity.ok(eventService.joinEvent(id, userId));
   }
 
   @Operation(summary = "Abandonar evento")
+  @PreAuthorize("hasAnyRole('SUBSCRIBED', 'ADMIN')")
   @DeleteMapping("/{id}/leave")
-  public ResponseEntity<EventResponseDTO> leave(
-      @PathVariable Long id,
-      @RequestParam Long userId) {
+  public ResponseEntity<EventResponseDTO> leave(@PathVariable Long id, @RequestParam Long userId) {
     return ResponseEntity.ok(eventService.leaveEvent(id, userId));
   }
 
-  // DELETE
+  // DELETE — solo ADMIN
   @Operation(summary = "Eliminar evento")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
     eventService.deleteEvent(id);

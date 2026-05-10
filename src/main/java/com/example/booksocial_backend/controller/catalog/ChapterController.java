@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.ChapterRequestDTO;
@@ -78,6 +79,7 @@ public class ChapterController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<ChapterResponseDTO> createChapter(
       @Valid @RequestBody ChapterRequestDTO request) {
@@ -98,6 +100,7 @@ public class ChapterController {
       @ApiResponse(responseCode = "400", description = "Lista inválida o vacía"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<ChapterResponseDTO>> createMany(
       @Valid @RequestBody List<ChapterRequestDTO> requests) {
@@ -182,6 +185,7 @@ public class ChapterController {
       @ApiResponse(responseCode = "204", description = "Capítulo eliminado correctamente"),
       @ApiResponse(responseCode = "404", description = "Capítulo no encontrado")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID del capítulo a eliminar", example = "1") @PathVariable Long id) {

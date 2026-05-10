@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.EditorialRequestDTO;
@@ -76,6 +77,7 @@ public class EditorialController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<EditorialResponseDTO> create(
       @Valid @RequestBody EditorialRequestDTO request) {
@@ -96,6 +98,7 @@ public class EditorialController {
       @ApiResponse(responseCode = "400", description = "Lista vacía o inválida"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<EditorialResponseDTO>> createMany(
       @Valid @RequestBody List<EditorialRequestDTO> requests) {
@@ -215,6 +218,7 @@ public class EditorialController {
       @ApiResponse(responseCode = "404", description = "Editorial no encontrada"),
       @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<EditorialResponseDTO> update(
       @Parameter(description = "ID de la editorial", example = "1") @PathVariable Long id,
@@ -238,6 +242,7 @@ public class EditorialController {
       @ApiResponse(responseCode = "204", description = "Editorial eliminada correctamente"),
       @ApiResponse(responseCode = "404", description = "Editorial no encontrada")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID de la editorial a eliminar", example = "1") @PathVariable Long id) {

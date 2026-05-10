@@ -1,28 +1,40 @@
 package com.example.booksocial_backend.exception;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
  * DTO que estructura la respuesta de error devuelta por {@link GlobalExceptionHandler}.
  *
- * <p>Incluye el instante del error, el código HTTP, el mensaje descriptivo
- * y la ruta de la petición que lo originó, siguiendo el formato estándar
- * de errores de Spring Boot.</p>
- *
- * @author Jorge
- * @version 1.4
- * @since 2026-04-22
+ * <p>Incluye timestamp, código HTTP, mensaje, ruta de la petición y,
+ * opcionalmente, el detalle de errores por campo para errores de validación.</p>
  */
 @Getter
-@AllArgsConstructor
 public class ExceptionBody {
 
-  private LocalDateTime timestamp;
-  private int status;
-  private String message;
-  private String path;
+  private final LocalDateTime timestamp;
+  private final int status;
+  private final String message;
+  private final String path;
+  private final List<Map<String, String>> fieldErrors;
+
+  public ExceptionBody(LocalDateTime timestamp, int status, String message, String path) {
+    this.timestamp = timestamp;
+    this.status = status;
+    this.message = message;
+    this.path = path;
+    this.fieldErrors = null;
+  }
+
+  public ExceptionBody(LocalDateTime timestamp, int status, String message, String path,
+      List<Map<String, String>> fieldErrors) {
+    this.timestamp = timestamp;
+    this.status = status;
+    this.message = message;
+    this.path = path;
+    this.fieldErrors = fieldErrors;
+  }
 }
-// ¿Meter dentro de Global Exception como clase de paquete?

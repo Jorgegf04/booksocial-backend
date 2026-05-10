@@ -1,7 +1,6 @@
 package com.example.booksocial_backend.domain.catalog;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
@@ -43,9 +42,8 @@ public class Volume {
   /**
    * Título del volumen.
    */
-  @NotBlank
   @Size(max = 200)
-  @Column(nullable = false, length = 200)
+  @Column(length = 200)
   private String title;
 
   /**

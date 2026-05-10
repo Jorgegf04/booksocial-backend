@@ -2,9 +2,6 @@ package com.example.booksocial_backend.domain.user;
 
 import java.time.LocalDate;
 
-import org.springframework.jca.support.LocalConnectionFactoryBean;
-
-import jakarta.annotation.Generated;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,7 +14,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -55,6 +52,7 @@ import lombok.ToString;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 public class Subscription {
 
   /**
@@ -85,6 +83,7 @@ public class Subscription {
    * Indica si la suscripción se encuentra activa en este momento.
    */
   @NotNull
+  @Builder.Default
   @Column(nullable = false)
   private Boolean activated = true;
 

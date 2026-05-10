@@ -1,5 +1,6 @@
 package com.example.booksocial_backend.domain.catalog;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.example.booksocial_backend.domain.commerce.OrderLine;
@@ -62,6 +63,7 @@ public class Product {
   @JoinColumn(name = "edition_id", nullable = false)
   private Edition edition;
 
+  @Builder.Default
   @OneToMany(mappedBy = "product", cascade = { CascadeType.PERSIST, CascadeType.MERGE })
-  private List<OrderLine> orderLines;
+  private List<OrderLine> orderLines = new ArrayList<>();
 }

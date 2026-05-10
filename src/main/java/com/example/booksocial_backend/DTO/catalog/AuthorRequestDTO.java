@@ -3,6 +3,8 @@ package com.example.booksocial_backend.DTO.catalog;
 import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,10 +25,17 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AuthorRequestDTO {
 
+    @NotBlank(message = "El nombre del autor es obligatorio")
+    @Size(max = 150)
     private String name;
-    private String nationality;
-    private LocalDate birthDate;
-    private String img;
-    private List<Long> workIds;
 
+    @Size(max = 100)
+    private String nationality;
+
+    private LocalDate birthDate;
+
+    @Size(max = 500)
+    private String img;
+
+    private List<Long> workIds;
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.TomeRequestDTO;
@@ -74,6 +75,7 @@ public class TomeController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<TomeResponseDTO> create(
       @Valid @RequestBody TomeRequestDTO request) {
@@ -94,6 +96,7 @@ public class TomeController {
       @ApiResponse(responseCode = "400", description = "Lista vacía o inválida"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<TomeResponseDTO>> createMany(
       @Valid @RequestBody List<TomeRequestDTO> requests) {
@@ -173,6 +176,7 @@ public class TomeController {
    * Actualiza un tomo existente.
    */
   @Operation(summary = "Actualizar tomo", description = "Modifica los datos de un tomo existente.")
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<TomeResponseDTO> update(
       @Parameter(description = "ID del tomo", example = "1") @PathVariable Long id,
@@ -189,6 +193,7 @@ public class TomeController {
    * Elimina un tomo del sistema.
    */
   @Operation(summary = "Eliminar tomo", description = "Elimina permanentemente un tomo del sistema.")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID del tomo", example = "1") @PathVariable Long id) {

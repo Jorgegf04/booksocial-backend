@@ -1,6 +1,8 @@
 package com.example.booksocial_backend.exception;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +11,6 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.CannotCreateTransactionException;
-import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -243,14 +244,12 @@ public class GlobalExceptionHandler {
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
   public ResponseEntity<ExceptionBody> handleMethodArgumentNotValid(MethodArgumentNotValidException ex, HttpServletRequest request) {
-    String message = ex.getBindingResult().getFieldErrors().stream()
-        .findFirst()
-        .map(FieldError::getDefaultMessage)
-        .orElse("Datos de entrada inválidos");
-    log.warn("[VALIDATION] [BEAN] [ERROR] campo='{}' mensaje='{}'",
-        ex.getBindingResult().getFieldErrors().stream().findFirst().map(FieldError::getField).orElse("?"),
-        message);
-    return buildResponse(message, HttpStatus.BAD_REQUEST, request);
+    List<Map<String, String>> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
+        .map(fe -> Map.of("field", fe.getField(), "message",
+            fe.getDefaultMessage() != null ? fe.getDefaultMessage() : "Valor inválido"))
+        .toList();
+    log.warn("[VALIDATION] [BEAN] [ERROR] {} campo(s) inválido(s): {}", fieldErrors.size(), fieldErrors);
+    return buildResponseWithFields("Errores de validación en la petición", HttpStatus.BAD_REQUEST, request, fieldErrors);
   }
 
   @ExceptionHandler(ConstraintViolationException.class)
@@ -317,6 +316,22 @@ public class GlobalExceptionHandler {
   }
 
   // =========================
+  // STOCK / AUTORIZACIÓN
+  // =========================
+
+  @ExceptionHandler(InsufficientStockException.class)
+  public ResponseEntity<ExceptionBody> handleInsufficientStock(InsufficientStockException ex, HttpServletRequest request) {
+    log.warn("[ORDER] [STOCK] [UNPROCESSABLE] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.UNPROCESSABLE_ENTITY, request);
+  }
+
+  @ExceptionHandler(UnauthorizedActionException.class)
+  public ResponseEntity<ExceptionBody> handleUnauthorizedAction(UnauthorizedActionException ex, HttpServletRequest request) {
+    log.warn("[SECURITY] [UNAUTHORIZED] [FORBIDDEN] {}", ex.getMessage());
+    return buildResponse(ex.getMessage(), HttpStatus.FORBIDDEN, request);
+  }
+
+  // =========================
   // ILLEGAL ARGUMENT
   // =========================
 
@@ -337,7 +352,7 @@ public class GlobalExceptionHandler {
   }
 
   // =========================
-  // BUILDER
+  // BUILDERS
   // =========================
 
   private ResponseEntity<ExceptionBody> buildResponse(String message, HttpStatus status, HttpServletRequest request) {
@@ -347,5 +362,16 @@ public class GlobalExceptionHandler {
             status.value(),
             message,
             request.getRequestURI()));
+  }
+
+  private ResponseEntity<ExceptionBody> buildResponseWithFields(String message, HttpStatus status,
+      HttpServletRequest request, List<Map<String, String>> fieldErrors) {
+    return ResponseEntity.status(status.value()).body(
+        new ExceptionBody(
+            LocalDateTime.now(),
+            status.value(),
+            message,
+            request.getRequestURI(),
+            fieldErrors));
   }
 }

@@ -123,6 +123,7 @@ public class User {
    * Un usuario inactivo no puede iniciar sesión.
    */
   @NotNull
+  @Builder.Default
   @Column(nullable = false)
   private Boolean active = true;
 

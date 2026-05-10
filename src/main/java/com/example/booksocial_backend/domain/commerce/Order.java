@@ -56,13 +56,18 @@ public class Order {
   private Double total;
 
   /**
-   * Usuario que realiza el pedido.
+   * Usuario que realiza el pedido. Puede ser null para pedidos de invitados.
    */
-  @NotNull
   @ToString.Exclude
   @ManyToOne
-  @JoinColumn(name = "user_id", nullable = false)
+  @JoinColumn(name = "user_id", nullable = true)
   private User user;
+
+  /**
+   * Email del comprador invitado (sin cuenta). Solo presente cuando user es null.
+   */
+  @Column(name = "guest_email", length = 100)
+  private String guestEmail;
 
   /**
    * Líneas de pedido.

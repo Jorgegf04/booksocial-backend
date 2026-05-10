@@ -1,5 +1,8 @@
 package com.example.booksocial_backend.DTO.catalog;
 
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,7 +23,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class VolumeRequestDTO {
 
+    @NotNull(message = "El número de volumen es obligatorio")
+    @Positive
     private Integer volumeNumber;
+
+    @Size(max = 200)
     private String title;
+
+    @NotNull(message = "El volumen debe estar asociado a una edición")
     private Long editionId;
 }

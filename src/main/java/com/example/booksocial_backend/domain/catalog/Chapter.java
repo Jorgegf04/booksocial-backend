@@ -1,9 +1,7 @@
 package com.example.booksocial_backend.domain.catalog;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 import lombok.*;
@@ -47,7 +45,6 @@ public class Chapter {
   /**
    * Título del capítulo.
    */
-  @NotBlank
   @Size(max = 200)
   @Column(length = 200)
   private String title;

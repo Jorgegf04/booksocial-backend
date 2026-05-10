@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.ProductRequestDTO;
@@ -77,6 +78,7 @@ public class ProductController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<ProductResponseDTO> create(
       @Valid @RequestBody ProductRequestDTO request) {
@@ -97,6 +99,7 @@ public class ProductController {
       @ApiResponse(responseCode = "400", description = "Lista vacía o inválida"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<ProductResponseDTO>> createMany(
       @Valid @RequestBody List<ProductRequestDTO> requests) {
@@ -181,6 +184,7 @@ public class ProductController {
    * Actualiza un producto existente.
    */
   @Operation(summary = "Actualizar producto", description = "Modifica los datos de un producto existente.")
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<ProductResponseDTO> update(
       @Parameter(description = "ID del producto", example = "1") @PathVariable Long id,
@@ -210,6 +214,7 @@ public class ProductController {
       @ApiResponse(responseCode = "400", description = "Cantidad inválida"),
       @ApiResponse(responseCode = "404", description = "Producto no encontrado")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PatchMapping("/{id}/decrease-stock")
   public ResponseEntity<Void> decreaseStock(
       @Parameter(description = "ID del producto", example = "1") @PathVariable Long id,
@@ -227,6 +232,7 @@ public class ProductController {
    * Elimina un producto del sistema.
    */
   @Operation(summary = "Eliminar producto", description = "Elimina permanentemente un producto del sistema.")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID del producto", example = "1") @PathVariable Long id) {

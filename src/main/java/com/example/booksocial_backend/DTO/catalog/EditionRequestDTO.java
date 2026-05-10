@@ -2,6 +2,9 @@ package com.example.booksocial_backend.DTO.catalog;
 
 import java.time.LocalDate;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,10 +25,20 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EditionRequestDTO {
 
+    @NotBlank(message = "El ISBN es obligatorio")
+    @Size(max = 20)
     private String isbn;
+
     private LocalDate editionDate;
+
+    @NotNull(message = "La edición debe estar asociada a una obra")
     private Long workId;
+
+    @NotNull(message = "La edición debe estar asociada a una editorial")
     private Long editorialId;
+
+    @Size(max = 255)
     private String title;
+
     private Integer totalTomes;
 }

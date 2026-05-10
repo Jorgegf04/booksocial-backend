@@ -63,6 +63,7 @@ public class TrackingOrderServiceImpl implements TrackingOrderService {
 
     TrackingOrder saved = trackingRepository.save(tracking);
 
+    log.info("[TRACKING_ORDER] [ADD] [SUCCESS] id={} orderId={} status={}", saved.getId(), request.getOrderId(), request.getTrackingStatus());
     return mapToDTO(saved);
   }
 

@@ -86,6 +86,7 @@ class OrderServiceImplTest {
 
     OrderRequestDTO request = new OrderRequestDTO(
         1L,
+        null,
         List.of(line));
 
     when(productRepository.findById(1L)).thenReturn(Optional.of(product));
@@ -103,6 +104,7 @@ class OrderServiceImplTest {
 
     OrderRequestDTO request = new OrderRequestDTO(
         1L,
+        null,
         List.of());
 
     assertThrows(IllegalArgumentException.class, () -> {
@@ -117,6 +119,7 @@ class OrderServiceImplTest {
 
     OrderRequestDTO request = new OrderRequestDTO(
         1L,
+        null,
         List.of(line));
 
     when(productRepository.findById(1L)).thenReturn(Optional.empty());
@@ -135,6 +138,7 @@ class OrderServiceImplTest {
 
     OrderRequestDTO request = new OrderRequestDTO(
         1L,
+        null,
         List.of(line));
 
     when(productRepository.findById(1L)).thenReturn(Optional.of(product));

@@ -16,6 +16,7 @@ import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
 import com.example.booksocial_backend.domain.catalog.Product;
 import com.example.booksocial_backend.domain.user.User;
+import com.example.booksocial_backend.exception.InsufficientStockException;
 import com.example.booksocial_backend.exception.OrderNotFoundException;
 import com.example.booksocial_backend.exception.ProductNotFoundException;
 
@@ -40,16 +41,21 @@ public class OrderServiceImpl implements OrderService {
   @Override
   public OrderResponseDTO createOrder(OrderRequestDTO request) {
 
-    log.info("[ORDER] [CREATE] [START] userId={}", request.getUserId());
+    log.info("[ORDER] [CREATE] [START] userId={} guestEmail={}", request.getUserId(), request.getGuestEmail());
 
     if (request.getOrderLines() == null || request.getOrderLines().isEmpty()) {
       throw new IllegalArgumentException("El pedido debe contener al menos una línea de pedido");
     }
 
-    User user = userRepository.getReferenceById(request.getUserId());
+    if (request.getUserId() == null && (request.getGuestEmail() == null || request.getGuestEmail().isBlank())) {
+      throw new IllegalArgumentException("Se requiere userId o guestEmail para crear un pedido");
+    }
+
+    User user = request.getUserId() != null ? userRepository.getReferenceById(request.getUserId()) : null;
 
     Order order = Order.builder()
         .user(user)
+        .guestEmail(user == null ? request.getGuestEmail() : null)
         .date(LocalDateTime.now())
         .build();
 
@@ -59,8 +65,10 @@ public class OrderServiceImpl implements OrderService {
               .orElseThrow(() -> new ProductNotFoundException("Producto no encontrado con id: " + dto.getProductId()));
 
           if (product.getStock() == null || product.getStock() < dto.getQuantity()) {
-            log.warn("[ORDER] [CREATE] [WARN] Stock insuficiente para productId={}", product.getId());
-            throw new IllegalArgumentException("Stock insuficiente para el producto con id: " + product.getId());
+            log.warn("[ORDER] [CREATE] [WARN] Stock insuficiente para productId={} (disponible={}, solicitado={})",
+                product.getId(), product.getStock(), dto.getQuantity());
+            throw new InsufficientStockException(product.getId(),
+                dto.getQuantity(), product.getStock() != null ? product.getStock() : 0);
           }
 
           product.setStock(product.getStock() - dto.getQuantity());
@@ -142,12 +150,16 @@ public class OrderServiceImpl implements OrderService {
         .mapToInt(OrderLine::getQuantity)
         .sum();
 
+    Long userId = order.getUser() != null ? order.getUser().getId() : null;
+    String username = order.getUser() != null ? order.getUser().getUsername() : null;
+
     return new OrderResponseDTO(
         order.getId(),
         order.getDate(),
         order.getTotal(),
-        order.getUser().getId(),
-        order.getUser().getUsername(),
+        userId,
+        username,
+        order.getGuestEmail(),
         totalItems,
         lines);
   }

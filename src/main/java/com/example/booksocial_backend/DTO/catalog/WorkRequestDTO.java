@@ -7,6 +7,9 @@ import com.example.booksocial_backend.domain.catalog.Demographic;
 import com.example.booksocial_backend.domain.catalog.Genre;
 import com.example.booksocial_backend.domain.catalog.WorkType;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -28,13 +31,25 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WorkRequestDTO {
 
+    @NotBlank(message = "El título es obligatorio")
+    @Size(max = 255)
     private String title;
+
+    @Size(max = 2000)
     private String description;
+
+    @NotNull(message = "El género es obligatorio")
     private Genre genre;
+
+    @NotNull(message = "El tipo de obra es obligatorio")
     private WorkType type;
+
     private Demographic demographic;
     private LocalDate publicationDate;
+
+    @Size(max = 500)
     private String img;
+
     private Double averageRating;
 
     private List<String> authors;

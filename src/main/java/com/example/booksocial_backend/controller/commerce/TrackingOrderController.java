@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -77,6 +78,7 @@ public class TrackingOrderController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<TrackingOrderResponseDTO> create(
       @Valid @RequestBody TrackingOrderRequestDTO request) {
@@ -97,6 +99,7 @@ public class TrackingOrderController {
       @ApiResponse(responseCode = "400", description = "Lista inválida"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<TrackingOrderResponseDTO>> createMany(
       @Valid @RequestBody List<TrackingOrderRequestDTO> requests) {
@@ -209,6 +212,7 @@ public class TrackingOrderController {
       @ApiResponse(responseCode = "204", description = "Tracking eliminado"),
       @ApiResponse(responseCode = "404", description = "Tracking no encontrado")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID del tracking", example = "1") @PathVariable Long id) {

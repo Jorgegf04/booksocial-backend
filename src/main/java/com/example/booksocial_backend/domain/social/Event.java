@@ -13,6 +13,7 @@ import java.util.List;
 
 import com.example.booksocial_backend.domain.user.User;
 
+
 /**
  * Evento exclusivo para usuarios suscritos dentro de la plataforma.
  *
@@ -27,6 +28,7 @@ import com.example.booksocial_backend.domain.user.User;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Event {
 
   /**
@@ -68,6 +70,7 @@ public class Event {
   /**
    * Relacion de eventos con usuarios
    */
+  @Builder.Default
   @ToString.Exclude
   @ManyToMany
   @JoinTable(name = "USER_EVENT", joinColumns = @JoinColumn(name = "event_id"), inverseJoinColumns = @JoinColumn(name = "user_id"))

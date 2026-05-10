@@ -180,6 +180,14 @@ public class UserServiceImpl implements UserService {
     if (request.getName() != null) existing.setName(request.getName());
     if (request.getSecondName() != null) existing.setSecondName(request.getSecondName());
     if (request.getImg() != null) existing.setImg(request.getImg());
+    if (request.getRole() != null && !request.getRole().isBlank()) {
+      try {
+        existing.setRole(Role.valueOf(request.getRole().trim().toUpperCase()));
+      } catch (IllegalArgumentException e) {
+        log.warn("[USER] [UPDATE] Rol desconocido ignorado: '{}'", request.getRole());
+      }
+    }
+    if (request.getActive() != null) existing.setActive(request.getActive());
 
     log.info("[USER] [UPDATE] [SUCCESS] id={}", id);
     return mapToDTO(userRepository.save(existing));

@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.catalog.VolumeRequestDTO;
@@ -74,6 +75,7 @@ public class VolumeController {
       @ApiResponse(responseCode = "400", description = "Datos inválidos"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<VolumeResponseDTO> create(
       @Valid @RequestBody VolumeRequestDTO request) {
@@ -94,6 +96,7 @@ public class VolumeController {
       @ApiResponse(responseCode = "400", description = "Lista vacía o inválida"),
       @ApiResponse(responseCode = "500", description = "Error interno del servidor")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<VolumeResponseDTO>> createMany(
       @Valid @RequestBody List<VolumeRequestDTO> requests) {
@@ -172,6 +175,7 @@ public class VolumeController {
    * Actualiza un volumen existente.
    */
   @Operation(summary = "Actualizar volumen", description = "Modifica los datos de un volumen existente.")
+  @PreAuthorize("hasRole('ADMIN')")
   @PutMapping("/{id}")
   public ResponseEntity<VolumeResponseDTO> update(
       @Parameter(description = "ID del volumen", example = "1") @PathVariable Long id,
@@ -188,6 +192,7 @@ public class VolumeController {
    * Elimina un volumen del sistema.
    */
   @Operation(summary = "Eliminar volumen", description = "Elimina permanentemente un volumen del sistema.")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(
       @Parameter(description = "ID del volumen", example = "1") @PathVariable Long id) {

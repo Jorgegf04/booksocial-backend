@@ -4,13 +4,8 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.commerce.OrderRequestDTO;
 import com.example.booksocial_backend.DTO.commerce.OrderResponseDTO;
@@ -18,7 +13,6 @@ import com.example.booksocial_backend.service.OrderService;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -26,34 +20,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 /**
- * Controlador REST encargado de la gestión de pedidos dentro del sistema
- * BookSocial.
- *
- * <p>
- * Un pedido representa una compra realizada por un usuario e incluye múltiples
- * líneas de pedido que contienen los productos adquiridos.
- * </p>
- *
- * <p>
- * Este controlador forma parte del subsistema de compra, permitiendo gestionar
- * el ciclo completo de los pedidos mediante una API REST.
- * </p>
- *
- * <p>
- * <b>Responsabilidades principales:</b>
- * </p>
- * <ul>
- * <li>Creación de pedidos</li>
- * <li>Creación masiva de pedidos</li>
- * <li>Consulta de pedidos</li>
- * <li>Consulta por usuario</li>
- * <li>Eliminación de pedidos</li>
- * </ul>
- *
- * <p>
- * Todas las respuestas se devuelven en formato JSON y están diseñadas para ser
- * consumidas por clientes REST como Postman, Swagger o frontend.
- * </p>
+ * Controlador REST encargado de la gestión de pedidos dentro del sistema BookSocial.
  *
  * @author Jorge
  * @version 1.1
@@ -67,126 +34,54 @@ public class OrderController {
 
   private final OrderService orderService;
 
-  // =========================
-  // CREATE
-  // =========================
-
-  /**
-   * Crea un nuevo pedido en el sistema.
-   *
-   * @param request DTO con la información del pedido
-   * @return Pedido creado con sus datos completos
-   */
-  @Operation(summary = "Crear pedido", description = "Registra un nuevo pedido con sus líneas asociadas.")
+  // CREATE — público para permitir checkout como invitado (sin cuenta)
+  @Operation(summary = "Crear pedido", description = "Registra un nuevo pedido. Accesible sin cuenta (checkout de invitado).")
   @ApiResponses({
       @ApiResponse(responseCode = "201", description = "Pedido creado correctamente"),
-      @ApiResponse(responseCode = "400", description = "Datos inválidos"),
-      @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+      @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
   @PostMapping
-  public ResponseEntity<OrderResponseDTO> createOrder(
-      @Valid @RequestBody OrderRequestDTO request) {
-
-    return ResponseEntity.status(HttpStatus.CREATED)
-        .body(orderService.createOrder(request));
+  public ResponseEntity<OrderResponseDTO> createOrder(@Valid @RequestBody OrderRequestDTO request) {
+    return ResponseEntity.status(HttpStatus.CREATED).body(orderService.createOrder(request));
   }
 
-  /**
-   * Crea múltiples pedidos en una única operación.
-   *
-   * @param requests lista de pedidos a registrar
-   * @return lista de pedidos creados
-   */
-  @Operation(summary = "Creación masiva de pedidos", description = "Permite registrar múltiples pedidos en una sola petición.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "201", description = "Pedidos creados correctamente"),
-      @ApiResponse(responseCode = "400", description = "Lista vacía o inválida"),
-      @ApiResponse(responseCode = "500", description = "Error interno del servidor")
-  })
+  @Operation(summary = "Creación masiva de pedidos")
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
-  public ResponseEntity<List<OrderResponseDTO>> createMany(
-      @Valid @RequestBody List<OrderRequestDTO> requests) {
-
-    if (requests == null || requests.isEmpty()) {
+  public ResponseEntity<List<OrderResponseDTO>> createMany(@Valid @RequestBody List<OrderRequestDTO> requests) {
+    if (requests == null || requests.isEmpty())
       throw new IllegalArgumentException("La lista de pedidos no puede estar vacía");
-    }
-
-    List<OrderResponseDTO> result = requests.stream()
-        .map(orderService::createOrder)
-        .toList();
-
-    return ResponseEntity.status(HttpStatus.CREATED).body(result);
+    return ResponseEntity.status(HttpStatus.CREATED)
+        .body(requests.stream().map(orderService::createOrder).toList());
   }
 
-  // =========================
-  // READ
-  // =========================
-
-  /**
-   * Obtiene un pedido por su identificador.
-   *
-   * @param id ID del pedido
-   * @return Pedido encontrado
-   */
-  @Operation(summary = "Obtener pedido por ID", description = "Recupera un pedido específico mediante su identificador.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "200", description = "Pedido encontrado"),
-      @ApiResponse(responseCode = "404", description = "Pedido no encontrado")
-  })
-  @GetMapping("/{id}")
-  public ResponseEntity<OrderResponseDTO> getById(
-      @Parameter(description = "ID del pedido", example = "1") @PathVariable Long id) {
-
-    return ResponseEntity.ok(orderService.getOrderById(id));
-  }
-
-  /**
-   * Obtiene todos los pedidos del sistema.
-   *
-   * @return listado de pedidos
-   */
-  @Operation(summary = "Listar pedidos", description = "Devuelve todos los pedidos registrados en el sistema.")
-  @ApiResponse(responseCode = "200", description = "Listado obtenido correctamente")
+  // READ — listado global solo ADMIN; por ID o usuario requiere autenticación
+  @Operation(summary = "Listar pedidos")
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping
   public ResponseEntity<List<OrderResponseDTO>> getAll() {
-
     return ResponseEntity.ok(orderService.getAllOrders());
   }
 
-  /**
-   * Obtiene los pedidos de un usuario.
-   *
-   * @param userId ID del usuario
-   * @return lista de pedidos del usuario
-   */
-  @Operation(summary = "Pedidos por usuario", description = "Obtiene todos los pedidos realizados por un usuario.")
-  @ApiResponse(responseCode = "200", description = "Pedidos obtenidos correctamente")
-  @GetMapping("/user/{userId}")
-  public ResponseEntity<List<OrderResponseDTO>> getByUser(
-      @Parameter(description = "ID del usuario", example = "1") @PathVariable Long userId) {
+  @Operation(summary = "Obtener pedido por ID")
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/{id}")
+  public ResponseEntity<OrderResponseDTO> getById(@PathVariable Long id) {
+    return ResponseEntity.ok(orderService.getOrderById(id));
+  }
 
+  @Operation(summary = "Pedidos por usuario")
+  @PreAuthorize("isAuthenticated()")
+  @GetMapping("/user/{userId}")
+  public ResponseEntity<List<OrderResponseDTO>> getByUser(@PathVariable Long userId) {
     return ResponseEntity.ok(orderService.getOrdersByUser(userId));
   }
 
-  // =========================
-  // DELETE
-  // =========================
-
-  /**
-   * Elimina un pedido del sistema.
-   *
-   * @param id ID del pedido
-   * @return respuesta sin contenido
-   */
-  @Operation(summary = "Eliminar pedido", description = "Elimina un pedido del sistema.")
-  @ApiResponses({
-      @ApiResponse(responseCode = "204", description = "Pedido eliminado"),
-      @ApiResponse(responseCode = "404", description = "Pedido no encontrado")
-  })
+  // DELETE — solo ADMIN
+  @Operation(summary = "Eliminar pedido")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
-  public ResponseEntity<Void> delete(
-      @Parameter(description = "ID del pedido", example = "1") @PathVariable Long id) {
-
+  public ResponseEntity<Void> delete(@PathVariable Long id) {
     orderService.deleteOrder(id);
     return ResponseEntity.noContent().build();
   }

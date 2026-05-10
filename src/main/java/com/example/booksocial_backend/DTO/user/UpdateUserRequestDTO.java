@@ -37,4 +37,8 @@ public class UpdateUserRequestDTO {
     @Size(max = 500)
     private String img;
 
+    private String role;
+
+    private Boolean active;
+
 }

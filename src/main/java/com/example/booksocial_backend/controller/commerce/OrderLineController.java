@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.commerce.OrderLineRequestDTO;
@@ -43,6 +44,7 @@ public class OrderLineController {
       @ApiResponse(responseCode = "201", description = "Línea creada correctamente"),
       @ApiResponse(responseCode = "400", description = "Datos inválidos")
   })
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping
   public ResponseEntity<OrderLineResponseDTO> create(
       @Valid @RequestBody OrderLineRequestDTO request) {
@@ -51,6 +53,7 @@ public class OrderLineController {
         .body(orderLineService.createOrderLine(request));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/batch")
   public ResponseEntity<List<OrderLineResponseDTO>> createMany(
       @Valid @RequestBody List<OrderLineRequestDTO> requests) {
@@ -96,6 +99,7 @@ public class OrderLineController {
   // =========================
 
   @Operation(summary = "Eliminar línea de pedido")
+  @PreAuthorize("hasRole('ADMIN')")
   @DeleteMapping("/{id}")
   public ResponseEntity<Void> delete(@PathVariable Long id) {
 

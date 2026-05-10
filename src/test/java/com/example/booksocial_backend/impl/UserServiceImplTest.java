@@ -184,7 +184,7 @@ class UserServiceImplTest {
   void shouldUpdateUserSuccessfully() {
 
     UpdateUserRequestDTO request = new UpdateUserRequestDTO(
-        "jorge_updated", "jorge_updated@test.com", "Jorge", "García", null);
+        "jorge_updated", "jorge_updated@test.com", "Jorge", "García", null, null, null);
 
     User updated = new User();
     updated.setId(1L);

@@ -3,6 +3,7 @@ package com.example.booksocial_backend.controller.social;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import com.example.booksocial_backend.DTO.social.ReactionRequestDTO;
@@ -31,39 +32,33 @@ public class ReactionController {
 
   private final ReactionService reactionService;
 
-  // CREATE / TOGGLE
+  // CREATE / TOGGLE — requiere autenticación
   @Operation(summary = "Toggle reacción", description = "Añade o elimina un like sobre un comentario.")
+  @PreAuthorize("isAuthenticated()")
   @PostMapping
-  public ResponseEntity<ReactionResponseDTO> toggle(
-      @Valid @RequestBody ReactionRequestDTO request) {
-
+  public ResponseEntity<ReactionResponseDTO> toggle(@Valid @RequestBody ReactionRequestDTO request) {
     return ResponseEntity.ok(reactionService.toggleReaction(request));
   }
 
-  // READ
+  // READ — público
   @Operation(summary = "Reacciones por comentario")
   @GetMapping("/comment/{commentId}")
   public ResponseEntity<List<ReactionResponseDTO>> getByComment(
       @Parameter(description = "ID del comentario") @PathVariable Long commentId) {
-
     return ResponseEntity.ok(reactionService.getReactionsByComment(commentId));
   }
 
   @Operation(summary = "Contar reacciones")
   @GetMapping("/comment/{commentId}/count")
-  public ResponseEntity<Integer> count(
-      @PathVariable Long commentId) {
-
+  public ResponseEntity<Integer> count(@PathVariable Long commentId) {
     return ResponseEntity.ok(reactionService.countReactionsByComment(commentId));
   }
 
-  // DELETE
+  // DELETE — requiere autenticación
   @Operation(summary = "Eliminar reacción")
+  @PreAuthorize("isAuthenticated()")
   @DeleteMapping
-  public ResponseEntity<Void> delete(
-      @RequestParam Long userId,
-      @RequestParam Long commentId) {
-
+  public ResponseEntity<Void> delete(@RequestParam Long userId, @RequestParam Long commentId) {
     reactionService.removeReaction(userId, commentId);
     return ResponseEntity.noContent().build();
   }

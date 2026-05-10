@@ -9,11 +9,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.booksocial_backend.DTO.user.SubscriptionRequestDTO;
 import com.example.booksocial_backend.DTO.user.SubscriptionResponseDTO;
+import com.example.booksocial_backend.domain.user.Role;
 import com.example.booksocial_backend.domain.user.Subscription;
 import com.example.booksocial_backend.domain.user.User;
 import com.example.booksocial_backend.exception.SubscriptionAlreadyActiveException;
 import com.example.booksocial_backend.exception.SubscriptionNotFoundException;
+import com.example.booksocial_backend.exception.UserNotFoundException;
 import com.example.booksocial_backend.repository.SubscriptionRepository;
+import com.example.booksocial_backend.repository.UserRepository;
 import com.example.booksocial_backend.service.SubscriptionService;
 
 import lombok.RequiredArgsConstructor;
@@ -26,6 +29,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
   private static final Logger log = LoggerFactory.getLogger(SubscriptionServiceImpl.class);
 
   private final SubscriptionRepository subscriptionRepository;
+  private final UserRepository userRepository;
 
   @Override
   public SubscriptionResponseDTO activateSubscription(SubscriptionRequestDTO request) {
@@ -35,18 +39,25 @@ public class SubscriptionServiceImpl implements SubscriptionService {
       throw new SubscriptionAlreadyActiveException(request.getUserId());
     }
 
-    Subscription subscription = new Subscription();
+    User user = userRepository.findById(request.getUserId())
+        .orElseThrow(() -> new UserNotFoundException(request.getUserId()));
+
+    user.setRole(Role.SUBSCRIBED);
+    userRepository.save(user);
+
+    // Reutilizar el registro existente (puede estar inactivo por cancelación previa)
+    // para no violar la constraint UNIQUE en user_id
+    Subscription subscription = subscriptionRepository.findByUserId(request.getUserId())
+        .orElse(new Subscription());
 
     subscription.setStartDate(LocalDate.now());
     subscription.setEndDate(LocalDate.now().plusDays(30));
     subscription.setActivated(true);
-
-    User user = new User();
-    user.setId(request.getUserId());
     subscription.setUser(user);
 
     Subscription saved = subscriptionRepository.save(subscription);
 
+    log.info("[SUBSCRIPTION] [ACTIVATE] [SUCCESS] userId={}", request.getUserId());
     return mapToDTO(saved);
   }
 
@@ -58,6 +69,11 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         .orElseThrow(() -> new SubscriptionNotFoundException(userId));
 
     subscription.setActivated(false);
+
+    User user = subscription.getUser();
+    user.setRole(Role.REGISTERED);
+    userRepository.save(user);
+
     log.info("[SUBSCRIPTION] [CANCEL] [SUCCESS] userId={}", userId);
   }
 
